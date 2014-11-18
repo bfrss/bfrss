@@ -333,10 +333,9 @@ function feed_purge_interval($feed_id)
         }
 
         return $purge_interval;
-
-    } else {
-        return -1;
     }
+
+    return -1;
 }
 
 function purge_orphans($do_output = false)
@@ -365,13 +364,12 @@ function get_feed_update_interval($feed_id)
 
         if ($update_interval != 0) {
             return $update_interval;
-        } else {
-            return get_pref('DEFAULT_UPDATE_INTERVAL', $owner_uid, false);
         }
 
-    } else {
-        return -1;
+        return get_pref('DEFAULT_UPDATE_INTERVAL', $owner_uid, false);
     }
+
+    return -1;
 }
 
 function fetch_file_contents(
@@ -478,63 +476,61 @@ function fetch_file_contents(
         curl_close($ch);
 
         return $contents;
-    } else {
-
-        $fetch_curl_used = false;
-
-        if ($login && $pass) {
-            $url_parts = array();
-
-            preg_match("/(^[^:]*):\/\/(.*)/", $url, $url_parts);
-
-            $pass = urlencode($pass);
-
-            if ($url_parts[1] && $url_parts[2]) {
-                $url = $url_parts[1] . "://$login:$pass@" . $url_parts[2];
-            }
-        }
-
-        if (!$post_query && $timestamp) {
-            $context = stream_context_create(array(
-                'http' => array(
-                    'method' => 'GET',
-                    'header' => "If-Modified-Since: ".gmdate("D, d M Y H:i:s \\G\\M\\T\r\n", $timestamp)
-                )));
-        } else {
-            $context = null;
-        }
-
-        $old_error = error_get_last();
-
-        $data = @file_get_contents($url, false, $context);
-
-        $fetch_last_content_type = false;  // reset if no type was sent from server
-        if (isset($http_response_header) && is_array($http_response_header)) {
-            foreach ($http_response_header as $h) {
-                if (substr(strtolower($h), 0, 13) == 'content-type:') {
-                    $fetch_last_content_type = substr($h, 14);
-                    // don't abort here b/c there might be more than one
-                    // e.g. if we were being redirected -- last one is the right one
-                }
-
-                if (substr(strtolower($h), 0, 7) == 'http/1.') {
-                    $fetch_last_error_code = (int) substr($h, 9, 3);
-                }
-            }
-        }
-
-        if (!$data) {
-            $error = error_get_last();
-
-            if ($error['message'] != $old_error['message']) {
-                $fetch_last_error = $error["message"];
-            } else {
-                $fetch_last_error = "HTTP Code: $fetch_last_error_code";
-            }
-        }
-        return $data;
     }
 
+    $fetch_curl_used = false;
+
+    if ($login && $pass) {
+        $url_parts = array();
+
+        preg_match("/(^[^:]*):\/\/(.*)/", $url, $url_parts);
+
+        $pass = urlencode($pass);
+
+        if ($url_parts[1] && $url_parts[2]) {
+            $url = $url_parts[1] . "://$login:$pass@" . $url_parts[2];
+        }
+    }
+
+    if (!$post_query && $timestamp) {
+        $context = stream_context_create(array(
+            'http' => array(
+                'method' => 'GET',
+                'header' => "If-Modified-Since: ".gmdate("D, d M Y H:i:s \\G\\M\\T\r\n", $timestamp)
+            )));
+    } else {
+        $context = null;
+    }
+
+    $old_error = error_get_last();
+
+    $data = @file_get_contents($url, false, $context);
+
+    $fetch_last_content_type = false;  // reset if no type was sent from server
+    if (isset($http_response_header) && is_array($http_response_header)) {
+        foreach ($http_response_header as $h) {
+            if (substr(strtolower($h), 0, 13) == 'content-type:') {
+                $fetch_last_content_type = substr($h, 14);
+                // don't abort here b/c there might be more than one
+                // e.g. if we were being redirected -- last one is the right one
+            }
+
+            if (substr(strtolower($h), 0, 7) == 'http/1.') {
+                $fetch_last_error_code = (int) substr($h, 9, 3);
+            }
+        }
+    }
+
+    if (!$data) {
+        $error = error_get_last();
+
+        if ($error['message'] != $old_error['message']) {
+            $fetch_last_error = $error["message"];
+        } else {
+            $fetch_last_error = "HTTP Code: $fetch_last_error_code";
+        }
+    }
+    return $data;
 }
 
 /**
@@ -816,27 +812,26 @@ function authenticate_user($login, $password, $check_only = false)
 
         return false;
 
-    } else {
-
-        $_SESSION["uid"] = 1;
-        $_SESSION["name"] = "admin";
-        $_SESSION["access_level"] = 10;
-
-        $_SESSION["hide_hello"] = true;
-        $_SESSION["hide_logout"] = true;
-
-        $_SESSION["auth_module"] = false;
-
-        if (!$_SESSION["csrf_token"]) {
-            $_SESSION["csrf_token"] = uniqid(rand(), true);
-        }
-
-        $_SESSION["ip_address"] = $_SERVER["REMOTE_ADDR"];
-
-        initialize_user_prefs($_SESSION["uid"]);
-
-        return true;
     }
+
+    $_SESSION["uid"] = 1;
+    $_SESSION["name"] = "admin";
+    $_SESSION["access_level"] = 10;
+
+    $_SESSION["hide_hello"] = true;
+    $_SESSION["hide_logout"] = true;
+
+    $_SESSION["auth_module"] = false;
+
+    if (!$_SESSION["csrf_token"]) {
+        $_SESSION["csrf_token"] = uniqid(rand(), true);
+    }
+
+    $_SESSION["ip_address"] = $_SERVER["REMOTE_ADDR"];
+
+    initialize_user_prefs($_SESSION["uid"]);
+
+    return true;
 }
 
 function make_password($length = 8)
@@ -970,9 +965,9 @@ function truncate_string($str, $max_len, $suffix = '&hellip;')
 {
     if (mb_strlen($str, "utf-8") > $max_len) {
         return mb_substr($str, 0, $max_len, "utf-8") . $suffix;
-    } else {
-        return $str;
     }
+
+    return $str;
 }
 
 function convert_timestamp($timestamp, $source_tz, $dest_tz)
@@ -1040,15 +1035,15 @@ function make_local_datetime(
 
     if (!$no_smart_dt) {
         return smart_date_time($user_timestamp, $tz_offset, $owner_uid);
-    } else {
-        if ($long) {
-            $format = get_pref('LONG_DATE_FORMAT', $owner_uid);
-        } else {
-            $format = get_pref('SHORT_DATE_FORMAT', $owner_uid);
-        }
-
-        return date($format, $user_timestamp);
     }
+
+    if ($long) {
+        $format = get_pref('LONG_DATE_FORMAT', $owner_uid);
+    } else {
+        $format = get_pref('SHORT_DATE_FORMAT', $owner_uid);
+    }
+
+    return date($format, $user_timestamp);
 }
 
 function smart_date_time($timestamp, $tz_offset = 0, $owner_uid = false)
@@ -1059,31 +1054,33 @@ function smart_date_time($timestamp, $tz_offset = 0, $owner_uid = false)
 
     if (date("Y.m.d", $timestamp) == date("Y.m.d", time() + $tz_offset)) {
         return date("G:i", $timestamp);
-    } elseif (date("Y", $timestamp) == date("Y", time() + $tz_offset)) {
+    }
+
+    if (date("Y", $timestamp) == date("Y", time() + $tz_offset)) {
         $format = get_pref('SHORT_DATE_FORMAT', $owner_uid);
         return date($format, $timestamp);
-    } else {
-        $format = get_pref('LONG_DATE_FORMAT', $owner_uid);
-        return date($format, $timestamp);
     }
+
+    $format = get_pref('LONG_DATE_FORMAT', $owner_uid);
+    return date($format, $timestamp);
 }
 
 function sql_bool_to_bool($s)
 {
     if ($s == "t" || $s == "1" || strtolower($s) == "true") {
         return true;
-    } else {
-        return false;
     }
+
+    return false;
 }
 
 function bool_to_sql_bool($s)
 {
     if ($s) {
         return "true";
-    } else {
-        return "false";
     }
+
+    return "false";
 }
 
 // Session caching removed due to causing wrong redirects to upgrade
@@ -1098,9 +1095,9 @@ function get_schema_version($nocache = false)
         $version = db_fetch_result($result, 0, "schema_version");
         $schema_version = $version;
         return $version;
-    } else {
-        return $schema_version;
     }
+
+    return $schema_version;
 }
 
 function sanity_check()
@@ -1142,14 +1139,13 @@ function file_is_locked($filename)
                 }
                 fclose($fp);
                 return true;
-            } else {
-                return false;
             }
+            return false;
         }
         return true; // consider the file always locked and skip the test
-    } else {
-        return false;
     }
+
+    return false;
 }
 
 
@@ -1173,9 +1169,9 @@ function make_lockfile($filename)
             fwrite($fp, posix_getpid() . "\n");
         }
         return $fp;
-    } else {
-        return false;
     }
+
+    return false;
 }
 
 function make_stampfile($filename)
@@ -1187,18 +1183,18 @@ function make_stampfile($filename)
         flock($fp, LOCK_UN);
         fclose($fp);
         return true;
-    } else {
-        return false;
     }
+
+    return false;
 }
 
 function sql_random_function()
 {
     if (DB_TYPE == "mysql") {
         return "RAND()";
-    } else {
-        return "RANDOM()";
     }
+
+    return "RANDOM()";
 }
 
 function catchup_feed($feed, $cat_view, $owner_uid = false, $max_id = false, $mode = 'all')
@@ -1383,21 +1379,21 @@ function getCategoryTitle($cat_id)
 {
     if ($cat_id == -1) {
         return __("Special");
-    } elseif ($cat_id == -2) {
-        return __("Labels");
-    } else {
-
-        $result = db_query(
-            "SELECT title FROM ttrss_feed_categories WHERE
-            id = '$cat_id'"
-        );
-
-        if (db_num_rows($result) == 1) {
-            return db_fetch_result($result, 0, "title");
-        } else {
-            return __("Uncategorized");
-        }
     }
+    if ($cat_id == -2) {
+        return __("Labels");
+    }
+
+    $result = db_query(
+        "SELECT title FROM ttrss_feed_categories WHERE
+        id = '$cat_id'"
+    );
+
+    if (db_num_rows($result) == 1) {
+        return db_fetch_result($result, 0, "title");
+    }
+
+    return __("Uncategorized");
 }
 
 
@@ -1512,9 +1508,13 @@ function getCategoryUnread($cat, $owner_uid = false)
         }
 
         return $unread;
-    } elseif ($cat == -1) {
+    }
+
+    if ($cat == -1) {
         return getFeedUnread(-1) + getFeedUnread(-2) + getFeedUnread(-3) + getFeedUnread(0);
-    } elseif ($cat == -2) {
+    }
+
+    if ($cat == -2) {
 
         $result = db_query(
             "SELECT COUNT(unread) AS unread FROM
@@ -1526,7 +1526,6 @@ function getCategoryUnread($cat, $owner_uid = false)
         $unread = db_fetch_result($result, 0, "unread");
 
         return $unread;
-
     }
 }
 
@@ -1548,9 +1547,9 @@ function getLabelUnread($label_id, $owner_uid = false)
 
     if (db_num_rows($result) != 0) {
         return db_fetch_result($result, 0, "unread");
-    } else {
-        return 0;
     }
+
+    return 0;
 }
 
 function getFeedArticles(
@@ -1575,9 +1574,13 @@ function getFeedArticles(
 
     if ($is_cat) {
         return getCategoryUnread($n_feed, $owner_uid);
-    } elseif ($n_feed == -6) {
+    }
+
+    if ($n_feed == -6) {
         return 0;
-    } elseif ($feed != "0" && $n_feed == 0) {
+    }
+
+    if ($feed != "0" && $n_feed == 0) {
 
         $feed = db_escape_string($feed);
 
@@ -1588,8 +1591,9 @@ function getFeedArticles(
             WHERE owner_uid = $owner_uid AND tag_name = '$feed'"
         );
         return db_fetch_result($result, 0, "count");
+    }
 
-    } elseif ($n_feed == -1) {
+    if ($n_feed == -1) {
         $match_part = "marked = true";
     } elseif ($n_feed == -2) {
         $match_part = "published = true";
@@ -1621,7 +1625,6 @@ function getFeedArticles(
         $label_id = feed_to_label_id($feed);
 
         return getLabelUnread($label_id, $owner_uid);
-
     }
 
     if ($match_part) {
@@ -1884,7 +1887,9 @@ function subscribe_to_feed($url, $cat_id = 0, $auth_login = '', $auth_pass = '')
 
         if (count($feedUrls) == 0) {
             return array("code" => 3);
-        } elseif (count($feedUrls) > 1) {
+        }
+
+        if (count($feedUrls) > 1) {
             return array("code" => 4, "feeds" => $feedUrls);
         }
         //use feed url as new URL
@@ -1932,9 +1937,9 @@ function subscribe_to_feed($url, $cat_id = 0, $auth_login = '', $auth_pass = '')
         }
 
         return array("code" => 1);
-    } else {
-        return array("code" => 0);
     }
+
+    return array("code" => 0);
 }
 
 function print_feed_select(
@@ -2156,9 +2161,13 @@ function getFeedCatTitle($id)
 {
     if ($id == -1) {
         return __("Special");
-    } elseif ($id < LABEL_BASE_INDEX) {
+    }
+
+    if ($id < LABEL_BASE_INDEX) {
         return __("Labels");
-    } elseif ($id > 0) {
+    }
+
+    if ($id > 0) {
         $result = db_query(
             "SELECT ttrss_feed_categories.title
             FROM ttrss_feeds, ttrss_feed_categories WHERE ttrss_feeds.id = '$id' AND
@@ -2166,13 +2175,11 @@ function getFeedCatTitle($id)
         );
         if (db_num_rows($result) == 1) {
             return db_fetch_result($result, 0, "title");
-        } else {
-            return __("Uncategorized");
         }
-    } else {
-        return "getFeedCatTitle($id) failed";
+        return __("Uncategorized");
     }
 
+    return "getFeedCatTitle($id) failed";
 }
 
 function getFeedIcon($id)
@@ -2199,10 +2206,9 @@ function getFeedIcon($id)
         default:
             if ($id < LABEL_BASE_INDEX) {
                 return "images/label.png";
-            } else {
-                if (file_exists(ICONS_DIR . "/$id.ico")) {
-                    return ICONS_URL . "/$id.ico";
-                }
+            }
+            if (file_exists(ICONS_DIR . "/$id.ico")) {
+                return ICONS_URL . "/$id.ico";
             }
             break;
     }
@@ -2214,37 +2220,42 @@ function getFeedTitle($id, $cat = false)
 {
     if ($cat) {
         return getCategoryTitle($id);
-    } elseif ($id == -1) {
+    }
+    if ($id == -1) {
         return __("Starred articles");
-    } elseif ($id == -2) {
+    }
+    if ($id == -2) {
         return __("Published articles");
-    } elseif ($id == -3) {
+    }
+    if ($id == -3) {
         return __("Fresh articles");
-    } elseif ($id == -4) {
+    }
+    if ($id == -4) {
         return __("All articles");
-    } elseif ($id === 0 || $id === "0") {
+    }
+    if ($id === 0 || $id === "0") {
         return __("Archived articles");
-    } elseif ($id == -6) {
+    }
+    if ($id == -6) {
         return __("Recently read");
-    } elseif ($id < LABEL_BASE_INDEX) {
+    }
+    if ($id < LABEL_BASE_INDEX) {
         $label_id = feed_to_label_id($id);
         $result = db_query("SELECT caption FROM ttrss_labels2 WHERE id = '$label_id'");
         if (db_num_rows($result) == 1) {
             return db_fetch_result($result, 0, "caption");
-        } else {
-            return "Unknown label ($label_id)";
         }
-
-    } elseif (is_numeric($id) && $id > 0) {
+        return "Unknown label ($label_id)";
+    }
+    if (is_numeric($id) && $id > 0) {
         $result = db_query("SELECT title FROM ttrss_feeds WHERE id = '$id'");
         if (db_num_rows($result) == 1) {
             return db_fetch_result($result, 0, "title");
-        } else {
-            return "Unknown feed ($id)";
         }
-    } else {
-        return $id;
+        return "Unknown feed ($id)";
     }
+
+    return $id;
 }
 
 // TODO: less dumb splitting
