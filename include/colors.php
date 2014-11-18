@@ -4,7 +4,8 @@ if (file_exists("lib/floIcon.php")) {
     require_once "lib/floIcon.php";
 }
 
-function _resolve_htmlcolor($color) {
+function _resolve_htmlcolor($color)
+{
     $htmlcolors = array ("aliceblue" => "#f0f8ff",
         "antiquewhite" => "#faebd7",
         "aqua" => "#00ffff",
@@ -162,7 +163,8 @@ function _resolve_htmlcolor($color) {
 }
 
 ### RGB >> HSL
-function _color_rgb2hsl($rgb) {
+function _color_rgb2hsl($rgb)
+{
     $r = $rgb[0]; $g = $rgb[1]; $b = $rgb[2];
     $min = min($r, min($g, $b)); $max = max($r, max($g, $b));
     $delta = $max - $min; $l = ($min + $max) / 2; $s = 0;
@@ -186,7 +188,8 @@ function _color_rgb2hsl($rgb) {
 }
 
 ### HSL >> RGB
-function _color_hsl2rgb($hsl) {
+function _color_hsl2rgb($hsl)
+{
     $h = $hsl[0]; $s = $hsl[1]; $l = $hsl[2];
     $m2 = ($l <= 0.5) ? $l * ($s + 1) : $l + $s - $l*$s;
     $m1 = $l * 2 - $m2;
@@ -196,7 +199,8 @@ function _color_hsl2rgb($hsl) {
 }
 
 ### Helper function for _color_hsl2rgb().
-function _color_hue2rgb($m1, $m2, $h) {
+function _color_hue2rgb($m1, $m2, $h)
+{
     $h = ($h < 0) ? $h + 1 : (($h > 1) ? $h - 1 : $h);
     if ($h * 6 < 1) {
         return $m1 + ($m2 - $m1) * $h * 6;
@@ -211,8 +215,8 @@ function _color_hue2rgb($m1, $m2, $h) {
 }
 
 ### Convert a hex color into an RGB triplet.
-function _color_unpack($hex, $normalize = false) {
-
+function _color_unpack($hex, $normalize = false)
+{
     if (strpos($hex, '#') !== 0) {
         $hex = _resolve_htmlcolor($hex);
     }
@@ -229,14 +233,16 @@ function _color_unpack($hex, $normalize = false) {
 }
 
 ### Convert an RGB triplet to a hex color.
-function _color_pack($rgb, $normalize = false) {
+function _color_pack($rgb, $normalize = false)
+{
     foreach ($rgb as $k => $v) {
         $out |= (($v * ($normalize ? 255 : 1)) << (16 - $k * 8));
     }
     return '#'. str_pad(dechex($out), 6, 0, STR_PAD_LEFT);
 }
 
-function rgb2hsl($arr) {
+function rgb2hsl($arr)
+{
     $r = $arr[0];
     $g = $arr[1];
     $b = $arr[2];
@@ -279,7 +285,8 @@ function rgb2hsl($arr) {
    return array($h, $s, $v);
 }
 
-function hsl2rgb($arr) {
+function hsl2rgb($arr)
+{
     $h = $arr[0];
     $s = $arr[1];
     $v = $arr[2];
@@ -326,7 +333,8 @@ function hsl2rgb($arr) {
     return array($r, $g, $B);
 }
 
-function colorPalette($imageFile, $numColors, $granularity = 5) {
+function colorPalette($imageFile, $numColors, $granularity = 5)
+{
     $granularity = max(1, abs((int)$granularity));
     $colors = array();
 
@@ -376,7 +384,8 @@ function colorPalette($imageFile, $numColors, $granularity = 5) {
     return array_slice(array_keys($colors), 0, $numColors);
 }
 
-function calculate_avg_color($iconFile) {
+function calculate_avg_color($iconFile)
+{
     $palette = colorPalette($iconFile, 4, 4);
 
     if (is_array($palette)) {
