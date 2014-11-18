@@ -32,7 +32,8 @@ require_once 'config.php';
  * @access public
  * @return boolean True if defined successfully or not.
  */
-function define_default($name, $value) {
+function define_default($name, $value)
+{
     defined($name) or define($name, $value);
 }
 
@@ -61,7 +62,8 @@ if (DB_TYPE == "pgsql") {
  * @access public
  * @return array A array of available translations.
  */
-function get_translations() {
+function get_translations()
+{
     $tr = array(
                 "auto"  => "Detect automatically",
                 "ar_SA" => "العربيّة (Arabic)",
@@ -98,7 +100,8 @@ require_once "lib/gettext/gettext.inc";
 
 require_once "lib/languagedetect/LanguageDetect.php";
 
-function startup_gettext() {
+function startup_gettext()
+{
 
     # Get locale from Accept-Language header
     $lang = al2gt(array_keys(get_translations()), "text/html");
@@ -141,7 +144,8 @@ require_once 'lib/pubsubhubbub/publisher.php';
 
 $schema_version = false;
 
-function _debug_suppress($suppress) {
+function _debug_suppress($suppress)
+{
     global $suppress_debugging;
 
     $suppress_debugging = $suppress;
@@ -153,7 +157,8 @@ function _debug_suppress($suppress) {
  * @param string $msg The debug message.
  * @return void
  */
-function _debug($msg, $show = true) {
+function _debug($msg, $show = true)
+{
     global $suppress_debugging;
 
     //echo "[$suppress_debugging] $msg $show\n";
@@ -214,7 +219,8 @@ function _debug($msg, $show = true) {
  * @access public
  * @return void
  */
-function purge_feed($feed_id, $purge_interval, $debug = false) {
+function purge_feed($feed_id, $purge_interval, $debug = false)
+{
 
     if (!$purge_interval) {
         $purge_interval = feed_purge_interval($feed_id);
@@ -310,7 +316,8 @@ function purge_feed($feed_id, $purge_interval, $debug = false) {
     return $rows;
 } // function purge_feed
 
-function feed_purge_interval($feed_id) {
+function feed_purge_interval($feed_id)
+{
 
     $result = db_query(
         "SELECT purge_interval, owner_uid FROM ttrss_feeds
@@ -332,7 +339,8 @@ function feed_purge_interval($feed_id) {
     }
 }
 
-function purge_orphans($do_output = false) {
+function purge_orphans($do_output = false)
+{
 
     // purge orphaned posts in main content table
     $result = db_query("DELETE FROM ttrss_entries WHERE
@@ -344,7 +352,8 @@ function purge_orphans($do_output = false) {
     }
 }
 
-function get_feed_update_interval($feed_id) {
+function get_feed_update_interval($feed_id)
+{
     $result = db_query(
         "SELECT owner_uid, update_interval FROM
         ttrss_feeds WHERE id = '$feed_id'"
@@ -537,7 +546,8 @@ function fetch_file_contents(
  * @access public
  * @return mixed The favicon URL, or false if none was found.
  */
-function get_favicon_url($url) {
+function get_favicon_url($url)
+{
 
     $favicon_url = false;
 
@@ -571,7 +581,8 @@ function get_favicon_url($url) {
     return $favicon_url;
 } // function get_favicon_url
 
-function check_feed_favicon($site_url, $feed) {
+function check_feed_favicon($site_url, $feed)
+{
     #print "FAVICON [$site_url]: $favicon_url\n";
 
     $icon_file = ICONS_DIR . "/$feed.ico";
@@ -618,7 +629,8 @@ function check_feed_favicon($site_url, $feed) {
     }
 }
 
-function print_select($id, $default, $values, $attributes = "") {
+function print_select($id, $default, $values, $attributes = "")
+{
     print "<select name=\"$id\" id=\"$id\" $attributes>";
     foreach ($values as $v) {
         if ($v == $default) {
@@ -634,7 +646,8 @@ function print_select($id, $default, $values, $attributes = "") {
     print "</select>";
 }
 
-function print_select_hash($id, $default, $values, $attributes = "") {
+function print_select_hash($id, $default, $values, $attributes = "")
+{
     print "<select name=\"$id\" id='$id' $attributes>";
     foreach (array_keys($values) as $v) {
         if ($v == $default) {
@@ -651,7 +664,8 @@ function print_select_hash($id, $default, $values, $attributes = "") {
     print "</select>";
 }
 
-function print_radio($id, $default, $true_is, $values, $attributes = "") {
+function print_radio($id, $default, $true_is, $values, $attributes = "")
+{
     foreach ($values as $v) {
 
         if ($v == $default) {
@@ -672,7 +686,8 @@ function print_radio($id, $default, $true_is, $values, $attributes = "") {
     }
 }
 
-function initialize_user_prefs($uid, $profile = false) {
+function initialize_user_prefs($uid, $profile = false)
+{
 
     $uid = db_escape_string($uid);
 
@@ -731,7 +746,8 @@ function initialize_user_prefs($uid, $profile = false) {
 
 }
 
-function get_ssl_certificate_id() {
+function get_ssl_certificate_id()
+{
     if ($_SERVER["REDIRECT_SSL_CLIENT_M_SERIAL"]) {
         return sha1(
             $_SERVER["REDIRECT_SSL_CLIENT_M_SERIAL"] .
@@ -751,7 +767,8 @@ function get_ssl_certificate_id() {
     return "";
 }
 
-function authenticate_user($login, $password, $check_only = false) {
+function authenticate_user($login, $password, $check_only = false)
+{
 
     if (!SINGLE_USER_MODE) {
         $user_id = false;
@@ -822,7 +839,8 @@ function authenticate_user($login, $password, $check_only = false) {
     }
 }
 
-function make_password($length = 8) {
+function make_password($length = 8)
+{
 
     $password = "";
     $possible = "0123456789abcdfghjkmnpqrstvwxyzABCDFGHJKMNPQRSTVWXYZ";
@@ -845,8 +863,8 @@ function make_password($length = 8) {
 
 // user preferences are checked on every login, not here
 
-function initialize_user($uid) {
-
+function initialize_user($uid)
+{
     db_query(
         "insert into ttrss_feeds (owner_uid,title,feed_url)
         values ('$uid', 'Tiny Tiny RSS: New Releases',
@@ -860,18 +878,21 @@ function initialize_user($uid) {
     );
 }
 
-function logout_user() {
+function logout_user()
+{
     session_destroy();
     if (isset($_COOKIE[session_name()])) {
         setcookie(session_name(), '', time()-42000, '/');
     }
 }
 
-function validate_csrf($csrf_token) {
+function validate_csrf($csrf_token)
+{
     return $csrf_token == $_SESSION['csrf_token'];
 }
 
-function load_user_plugins($owner_uid) {
+function load_user_plugins($owner_uid)
+{
     if ($owner_uid && SCHEMA_VERSION >= 100) {
         $plugins = get_pref("_ENABLED_PLUGINS", $owner_uid);
 
@@ -883,7 +904,8 @@ function load_user_plugins($owner_uid) {
     }
 }
 
-function login_sequence() {
+function login_sequence()
+{
     if (SINGLE_USER_MODE) {
         @session_start();
         authenticate_user("admin", null);
@@ -944,7 +966,8 @@ function login_sequence() {
     }
 }
 
-function truncate_string($str, $max_len, $suffix = '&hellip;') {
+function truncate_string($str, $max_len, $suffix = '&hellip;')
+{
     if (mb_strlen($str, "utf-8") > $max_len) {
         return mb_substr($str, 0, $max_len, "utf-8") . $suffix;
     } else {
@@ -952,8 +975,8 @@ function truncate_string($str, $max_len, $suffix = '&hellip;') {
     }
 }
 
-function convert_timestamp($timestamp, $source_tz, $dest_tz) {
-
+function convert_timestamp($timestamp, $source_tz, $dest_tz)
+{
     try {
         $source_tz = new DateTimeZone($source_tz);
     } catch (Exception $e) {
@@ -1028,7 +1051,8 @@ function make_local_datetime(
     }
 }
 
-function smart_date_time($timestamp, $tz_offset = 0, $owner_uid = false) {
+function smart_date_time($timestamp, $tz_offset = 0, $owner_uid = false)
+{
     if (!$owner_uid) {
         $owner_uid = $_SESSION['uid'];
     }
@@ -1044,7 +1068,8 @@ function smart_date_time($timestamp, $tz_offset = 0, $owner_uid = false) {
     }
 }
 
-function sql_bool_to_bool($s) {
+function sql_bool_to_bool($s)
+{
     if ($s == "t" || $s == "1" || strtolower($s) == "true") {
         return true;
     } else {
@@ -1052,7 +1077,8 @@ function sql_bool_to_bool($s) {
     }
 }
 
-function bool_to_sql_bool($s) {
+function bool_to_sql_bool($s)
+{
     if ($s) {
         return "true";
     } else {
@@ -1063,7 +1089,8 @@ function bool_to_sql_bool($s) {
 // Session caching removed due to causing wrong redirects to upgrade
 // script when get_schema_version() is called on an obsolete session
 // created on a previous schema version.
-function get_schema_version($nocache = false) {
+function get_schema_version($nocache = false)
+{
     global $schema_version;
 
     if (!$schema_version && !$nocache) {
@@ -1076,7 +1103,8 @@ function get_schema_version($nocache = false) {
     }
 }
 
-function sanity_check() {
+function sanity_check()
+{
     require_once 'errors.php';
     global $ERRORS;
 
@@ -1101,7 +1129,8 @@ function sanity_check() {
     return array("code" => $error_code, "message" => $ERRORS[$error_code]);
 }
 
-function file_is_locked($filename) {
+function file_is_locked($filename)
+{
     if (file_exists(LOCK_DIRECTORY . "/$filename")) {
         if (function_exists('flock')) {
             $fp = @fopen(LOCK_DIRECTORY . "/$filename", "r");
@@ -1124,7 +1153,8 @@ function file_is_locked($filename) {
 }
 
 
-function make_lockfile($filename) {
+function make_lockfile($filename)
+{
     $fp = fopen(LOCK_DIRECTORY . "/$filename", "w");
 
     if ($fp && flock($fp, LOCK_EX | LOCK_NB)) {
@@ -1148,7 +1178,8 @@ function make_lockfile($filename) {
     }
 }
 
-function make_stampfile($filename) {
+function make_stampfile($filename)
+{
     $fp = fopen(LOCK_DIRECTORY . "/$filename", "w");
 
     if (flock($fp, LOCK_EX | LOCK_NB)) {
@@ -1161,7 +1192,8 @@ function make_stampfile($filename) {
     }
 }
 
-function sql_random_function() {
+function sql_random_function()
+{
     if (DB_TYPE == "mysql") {
         return "RAND()";
     } else {
@@ -1169,7 +1201,8 @@ function sql_random_function() {
     }
 }
 
-function catchup_feed($feed, $cat_view, $owner_uid = false, $max_id = false, $mode = 'all') {
+function catchup_feed($feed, $cat_view, $owner_uid = false, $max_id = false, $mode = 'all')
+{
 
     if (!$owner_uid) {
         $owner_uid = $_SESSION['uid'];
@@ -1334,7 +1367,8 @@ function catchup_feed($feed, $cat_view, $owner_uid = false, $max_id = false, $mo
     }
 }
 
-function getAllCounters() {
+function getAllCounters()
+{
     $data = getGlobalCounters();
 
     $data = array_merge($data, getVirtCounters());
@@ -1345,8 +1379,8 @@ function getAllCounters() {
     return $data;
 }
 
-function getCategoryTitle($cat_id) {
-
+function getCategoryTitle($cat_id)
+{
     if ($cat_id == -1) {
         return __("Special");
     } elseif ($cat_id == -2) {
@@ -1367,7 +1401,8 @@ function getCategoryTitle($cat_id) {
 }
 
 
-function getCategoryCounters() {
+function getCategoryCounters()
+{
     $ret_arr = array();
 
     /* Labels category */
@@ -1411,7 +1446,8 @@ function getCategoryCounters() {
 }
 
 // only accepts real cats (>= 0)
-function getCategoryChildrenUnread($cat, $owner_uid = false) {
+function getCategoryChildrenUnread($cat, $owner_uid = false)
+{
     if (!$owner_uid) {
         $owner_uid = $_SESSION["uid"];
     }
@@ -1431,8 +1467,8 @@ function getCategoryChildrenUnread($cat, $owner_uid = false) {
     return $unread;
 }
 
-function getCategoryUnread($cat, $owner_uid = false) {
-
+function getCategoryUnread($cat, $owner_uid = false)
+{
     if (!$owner_uid) {
         $owner_uid = $_SESSION["uid"];
     }
@@ -1494,11 +1530,13 @@ function getCategoryUnread($cat, $owner_uid = false) {
     }
 }
 
-function getFeedUnread($feed, $is_cat = false) {
+function getFeedUnread($feed, $is_cat = false)
+{
     return getFeedArticles($feed, $is_cat, true, $_SESSION["uid"]);
 }
 
-function getLabelUnread($label_id, $owner_uid = false) {
+function getLabelUnread($label_id, $owner_uid = false)
+{
     if (!$owner_uid) {
         $owner_uid = $_SESSION["uid"];
     }
@@ -1619,7 +1657,8 @@ function getFeedArticles(
     return $unread;
 }
 
-function getGlobalUnread($user_id = false) {
+function getGlobalUnread($user_id = false)
+{
 
     if (!$user_id) {
         $user_id = $_SESSION["uid"];
@@ -1635,7 +1674,8 @@ function getGlobalUnread($user_id = false) {
     return $c_id;
 }
 
-function getGlobalCounters($global_unread = -1) {
+function getGlobalCounters($global_unread = -1)
+{
     $ret_arr = array();
 
     if ($global_unread == -1) {
@@ -1666,7 +1706,8 @@ function getGlobalCounters($global_unread = -1) {
     return $ret_arr;
 }
 
-function getVirtCounters() {
+function getVirtCounters()
+{
 
     $ret_arr = array();
 
@@ -1708,8 +1749,8 @@ function getVirtCounters() {
     return $ret_arr;
 }
 
-function getLabelCounters($descriptions = false) {
-
+function getLabelCounters($descriptions = false)
+{
     $ret_arr = array();
 
     $owner_uid = $_SESSION["uid"];
@@ -1743,8 +1784,8 @@ function getLabelCounters($descriptions = false) {
     return $ret_arr;
 }
 
-function getFeedCounters($active_feed = false) {
-
+function getFeedCounters($active_feed = false)
+{
     $ret_arr = array();
 
     $query = "SELECT ttrss_feeds.id,
@@ -1796,7 +1837,8 @@ function getFeedCounters($active_feed = false) {
     return $ret_arr;
 }
 
-function get_pgsql_version() {
+function get_pgsql_version()
+{
     $result = db_query("SELECT version() AS version");
     $version = explode(" ", db_fetch_result($result, 0, "version"));
     return $version[1];
@@ -1815,8 +1857,8 @@ function get_pgsql_version() {
  *                 5 - Couldn't download the URL content.
  *                 6 - Content is an invalid XML.
  */
-function subscribe_to_feed($url, $cat_id = 0, $auth_login = '', $auth_pass = '') {
-
+function subscribe_to_feed($url, $cat_id = 0, $auth_login = '', $auth_pass = '')
+{
     global $fetch_last_error;
 
     require_once "include/rssfuncs.php";
@@ -2105,11 +2147,13 @@ function print_feed_cat_select(
     }
 }
 
-function checkbox_to_sql_bool($val) {
+function checkbox_to_sql_bool($val)
+{
     return ($val == "on") ? "true" : "false";
 }
 
-function getFeedCatTitle($id) {
+function getFeedCatTitle($id)
+{
     if ($id == -1) {
         return __("Special");
     } elseif ($id < LABEL_BASE_INDEX) {
@@ -2131,7 +2175,8 @@ function getFeedCatTitle($id) {
 
 }
 
-function getFeedIcon($id) {
+function getFeedIcon($id)
+{
     switch ($id) {
         case 0:
             return "images/archive.png";
@@ -2165,7 +2210,8 @@ function getFeedIcon($id) {
     return false;
 }
 
-function getFeedTitle($id, $cat = false) {
+function getFeedTitle($id, $cat = false)
+{
     if ($cat) {
         return getCategoryTitle($id);
     } elseif ($id == -1) {
