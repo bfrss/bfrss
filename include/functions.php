@@ -492,7 +492,7 @@ function fetch_file_contents(
                     'header' => "If-Modified-Since: ".gmdate("D, d M Y H:i:s \\G\\M\\T\r\n", $timestamp)
                 )));
         } else {
-            $context = NULL;
+            $context = null;
         }
 
         $old_error = error_get_last();
@@ -703,7 +703,7 @@ function initialize_user_prefs($uid, $profile = false) {
     }
 
     while ($line = db_fetch_assoc($result)) {
-        if (array_search($line["pref_name"], $active_prefs) === FALSE) {
+        if (array_search($line["pref_name"], $active_prefs) === false) {
             //print "adding " . $line["pref_name"] . "<br>";
 
             $line["def_value"] = db_escape_string($line["def_value"]);
