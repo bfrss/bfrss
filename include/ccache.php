@@ -82,7 +82,7 @@ function ccache_find($feed_id, $owner_uid, $is_cat = false, $no_update = false)
 
     if (DB_TYPE == "pgsql") {
         $date_qpart = "updated > NOW() - INTERVAL '15 minutes'";
-    } else if (DB_TYPE == "mysql") {
+    } elseif (DB_TYPE == "mysql") {
         $date_qpart = "updated > DATE_SUB(NOW(), INTERVAL 15 MINUTE)";
     }
 
@@ -214,7 +214,7 @@ function ccache_update(
 
             }
         }
-    } else if ($feed_id < 0) {
+    } elseif ($feed_id < 0) {
         ccache_update_all($owner_uid);
     }
 
