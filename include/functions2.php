@@ -8,7 +8,7 @@ function make_init_params() {
         "HIDE_READ_SHOWS_SPECIAL", "COMBINED_DISPLAY_MODE") as $param) {
 
              $params[strtolower($param)] = (int) get_pref($param);
-     }
+    }
 
     $params["icons_url"] = ICONS_URL;
     $params["cookie_lifetime"] = SESSION_COOKIE_LIFETIME;
@@ -276,93 +276,91 @@ function search_to_sql($search) {
         $commandpair = explode(":", mb_strtolower($k), 2);
 
         switch ($commandpair[0]) {
-        case "title":
-            if ($commandpair[1]) {
-                array_push($query_keywords, "($not (LOWER(ttrss_entries.title) LIKE '%".
-                    db_escape_string(mb_strtolower($commandpair[1]))."%'))");
-            } else {
-                array_push($query_keywords, "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
-                        OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))");
-                array_push($search_words, $k);
-            }
-            break;
-        case "author":
-            if ($commandpair[1]) {
-                array_push($query_keywords, "($not (LOWER(author) LIKE '%".
-                    db_escape_string(mb_strtolower($commandpair[1]))."%'))");
-            } else {
-                array_push($query_keywords, "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
-                        OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))");
-                array_push($search_words, $k);
-            }
-            break;
-        case "note":
-            if ($commandpair[1]) {
-                if ($commandpair[1] == "true") {
-                    array_push($query_keywords, "($not (note IS NOT NULL AND note != ''))");
-                } elseif ($commandpair[1] == "false") {
-                    array_push($query_keywords, "($not (note IS NULL OR note = ''))");
-                } else {
-                    array_push($query_keywords, "($not (LOWER(note) LIKE '%".
+            case "title":
+                if ($commandpair[1]) {
+                    array_push($query_keywords, "($not (LOWER(ttrss_entries.title) LIKE '%".
                         db_escape_string(mb_strtolower($commandpair[1]))."%'))");
-                }
-            } else {
-                array_push($query_keywords, "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
-                        OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))");
-                if (!$not) {
-                    array_push($search_words, $k);
-                }
-            }
-            break;
-        case "star":
-
-            if ($commandpair[1]) {
-                if ($commandpair[1] == "true") {
-                    array_push($query_keywords, "($not (marked = true))");
                 } else {
-                    array_push($query_keywords, "($not (marked = false))");
-                }
-            } else {
-                array_push($query_keywords, "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
+                    array_push($query_keywords, "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
                         OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))");
-                if (!$not) {
                     array_push($search_words, $k);
                 }
-            }
-            break;
-        case "pub":
-            if ($commandpair[1]) {
-                if ($commandpair[1] == "true") {
-                    array_push($query_keywords, "($not (published = true))");
+                break;
+            case "author":
+                if ($commandpair[1]) {
+                    array_push($query_keywords, "($not (LOWER(author) LIKE '%".
+                        db_escape_string(mb_strtolower($commandpair[1]))."%'))");
                 } else {
-                    array_push($query_keywords, "($not (published = false))");
-                }
-            } else {
-                array_push($query_keywords, "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
+                    array_push($query_keywords, "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
                         OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))");
-                if (!$not) {
                     array_push($search_words, $k);
                 }
-            }
-            break;
-        default:
-            if (strpos($k, "@") === 0) {
+                break;
+            case "note":
+                if ($commandpair[1]) {
+                    if ($commandpair[1] == "true") {
+                        array_push($query_keywords, "($not (note IS NOT NULL AND note != ''))");
+                    } elseif ($commandpair[1] == "false") {
+                        array_push($query_keywords, "($not (note IS NULL OR note = ''))");
+                    } else {
+                        array_push($query_keywords, "($not (LOWER(note) LIKE '%".
+                            db_escape_string(mb_strtolower($commandpair[1]))."%'))");
+                    }
+                } else {
+                    array_push($query_keywords, "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
+                        OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))");
+                    if (!$not) {
+                        array_push($search_words, $k);
+                    }
+                }
+                break;
+            case "star":
+                if ($commandpair[1]) {
+                    if ($commandpair[1] == "true") {
+                        array_push($query_keywords, "($not (marked = true))");
+                    } else {
+                        array_push($query_keywords, "($not (marked = false))");
+                    }
+                } else {
+                    array_push($query_keywords, "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
+                        OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))");
+                    if (!$not) {
+                        array_push($search_words, $k);
+                    }
+                }
+                break;
+            case "pub":
+                if ($commandpair[1]) {
+                    if ($commandpair[1] == "true") {
+                        array_push($query_keywords, "($not (published = true))");
+                    } else {
+                        array_push($query_keywords, "($not (published = false))");
+                    }
+                } else {
+                    array_push($query_keywords, "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
+                        OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))");
+                    if (!$not) {
+                        array_push($search_words, $k);
+                    }
+                }
+                break;
+            default:
+                if (strpos($k, "@") === 0) {
+                    $user_tz_string = get_pref('USER_TIMEZONE', $_SESSION['uid']);
+                    $orig_ts = strtotime(substr($k, 1));
+                    $k = date("Y-m-d", convert_timestamp($orig_ts, $user_tz_string, 'UTC'));
 
-                $user_tz_string = get_pref('USER_TIMEZONE', $_SESSION['uid']);
-                $orig_ts = strtotime(substr($k, 1));
-                $k = date("Y-m-d", convert_timestamp($orig_ts, $user_tz_string, 'UTC'));
+                    //$k = date("Y-m-d", strtotime(substr($k, 1)));
 
-                //$k = date("Y-m-d", strtotime(substr($k, 1)));
-
-                array_push($query_keywords, "(".SUBSTRING_FOR_DATE."(updated,1,LENGTH('$k')) $not = '$k')");
-            } else {
-                array_push($query_keywords, "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
+                    array_push($query_keywords, "(".SUBSTRING_FOR_DATE."(updated,1,LENGTH('$k')) $not = '$k')");
+                } else {
+                    array_push($query_keywords, "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
                         OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))");
 
-                if (!$not) {
-                    array_push($search_words, $k);
+                    if (!$not) {
+                        array_push($search_words, $k);
+                    }
                 }
-            }
         }
     }
 
@@ -408,350 +406,349 @@ function queryFeedHeadlines($feed, $limit, $view_mode, $cat_view, $search, $sear
     $ext_tables_part = "";
     $search_words = array();
 
-        if ($search) {
-            foreach (PluginHost::getInstance()->get_hooks(PluginHost::HOOK_SEARCH) as $plugin) {
-                list($search_query_part, $search_words) = $plugin->hook_search($search);
-                break;
-            }
-
-            // fall back in case of no plugins
-            if (!$search_query_part) {
-                list($search_query_part, $search_words) = search_to_sql($search);
-            }
-            $search_query_part .= " AND ";
-        } else {
-            $search_query_part = "";
+    if ($search) {
+        foreach (PluginHost::getInstance()->get_hooks(PluginHost::HOOK_SEARCH) as $plugin) {
+            list($search_query_part, $search_words) = $plugin->hook_search($search);
+            break;
         }
 
-        if ($filter) {
+        // fall back in case of no plugins
+        if (!$search_query_part) {
+            list($search_query_part, $search_words) = search_to_sql($search);
+        }
+        $search_query_part .= " AND ";
+    } else {
+        $search_query_part = "";
+    }
 
-            if (DB_TYPE == "pgsql") {
-                $query_strategy_part .= " AND updated > NOW() - INTERVAL '14 days' ";
-            } else {
-                $query_strategy_part .= " AND updated > DATE_SUB(NOW(), INTERVAL 14 DAY) ";
-            }
+    if ($filter) {
 
-            $override_order = "updated DESC";
+        if (DB_TYPE == "pgsql") {
+            $query_strategy_part .= " AND updated > NOW() - INTERVAL '14 days' ";
+        } else {
+            $query_strategy_part .= " AND updated > DATE_SUB(NOW(), INTERVAL 14 DAY) ";
+        }
 
-            $filter_query_part = filter_to_sql($filter, $owner_uid);
+        $override_order = "updated DESC";
 
-            // Try to check if SQL regexp implementation chokes on a valid regexp
+        $filter_query_part = filter_to_sql($filter, $owner_uid);
+
+        // Try to check if SQL regexp implementation chokes on a valid regexp
 
 
-            $result = db_query("SELECT true AS true_val
-                                    FROM ttrss_entries
-                                    JOIN ttrss_user_entries ON ttrss_entries.id = ttrss_user_entries.ref_id
-                                    JOIN ttrss_feeds ON ttrss_feeds.id = ttrss_user_entries.feed_id
-                WHERE $filter_query_part LIMIT 1", false);
+        $result = db_query("SELECT true AS true_val
+            FROM ttrss_entries
+            JOIN ttrss_user_entries ON ttrss_entries.id = ttrss_user_entries.ref_id
+            JOIN ttrss_feeds ON ttrss_feeds.id = ttrss_user_entries.feed_id
+            WHERE $filter_query_part LIMIT 1", false);
 
-            if ($result) {
-                $test = db_fetch_result($result, 0, "true_val");
+        if ($result) {
+            $test = db_fetch_result($result, 0, "true_val");
 
-                if (!$test) {
-                    $filter_query_part = "false AND";
-                } else {
-                    $filter_query_part .= " AND";
-                }
-            } else {
+            if (!$test) {
                 $filter_query_part = "false AND";
+            } else {
+                $filter_query_part .= " AND";
+            }
+        } else {
+            $filter_query_part = "false AND";
+        }
+
+    } else {
+        $filter_query_part = "";
+    }
+
+    if ($since_id) {
+        $since_id_part = "ttrss_entries.id > $since_id AND ";
+    } else {
+        $since_id_part = "";
+    }
+
+    $view_query_part = "";
+
+    if ($view_mode == "adaptive") {
+        if ($search) {
+            $view_query_part = " ";
+        } elseif ($feed != -1) {
+
+            $unread = getFeedUnread($feed, $cat_view);
+
+            if ($cat_view && $feed > 0 && $include_children) {
+                $unread += getCategoryChildrenUnread($feed);
             }
 
-        } else {
-            $filter_query_part = "";
-        }
-
-        if ($since_id) {
-            $since_id_part = "ttrss_entries.id > $since_id AND ";
-        } else {
-            $since_id_part = "";
-        }
-
-        $view_query_part = "";
-
-        if ($view_mode == "adaptive") {
-            if ($search) {
-                $view_query_part = " ";
-            } elseif ($feed != -1) {
-
-                $unread = getFeedUnread($feed, $cat_view);
-
-                if ($cat_view && $feed > 0 && $include_children) {
-                    $unread += getCategoryChildrenUnread($feed);
-                }
-
-                if ($unread > 0) {
-                    $view_query_part = " unread = true AND ";
-                }
-
+            if ($unread > 0) {
+                $view_query_part = " unread = true AND ";
             }
         }
+    }
 
-        if ($view_mode == "marked") {
-            $view_query_part = " marked = true AND ";
+    if ($view_mode == "marked") {
+        $view_query_part = " marked = true AND ";
+    }
+
+    if ($view_mode == "has_note") {
+        $view_query_part = " (note IS NOT NULL AND note != '') AND ";
+    }
+
+    if ($view_mode == "published") {
+        $view_query_part = " published = true AND ";
+    }
+
+    if ($view_mode == "unread" && $feed != -6) {
+        $view_query_part = " unread = true AND ";
+    }
+
+    if ($limit > 0) {
+        $limit_query_part = "LIMIT " . $limit;
+    }
+
+    $allow_archived = false;
+
+    $vfeed_query_part = "";
+
+    // override query strategy and enable feed display when searching globally
+    if ($search && $search_mode == "all_feeds") {
+        $query_strategy_part = "true";
+        $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
+    /* tags */
+    } elseif (!is_numeric($feed)) {
+        $query_strategy_part = "true";
+        $vfeed_query_part = "(SELECT title FROM ttrss_feeds WHERE
+            id = feed_id) as feed_title,";
+    } elseif ($search && $search_mode == "this_cat") {
+        $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
+
+        if ($feed > 0) {
+            if ($include_children) {
+                $subcats = getChildCategories($feed, $owner_uid);
+                array_push($subcats, $feed);
+                $cats_qpart = join(",", $subcats);
+            } else {
+                $cats_qpart = $feed;
+            }
+
+            $query_strategy_part = "ttrss_feeds.cat_id IN ($cats_qpart)";
+
+        } else {
+            $query_strategy_part = "ttrss_feeds.cat_id IS NULL";
         }
 
-        if ($view_mode == "has_note") {
-            $view_query_part = " (note IS NOT NULL AND note != '') AND ";
-        }
+    } elseif ($feed > 0) {
 
-        if ($view_mode == "published") {
-            $view_query_part = " published = true AND ";
-        }
-
-        if ($view_mode == "unread" && $feed != -6) {
-            $view_query_part = " unread = true AND ";
-        }
-
-        if ($limit > 0) {
-            $limit_query_part = "LIMIT " . $limit;
-        }
-
-        $allow_archived = false;
-
-        $vfeed_query_part = "";
-
-        // override query strategy and enable feed display when searching globally
-        if ($search && $search_mode == "all_feeds") {
-            $query_strategy_part = "true";
-            $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
-        /* tags */
-        } elseif (!is_numeric($feed)) {
-            $query_strategy_part = "true";
-            $vfeed_query_part = "(SELECT title FROM ttrss_feeds WHERE
-                id = feed_id) as feed_title,";
-        } elseif ($search && $search_mode == "this_cat") {
-            $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
+        if ($cat_view) {
 
             if ($feed > 0) {
                 if ($include_children) {
+                    # sub-cats
                     $subcats = getChildCategories($feed, $owner_uid);
+
                     array_push($subcats, $feed);
-                    $cats_qpart = join(",", $subcats);
-                } else {
-                    $cats_qpart = $feed;
-                }
-
-                $query_strategy_part = "ttrss_feeds.cat_id IN ($cats_qpart)";
-
-            } else {
-                $query_strategy_part = "ttrss_feeds.cat_id IS NULL";
-            }
-
-        } elseif ($feed > 0) {
-
-            if ($cat_view) {
-
-                if ($feed > 0) {
-                    if ($include_children) {
-                        # sub-cats
-                        $subcats = getChildCategories($feed, $owner_uid);
-
-                        array_push($subcats, $feed);
-                        $query_strategy_part = "cat_id IN (".
-                                implode(",", $subcats).")";
-
-                    } else {
-                        $query_strategy_part = "cat_id = '$feed'";
-                    }
+                    $query_strategy_part = "cat_id IN (".
+                        implode(",", $subcats).")";
 
                 } else {
-                    $query_strategy_part = "cat_id IS NULL";
+                    $query_strategy_part = "cat_id = '$feed'";
                 }
 
-                $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
-
             } else {
-                $query_strategy_part = "feed_id = '$feed'";
+                $query_strategy_part = "cat_id IS NULL";
             }
-        } elseif ($feed == 0 && !$cat_view) { // archive virtual feed
-            $query_strategy_part = "feed_id IS NULL";
-            $allow_archived = true;
-        } elseif ($feed == 0 && $cat_view) { // uncategorized
-            $query_strategy_part = "cat_id IS NULL AND feed_id IS NOT NULL";
+
             $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
-        } elseif ($feed == -1) { // starred virtual feed
-            $query_strategy_part = "marked = true";
+
+        } else {
+            $query_strategy_part = "feed_id = '$feed'";
+        }
+    } elseif ($feed == 0 && !$cat_view) { // archive virtual feed
+        $query_strategy_part = "feed_id IS NULL";
+        $allow_archived = true;
+    } elseif ($feed == 0 && $cat_view) { // uncategorized
+        $query_strategy_part = "cat_id IS NULL AND feed_id IS NOT NULL";
+        $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
+    } elseif ($feed == -1) { // starred virtual feed
+        $query_strategy_part = "marked = true";
+        $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
+        $allow_archived = true;
+
+        if (!$override_order) {
+            $override_order = "last_marked DESC, date_entered DESC, updated DESC";
+        }
+
+    } elseif ($feed == -2) { // published virtual feed OR labels category
+
+        if (!$cat_view) {
+            $query_strategy_part = "published = true";
             $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
             $allow_archived = true;
 
             if (!$override_order) {
-                $override_order = "last_marked DESC, date_entered DESC, updated DESC";
+                $override_order = "last_published DESC, date_entered DESC, updated DESC";
             }
 
-        } elseif ($feed == -2) { // published virtual feed OR labels category
-
-            if (!$cat_view) {
-                $query_strategy_part = "published = true";
-                $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
-                $allow_archived = true;
-
-                if (!$override_order) {
-                    $override_order = "last_published DESC, date_entered DESC, updated DESC";
-                }
-
-            } else {
-                $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
-
-                $ext_tables_part = ",ttrss_labels2,ttrss_user_labels2";
-
-                $query_strategy_part = "ttrss_labels2.id = ttrss_user_labels2.label_id AND
-                    ttrss_user_labels2.article_id = ref_id";
-
-            }
-        } elseif ($feed == -6) { // recently read
-            $query_strategy_part = "unread = false AND last_read IS NOT NULL";
+        } else {
             $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
-            $allow_archived = true;
-            $ignore_vfeed_group = true;
 
-            if (!$override_order) {
-                $override_order = "last_read DESC";
-            }
+            $ext_tables_part = ",ttrss_labels2,ttrss_user_labels2";
 
-        /*} elseif ($feed == -7) { // shared
-            $query_strategy_part = "uuid != ''";
-            $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
-            $allow_archived = true; */
-        } elseif ($feed == -3) { // fresh virtual feed
-            $query_strategy_part = "unread = true AND score >= 0";
-
-            $intl = get_pref("FRESH_ARTICLE_MAX_AGE", $owner_uid);
-
-            if (DB_TYPE == "pgsql") {
-                $query_strategy_part .= " AND date_entered > NOW() - INTERVAL '$intl hour' ";
-            } else {
-                $query_strategy_part .= " AND date_entered > DATE_SUB(NOW(), INTERVAL $intl HOUR) ";
-            }
-
-            $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
-        } elseif ($feed == -4) { // all articles virtual feed
-            $allow_archived = true;
-            $query_strategy_part = "true";
-            $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
-        } elseif ($feed <= LABEL_BASE_INDEX) { // labels
-            $label_id = feed_to_label_id($feed);
-
-            $query_strategy_part = "label_id = '$label_id' AND
-                ttrss_labels2.id = ttrss_user_labels2.label_id AND
+            $query_strategy_part = "ttrss_labels2.id = ttrss_user_labels2.label_id AND
                 ttrss_user_labels2.article_id = ref_id";
 
-            $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
-            $ext_tables_part = ",ttrss_labels2,ttrss_user_labels2";
-            $allow_archived = true;
+        }
+    } elseif ($feed == -6) { // recently read
+        $query_strategy_part = "unread = false AND last_read IS NOT NULL";
+        $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
+        $allow_archived = true;
+        $ignore_vfeed_group = true;
+
+        if (!$override_order) {
+            $override_order = "last_read DESC";
+        }
+
+    /*} elseif ($feed == -7) { // shared
+        $query_strategy_part = "uuid != ''";
+        $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
+        $allow_archived = true; */
+    } elseif ($feed == -3) { // fresh virtual feed
+        $query_strategy_part = "unread = true AND score >= 0";
+
+        $intl = get_pref("FRESH_ARTICLE_MAX_AGE", $owner_uid);
+
+        if (DB_TYPE == "pgsql") {
+            $query_strategy_part .= " AND date_entered > NOW() - INTERVAL '$intl hour' ";
+        } else {
+            $query_strategy_part .= " AND date_entered > DATE_SUB(NOW(), INTERVAL $intl HOUR) ";
+        }
+
+        $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
+    } elseif ($feed == -4) { // all articles virtual feed
+        $allow_archived = true;
+        $query_strategy_part = "true";
+        $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
+    } elseif ($feed <= LABEL_BASE_INDEX) { // labels
+        $label_id = feed_to_label_id($feed);
+
+        $query_strategy_part = "label_id = '$label_id' AND
+            ttrss_labels2.id = ttrss_user_labels2.label_id AND
+            ttrss_user_labels2.article_id = ref_id";
+
+        $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
+        $ext_tables_part = ",ttrss_labels2,ttrss_user_labels2";
+        $allow_archived = true;
+
+    } else {
+        $query_strategy_part = "true";
+    }
+
+    $order_by = "score DESC, date_entered DESC, updated DESC";
+
+    if ($view_mode == "unread_first") {
+        $order_by = "unread DESC, $order_by";
+    }
+
+    if ($override_order) {
+        $order_by = $override_order;
+    }
+
+    if ($override_strategy) {
+        $query_strategy_part = $override_strategy;
+    }
+
+    if ($override_vfeed) {
+        $vfeed_query_part = $override_vfeed;
+    }
+
+    $feed_title = "";
+
+    if ($search) {
+        $feed_title = T_sprintf("Search results: %s", $search);
+    } else {
+        if ($cat_view) {
+            $feed_title = getCategoryTitle($feed);
+        } else {
+            if (is_numeric($feed) && $feed > 0) {
+                $result = db_query("SELECT title,site_url,last_error,last_updated
+                    FROM ttrss_feeds WHERE id = '$feed' AND owner_uid = $owner_uid");
+
+                $feed_title = db_fetch_result($result, 0, "title");
+                $feed_site_url = db_fetch_result($result, 0, "site_url");
+                $last_error = db_fetch_result($result, 0, "last_error");
+                $last_updated = db_fetch_result($result, 0, "last_updated");
+            } else {
+                $feed_title = getFeedTitle($feed);
+            }
+        }
+    }
+
+
+    $content_query_part = "content, ";
+
+
+    if (is_numeric($feed)) {
+
+        if ($feed >= 0) {
+            $feed_kind = "Feeds";
+        } else {
+            $feed_kind = "Labels";
+        }
+
+        if ($limit_query_part) {
+            $offset_query_part = "OFFSET $offset";
+        }
+
+        // proper override_order applied above
+        if ($vfeed_query_part && !$ignore_vfeed_group && get_pref('VFEED_GROUP_BY_FEED', $owner_uid)) {
+            if (!$override_order) {
+                $order_by = "ttrss_feeds.title, $order_by";
+            } else {
+                $order_by = "ttrss_feeds.title, $override_order";
+            }
+        }
+
+        if (!$allow_archived) {
+            $from_qpart = "ttrss_entries,ttrss_user_entries,ttrss_feeds$ext_tables_part";
+            $feed_check_qpart = "ttrss_user_entries.feed_id = ttrss_feeds.id AND";
 
         } else {
-            $query_strategy_part = "true";
+            $from_qpart = "ttrss_entries$ext_tables_part,ttrss_user_entries
+                LEFT JOIN ttrss_feeds ON (feed_id = ttrss_feeds.id)";
         }
 
-        $order_by = "score DESC, date_entered DESC, updated DESC";
-
-        if ($view_mode == "unread_first") {
-            $order_by = "unread DESC, $order_by";
+        if ($vfeed_query_part) {
+            $vfeed_query_part .= "favicon_avg_color,";
         }
 
-        if ($override_order) {
-            $order_by = $override_order;
-        }
-
-        if ($override_strategy) {
-            $query_strategy_part = $override_strategy;
-        }
-
-        if ($override_vfeed) {
-            $vfeed_query_part = $override_vfeed;
-        }
-
-        $feed_title = "";
-
-        if ($search) {
-            $feed_title = T_sprintf("Search results: %s", $search);
+        if ($start_ts) {
+            $start_ts_formatted = date("Y/m/d H:i:s", strtotime($start_ts));
+            $start_ts_query_part = "date_entered >= '$start_ts_formatted' AND";
         } else {
-            if ($cat_view) {
-                $feed_title = getCategoryTitle($feed);
-            } else {
-                if (is_numeric($feed) && $feed > 0) {
-                    $result = db_query("SELECT title,site_url,last_error,last_updated
-                        FROM ttrss_feeds WHERE id = '$feed' AND owner_uid = $owner_uid");
-
-                    $feed_title = db_fetch_result($result, 0, "title");
-                    $feed_site_url = db_fetch_result($result, 0, "site_url");
-                    $last_error = db_fetch_result($result, 0, "last_error");
-                    $last_updated = db_fetch_result($result, 0, "last_updated");
-                } else {
-                    $feed_title = getFeedTitle($feed);
-                }
-            }
+            $start_ts_query_part = "";
         }
 
-
-        $content_query_part = "content, ";
-
-
-        if (is_numeric($feed)) {
-
-            if ($feed >= 0) {
-                $feed_kind = "Feeds";
-            } else {
-                $feed_kind = "Labels";
-            }
-
-            if ($limit_query_part) {
-                $offset_query_part = "OFFSET $offset";
-            }
-
-            // proper override_order applied above
-            if ($vfeed_query_part && !$ignore_vfeed_group && get_pref('VFEED_GROUP_BY_FEED', $owner_uid)) {
-                if (!$override_order) {
-                    $order_by = "ttrss_feeds.title, $order_by";
-                } else {
-                    $order_by = "ttrss_feeds.title, $override_order";
-                }
-            }
-
-            if (!$allow_archived) {
-                $from_qpart = "ttrss_entries,ttrss_user_entries,ttrss_feeds$ext_tables_part";
-                $feed_check_qpart = "ttrss_user_entries.feed_id = ttrss_feeds.id AND";
-
-            } else {
-                $from_qpart = "ttrss_entries$ext_tables_part,ttrss_user_entries
-                    LEFT JOIN ttrss_feeds ON (feed_id = ttrss_feeds.id)";
-            }
-
-            if ($vfeed_query_part) {
-                $vfeed_query_part .= "favicon_avg_color,";
-            }
-
-            if ($start_ts) {
-                $start_ts_formatted = date("Y/m/d H:i:s", strtotime($start_ts));
-                $start_ts_query_part = "date_entered >= '$start_ts_formatted' AND";
-            } else {
-                $start_ts_query_part = "";
-            }
-
-            $query = "SELECT DISTINCT
-                    date_entered,
-                    guid,
-                    ttrss_entries.id,ttrss_entries.title,
-                    updated,
-                    label_cache,
-                    tag_cache,
-                    always_display_enclosures,
-                    site_url,
-                    note,
-                    num_comments,
-                    comments,
-                    int_id,
-                    uuid,
-                    lang,
-                    hide_images,
-                    unread,feed_id,marked,published,link,last_read,orig_feed_id,
-                    last_marked, last_published,
-                    $vfeed_query_part
-                    $content_query_part
-                    author,score
-                FROM
-                    $from_qpart
-                WHERE
+        $query = "SELECT DISTINCT
+                date_entered,
+                guid,
+                ttrss_entries.id,ttrss_entries.title,
+                updated,
+                label_cache,
+                tag_cache,
+                always_display_enclosures,
+                site_url,
+                note,
+                num_comments,
+                comments,
+                int_id,
+                uuid,
+                lang,
+                hide_images,
+                unread,feed_id,marked,published,link,last_read,orig_feed_id,
+                last_marked, last_published,
+                $vfeed_query_part
+                $content_query_part
+                author,score
+            FROM
+                $from_qpart
+            WHERE
                 $feed_check_qpart
                 ttrss_user_entries.ref_id = ttrss_entries.id AND
                 ttrss_user_entries.owner_uid = '$owner_uid' AND
@@ -763,85 +760,85 @@ function queryFeedHeadlines($feed, $limit, $view_mode, $cat_view, $search, $sear
                 $query_strategy_part ORDER BY $order_by
                 $limit_query_part $offset_query_part";
 
-            if ($_REQUEST["debug"]) {
-                print $query;
-            }
-
-            $result = db_query($query);
-
-        } else {
-            // browsing by tag
-
-            $select_qpart = "SELECT DISTINCT " .
-                            "date_entered," .
-                            "guid," .
-                            "note," .
-                            "ttrss_entries.id as id," .
-                            "title," .
-                            "updated," .
-                            "unread," .
-                            "feed_id," .
-                            "orig_feed_id," .
-                            "marked," .
-                            "num_comments, " .
-                            "comments, " .
-                            "tag_cache," .
-                            "label_cache," .
-                            "link," .
-                            "lang," .
-                            "uuid," .
-                            "last_read," .
-                            "(SELECT hide_images FROM ttrss_feeds WHERE id = feed_id) AS hide_images," .
-                            "last_marked, last_published, " .
-                            $since_id_part .
-                            $vfeed_query_part .
-                            $content_query_part .
-                            "score ";
-
-            $feed_kind = "Tags";
-            $all_tags = explode(",", $feed);
-            if ($search_mode == 'any') {
-                $tag_sql = "tag_name in (" . implode(", ", array_map("db_quote", $all_tags)) . ")";
-                $from_qpart = " FROM ttrss_entries,ttrss_user_entries,ttrss_tags ";
-                $where_qpart = " WHERE " .
-                               "ref_id = ttrss_entries.id AND " .
-                               "ttrss_user_entries.owner_uid = $owner_uid AND " .
-                               "post_int_id = int_id AND $tag_sql AND " .
-                               $view_query_part .
-                               $search_query_part .
-                               $query_strategy_part . " ORDER BY $order_by " .
-                               $limit_query_part;
-
-            } else {
-                $i = 1;
-                $sub_selects = array();
-                $sub_ands = array();
-                foreach ($all_tags as $term) {
-                    array_push($sub_selects, "(SELECT post_int_id from ttrss_tags WHERE tag_name = " . db_quote($term) . " AND owner_uid = $owner_uid) as A$i");
-                    $i++;
-                }
-                if ($i > 2) {
-                    $x = 1;
-                    $y = 2;
-                    do {
-                        array_push($sub_ands, "A$x.post_int_id = A$y.post_int_id");
-                        $x++;
-                        $y++;
-                    } while ($y < $i);
-                }
-                array_push($sub_ands, "A1.post_int_id = ttrss_user_entries.int_id and ttrss_user_entries.owner_uid = $owner_uid");
-                array_push($sub_ands, "ttrss_user_entries.ref_id = ttrss_entries.id");
-                $from_qpart = " FROM " . implode(", ", $sub_selects) . ", ttrss_user_entries, ttrss_entries";
-                $where_qpart = " WHERE " . implode(" AND ", $sub_ands);
-            }
-            //                error_log("TAG SQL: " . $tag_sql);
-            // $tag_sql = "tag_name = '$feed'";   DEFAULT way
-
-            //                error_log("[". $select_qpart . "][" . $from_qpart . "][" .$where_qpart . "]");
-            $result = db_query($select_qpart . $from_qpart . $where_qpart);
+        if ($_REQUEST["debug"]) {
+            print $query;
         }
 
-        return array($result, $feed_title, $feed_site_url, $last_error, $last_updated, $search_words);
+        $result = db_query($query);
+
+    } else {
+        // browsing by tag
+
+        $select_qpart = "SELECT DISTINCT " .
+            "date_entered," .
+            "guid," .
+            "note," .
+            "ttrss_entries.id as id," .
+            "title," .
+            "updated," .
+            "unread," .
+            "feed_id," .
+            "orig_feed_id," .
+            "marked," .
+            "num_comments, " .
+            "comments, " .
+            "tag_cache," .
+            "label_cache," .
+            "link," .
+            "lang," .
+            "uuid," .
+            "last_read," .
+            "(SELECT hide_images FROM ttrss_feeds WHERE id = feed_id) AS hide_images," .
+            "last_marked, last_published, " .
+            $since_id_part .
+            $vfeed_query_part .
+            $content_query_part .
+            "score ";
+
+        $feed_kind = "Tags";
+        $all_tags = explode(",", $feed);
+        if ($search_mode == 'any') {
+            $tag_sql = "tag_name in (" . implode(", ", array_map("db_quote", $all_tags)) . ")";
+            $from_qpart = " FROM ttrss_entries,ttrss_user_entries,ttrss_tags ";
+            $where_qpart = " WHERE " .
+                "ref_id = ttrss_entries.id AND " .
+                "ttrss_user_entries.owner_uid = $owner_uid AND " .
+                "post_int_id = int_id AND $tag_sql AND " .
+                $view_query_part .
+                $search_query_part .
+                $query_strategy_part . " ORDER BY $order_by " .
+                $limit_query_part;
+
+        } else {
+            $i = 1;
+            $sub_selects = array();
+            $sub_ands = array();
+            foreach ($all_tags as $term) {
+                array_push($sub_selects, "(SELECT post_int_id from ttrss_tags WHERE tag_name = " . db_quote($term) . " AND owner_uid = $owner_uid) as A$i");
+                $i++;
+            }
+            if ($i > 2) {
+                $x = 1;
+                $y = 2;
+                do {
+                    array_push($sub_ands, "A$x.post_int_id = A$y.post_int_id");
+                    $x++;
+                    $y++;
+                } while ($y < $i);
+            }
+            array_push($sub_ands, "A1.post_int_id = ttrss_user_entries.int_id and ttrss_user_entries.owner_uid = $owner_uid");
+            array_push($sub_ands, "ttrss_user_entries.ref_id = ttrss_entries.id");
+            $from_qpart = " FROM " . implode(", ", $sub_selects) . ", ttrss_user_entries, ttrss_entries";
+            $where_qpart = " WHERE " . implode(" AND ", $sub_ands);
+        }
+        //                error_log("TAG SQL: " . $tag_sql);
+        // $tag_sql = "tag_name = '$feed'";   DEFAULT way
+
+        //                error_log("[". $select_qpart . "][" . $from_qpart . "][" .$where_qpart . "]");
+        $result = db_query($select_qpart . $from_qpart . $where_qpart);
+    }
+
+    return array($result, $feed_title, $feed_site_url, $last_error, $last_updated, $search_words);
 
 }
 
@@ -1456,9 +1453,9 @@ function format_article($id, $mark_as_read = true, $zoom_mode = false, $owner_ui
         $rv['content'] .= "</div>";
 
         $rv['content'] .= "<div id=\"POSTNOTE-$id\">";
-            if ($line['note']) {
-                $rv['content'] .= format_article_note($id, $line['note'], !$zoom_mode);
-            }
+        if ($line['note']) {
+            $rv['content'] .= format_article_note($id, $line['note'], !$zoom_mode);
+        }
         $rv['content'] .= "</div>";
 
         if (!$line['lang']) {
@@ -1672,8 +1669,8 @@ function format_article_labels($labels, $id) {
     foreach ($labels as $l) {
         $labels_str .= sprintf("<span class='hlLabelRef'
             style='color : %s; background-color : %s'>%s</span>",
-                $l[2], $l[3], $l[1]);
-        }
+            $l[2], $l[3], $l[1]);
+    }
 
     return $labels_str;
 
@@ -1977,27 +1974,27 @@ function format_article_enclosures($id, $always_display_enclosures,
                     if (preg_match("/image/", $entry["type"]) ||
                             preg_match("/\.(jpg|png|gif|bmp)/i", $entry["filename"])) {
 
-                            if (!$hide_images) {
-                                $encsize = '';
-                                if ($entry['height'] > 0) {
-                                    $encsize .= ' height="' . intval($entry['width']) . '"';
-                                }
-                                if ($entry['width'] > 0) {
-                                    $encsize .= ' width="' . intval($entry['height']) . '"';
-                                }
-                                $rv .= "<p><img
-                                alt=\"".htmlspecialchars($entry["filename"])."\"
-                                src=\"" .htmlspecialchars($entry["url"]) . "\"
-                                " . $encsize . " /></p>";
-                            } else {
-                                $rv .= "<p><a target=\"_blank\"
-                                href=\"".htmlspecialchars($entry["url"])."\"
-                                >" .htmlspecialchars($entry["url"]) . "</a></p>";
+                        if (!$hide_images) {
+                            $encsize = '';
+                            if ($entry['height'] > 0) {
+                                $encsize .= ' height="' . intval($entry['width']) . '"';
                             }
+                            if ($entry['width'] > 0) {
+                                $encsize .= ' width="' . intval($entry['height']) . '"';
+                            }
+                            $rv .= "<p><img
+                            alt=\"".htmlspecialchars($entry["filename"])."\"
+                            src=\"" .htmlspecialchars($entry["url"]) . "\"
+                            " . $encsize . " /></p>";
+                        } else {
+                            $rv .= "<p><a target=\"_blank\"
+                            href=\"".htmlspecialchars($entry["url"])."\"
+                            >" .htmlspecialchars($entry["url"]) . "</a></p>";
+                        }
 
-                            if ($entry['title']) {
-                                $rv.= "<div class=\"enclosure_title\">${entry['title']}</div>";
-                            }
+                        if ($entry['title']) {
+                            $rv.= "<div class=\"enclosure_title\">${entry['title']}</div>";
+                        }
                     }
                 }
             }
@@ -2153,7 +2150,7 @@ function filter_to_sql($filter, $owner_uid) {
 
             $rule['reg_exp'] = db_escape_string($rule['reg_exp']);
 
-                switch ($rule["type"]) {
+            switch ($rule["type"]) {
                 case "title":
                     $qpart = "LOWER(ttrss_entries.title) $reg_qpart LOWER('".
                         $rule['reg_exp'] . "')";
@@ -2450,7 +2447,7 @@ function T_js_decl($s1, $s2) {
 
 function init_js_translations() {
 
-print 'var T_messages = new Object();
+    print 'var T_messages = new Object();
 
     function __(msg) {
         if (T_messages[msg]) {
