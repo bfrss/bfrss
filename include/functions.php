@@ -118,7 +118,7 @@ function startup_gettext() {
     if ($lang) {
         if (defined('LC_MESSAGES')) {
             _setlocale(LC_MESSAGES, $lang);
-        } else if (defined('LC_ALL')) {
+        } elseif (defined('LC_ALL')) {
             _setlocale(LC_ALL, $lang);
         }
 
@@ -962,7 +962,7 @@ function smart_date_time($timestamp, $tz_offset = 0, $owner_uid = false) {
 
     if (date("Y.m.d", $timestamp) == date("Y.m.d", time() + $tz_offset)) {
         return date("G:i", $timestamp);
-    } else if (date("Y", $timestamp) == date("Y", time() + $tz_offset)) {
+    } elseif (date("Y", $timestamp) == date("Y", time() + $tz_offset)) {
         $format = get_pref('SHORT_DATE_FORMAT', $owner_uid);
         return date($format, $timestamp);
     } else {
@@ -1155,7 +1155,7 @@ function catchup_feed($feed, $cat_view, $owner_uid = false, $max_id = false, $mo
                                     AND owner_uid = $owner_uid AND unread = true AND feed_id IN
                                         (SELECT id FROM ttrss_feeds WHERE $cat_qpart) AND $date_qpart) as tmp)");
 
-                } else if ($feed == -2) {
+                } elseif ($feed == -2) {
 
                     db_query("UPDATE ttrss_user_entries
                         SET unread = false,last_read = NOW() WHERE (SELECT COUNT(*)
@@ -1163,7 +1163,7 @@ function catchup_feed($feed, $cat_view, $owner_uid = false, $max_id = false, $mo
                             AND unread = true AND owner_uid = $owner_uid");
                 }
 
-            } else if ($feed > 0) {
+            } elseif ($feed > 0) {
 
                 db_query("UPDATE ttrss_user_entries
                     SET unread = false, last_read = NOW() WHERE ref_id IN
@@ -1171,7 +1171,7 @@ function catchup_feed($feed, $cat_view, $owner_uid = false, $max_id = false, $mo
                             (SELECT id FROM ttrss_entries, ttrss_user_entries WHERE ref_id = id
                                 AND owner_uid = $owner_uid AND unread = true AND feed_id = $feed AND $date_qpart) as tmp)");
 
-            } else if ($feed < 0 && $feed > LABEL_BASE_INDEX) { // special, like starred
+            } elseif ($feed < 0 && $feed > LABEL_BASE_INDEX) { // special, like starred
 
                 if ($feed == -1) {
                     db_query("UPDATE ttrss_user_entries
@@ -1215,7 +1215,7 @@ function catchup_feed($feed, $cat_view, $owner_uid = false, $max_id = false, $mo
                                     AND owner_uid = $owner_uid AND unread = true AND $date_qpart) as tmp)");
                 }
 
-            } else if ($feed < LABEL_BASE_INDEX) { // label
+            } elseif ($feed < LABEL_BASE_INDEX) { // label
 
                 $label_id = feed_to_label_id($feed);
 
@@ -1256,7 +1256,7 @@ function getCategoryTitle($cat_id) {
 
     if ($cat_id == -1) {
         return __("Special");
-    } else if ($cat_id == -2) {
+    } elseif ($cat_id == -2) {
         return __("Labels");
     } else {
 
@@ -1369,9 +1369,9 @@ function getCategoryUnread($cat, $owner_uid = false) {
         }
 
         return $unread;
-    } else if ($cat == -1) {
+    } elseif ($cat == -1) {
         return getFeedUnread(-1) + getFeedUnread(-2) + getFeedUnread(-3) + getFeedUnread(0);
-    } else if ($cat == -2) {
+    } elseif ($cat == -2) {
 
         $result = db_query("
             SELECT COUNT(unread) AS unread FROM
@@ -1419,9 +1419,9 @@ function getFeedArticles($feed, $is_cat = false, $unread_only = false,
 
     if ($is_cat) {
         return getCategoryUnread($n_feed, $owner_uid);
-    } else if ($n_feed == -6) {
+    } elseif ($n_feed == -6) {
         return 0;
-    } else if ($feed != "0" && $n_feed == 0) {
+    } elseif ($feed != "0" && $n_feed == 0) {
 
         $feed = db_escape_string($feed);
 
@@ -1431,11 +1431,11 @@ function getFeedArticles($feed, $is_cat = false, $unread_only = false,
             WHERE owner_uid = $owner_uid AND tag_name = '$feed'");
         return db_fetch_result($result, 0, "count");
 
-    } else if ($n_feed == -1) {
+    } elseif ($n_feed == -1) {
         $match_part = "marked = true";
-    } else if ($n_feed == -2) {
+    } elseif ($n_feed == -2) {
         $match_part = "published = true";
-    } else if ($n_feed == -3) {
+    } elseif ($n_feed == -3) {
         $match_part = "unread = true AND score >= 0";
 
         $intl = get_pref("FRESH_ARTICLE_MAX_AGE", $owner_uid);
@@ -1448,9 +1448,9 @@ function getFeedArticles($feed, $is_cat = false, $unread_only = false,
 
         $need_entries = true;
 
-    } else if ($n_feed == -4) {
+    } elseif ($n_feed == -4) {
         $match_part = "true";
-    } else if ($n_feed >= 0) {
+    } elseif ($n_feed >= 0) {
 
         if ($n_feed != 0) {
             $match_part = "feed_id = '$n_feed'";
@@ -1458,7 +1458,7 @@ function getFeedArticles($feed, $is_cat = false, $unread_only = false,
             $match_part = "feed_id IS NULL";
         }
 
-    } else if ($feed < LABEL_BASE_INDEX) {
+    } elseif ($feed < LABEL_BASE_INDEX) {
 
         $label_id = feed_to_label_id($feed);
 
@@ -1700,7 +1700,7 @@ function subscribe_to_feed($url, $cat_id = 0,
 
         if (count($feedUrls) == 0) {
             return array("code" => 3);
-        } else if (count($feedUrls) > 1) {
+        } elseif (count($feedUrls) > 1) {
             return array("code" => 4, "feeds" => $feedUrls);
         }
         //use feed url as new URL
@@ -1908,9 +1908,9 @@ function checkbox_to_sql_bool($val) {
 function getFeedCatTitle($id) {
     if ($id == -1) {
         return __("Special");
-    } else if ($id < LABEL_BASE_INDEX) {
+    } elseif ($id < LABEL_BASE_INDEX) {
         return __("Labels");
-    } else if ($id > 0) {
+    } elseif ($id > 0) {
         $result = db_query("SELECT ttrss_feed_categories.title
             FROM ttrss_feeds, ttrss_feed_categories WHERE ttrss_feeds.id = '$id' AND
                 cat_id = ttrss_feed_categories.id");
@@ -1961,19 +1961,19 @@ function getFeedIcon($id) {
 function getFeedTitle($id, $cat = false) {
     if ($cat) {
         return getCategoryTitle($id);
-    } else if ($id == -1) {
+    } elseif ($id == -1) {
         return __("Starred articles");
-    } else if ($id == -2) {
+    } elseif ($id == -2) {
         return __("Published articles");
-    } else if ($id == -3) {
+    } elseif ($id == -3) {
         return __("Fresh articles");
-    } else if ($id == -4) {
+    } elseif ($id == -4) {
         return __("All articles");
-    } else if ($id === 0 || $id === "0") {
+    } elseif ($id === 0 || $id === "0") {
         return __("Archived articles");
-    } else if ($id == -6) {
+    } elseif ($id == -6) {
         return __("Recently read");
-    } else if ($id < LABEL_BASE_INDEX) {
+    } elseif ($id < LABEL_BASE_INDEX) {
         $label_id = feed_to_label_id($id);
         $result = db_query("SELECT caption FROM ttrss_labels2 WHERE id = '$label_id'");
         if (db_num_rows($result) == 1) {
@@ -1982,7 +1982,7 @@ function getFeedTitle($id, $cat = false) {
             return "Unknown label ($label_id)";
         }
 
-    } else if (is_numeric($id) && $id > 0) {
+    } elseif (is_numeric($id) && $id > 0) {
         $result = db_query("SELECT title FROM ttrss_feeds WHERE id = '$id'");
         if (db_num_rows($result) == 1) {
             return db_fetch_result($result, 0, "title");
