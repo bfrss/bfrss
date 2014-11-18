@@ -1,5 +1,6 @@
 <?php
-function make_init_params() {
+function make_init_params()
+{
     $params = array();
 
     foreach (array("ON_CATCHUP_SHOW_NEXT_FEED", "HIDE_READ_FEEDS",
@@ -44,7 +45,8 @@ function make_init_params() {
     return $params;
 }
 
-function get_hotkeys_info() {
+function get_hotkeys_info()
+{
     $hotkeys = array(
         __("Navigation") => array(
             "next_feed" => __("Open next feed"),
@@ -114,7 +116,8 @@ function get_hotkeys_info() {
     return $hotkeys;
 }
 
-function get_hotkeys_map() {
+function get_hotkeys_map()
+{
     $hotkeys = array(
         //"navigation" => array(
             "k" => "next_feed",
@@ -200,7 +203,8 @@ function get_hotkeys_map() {
     return array($prefixes, $hotkeys);
 }
 
-function make_runtime_info() {
+function make_runtime_info()
+{
     $data = array();
 
     $result = db_query("SELECT MAX(id) AS mid, COUNT(*) AS nf FROM
@@ -257,8 +261,8 @@ function make_runtime_info() {
     return $data;
 }
 
-function search_to_sql($search) {
-
+function search_to_sql($search)
+{
     $search_query_part = "";
 
     $keywords = str_getcsv($search, " ");
@@ -396,7 +400,8 @@ function search_to_sql($search) {
     return array($search_query_part, $search_words);
 }
 
-function getParentCategories($cat, $owner_uid) {
+function getParentCategories($cat, $owner_uid)
+{
     $rv = array();
 
     $result = db_query(
@@ -412,7 +417,8 @@ function getParentCategories($cat, $owner_uid) {
     return $rv;
 }
 
-function getChildCategories($cat, $owner_uid) {
+function getChildCategories($cat, $owner_uid)
+{
     $rv = array();
 
     $result = db_query(
@@ -1028,7 +1034,8 @@ function sanitize($str, $force_remove_images = false, $owner = false, $site_url 
     return $res;
 }
 
-function strip_harmful_tags($doc, $allowed_elements, $disallowed_attributes) {
+function strip_harmful_tags($doc, $allowed_elements, $disallowed_attributes)
+{
     $xpath = new DOMXPath($doc);
     $entries = $xpath->query('//*');
 
@@ -1060,7 +1067,8 @@ function strip_harmful_tags($doc, $allowed_elements, $disallowed_attributes) {
     return $doc;
 }
 
-function check_for_update() {
+function check_for_update()
+{
     if (CHECK_FOR_NEW_VERSION && $_SESSION['access_level'] >= 10) {
         $version_url = "http://tt-rss.org/version.php?ver=" . VERSION .
             "&iid=" . sha1(SELF_URL_PATH);
@@ -1079,8 +1087,8 @@ function check_for_update() {
     return false;
 }
 
-function catchupArticlesById($ids, $cmode, $owner_uid = false) {
-
+function catchupArticlesById($ids, $cmode, $owner_uid = false)
+{
     if (!$owner_uid) {
         $owner_uid = $_SESSION["uid"];
     }
@@ -1128,8 +1136,8 @@ function catchupArticlesById($ids, $cmode, $owner_uid = false) {
     }
 }
 
-function get_article_tags($id, $owner_uid = 0, $tag_cache = false) {
-
+function get_article_tags($id, $owner_uid = 0, $tag_cache = false)
+{
     $a_id = db_escape_string($id);
 
     if (!$owner_uid) {
@@ -1180,13 +1188,15 @@ function get_article_tags($id, $owner_uid = 0, $tag_cache = false) {
     return $tags;
 }
 
-function trim_array($array) {
+function trim_array($array)
+{
     $tmp = $array;
     array_walk($tmp, 'trim');
     return $tmp;
 }
 
-function tag_is_valid($tag) {
+function tag_is_valid($tag)
+{
     if ($tag == '') {
         return false;
     }
@@ -1204,48 +1214,56 @@ function tag_is_valid($tag) {
     return true;
 }
 
-function render_login_form() {
+function render_login_form()
+{
     header('Cache-Control: public');
 
     require_once "login_form.php";
     exit;
 }
 
-function format_warning($msg, $id = "") {
+function format_warning($msg, $id = "")
+{
     return "<div class=\"warning\" id=\"$id\">
         <span><img src=\"images/alert.png\"></span><span>$msg</span></div>";
 }
 
-function format_notice($msg, $id = "") {
+function format_notice($msg, $id = "")
+{
     return "<div class=\"notice\" id=\"$id\">
         <span><img src=\"images/information.png\"></span><span>$msg</span></div>";
 }
 
-function format_error($msg, $id = "") {
+function format_error($msg, $id = "")
+{
     return "<div class=\"error\" id=\"$id\">
         <span><img src=\"images/alert.png\"></span><span>$msg</span></div>";
 }
 
-function print_notice($msg) {
+function print_notice($msg)
+{
     return print format_notice($msg);
 }
 
-function print_warning($msg) {
+function print_warning($msg)
+{
     return print format_warning($msg);
 }
 
-function print_error($msg) {
+function print_error($msg)
+{
     return print format_error($msg);
 }
 
 
-function T_sprintf() {
+function T_sprintf()
+{
     $args = func_get_args();
     return vsprintf(__(array_shift($args)), $args);
 }
 
-function format_inline_player($url, $ctype) {
-
+function format_inline_player($url, $ctype)
+{
     $entry = "";
 
     $url = htmlspecialchars($url);
@@ -1287,7 +1305,8 @@ function format_inline_player($url, $ctype) {
 
 }
 
-function format_article($id, $mark_as_read = true, $zoom_mode = false, $owner_uid = false) {
+function format_article($id, $mark_as_read = true, $zoom_mode = false, $owner_uid = false)
+{
     if (!$owner_uid) {
         $owner_uid = $_SESSION["uid"];
     }
@@ -1555,13 +1574,15 @@ function format_article($id, $mark_as_read = true, $zoom_mode = false, $owner_ui
 
 }
 
-function print_checkpoint($n, $s) {
+function print_checkpoint($n, $s)
+{
     $ts = microtime(true);
     echo sprintf("<!-- CP[$n] %.4f seconds -->\n", $ts - $s);
     return $ts;
 }
 
-function sanitize_tag($tag) {
+function sanitize_tag($tag)
+{
     $tag = trim($tag);
 
     $tag = mb_strtolower($tag, 'utf-8');
@@ -1575,7 +1596,8 @@ function sanitize_tag($tag) {
     return $tag;
 }
 
-function get_self_url_prefix() {
+function get_self_url_prefix()
+{
     if (strrpos(SELF_URL_PATH, "/") === strlen(SELF_URL_PATH)-1) {
         return substr(SELF_URL_PATH, 0, strlen(SELF_URL_PATH)-1);
     } else {
@@ -1588,7 +1610,8 @@ function get_self_url_prefix() {
  *
  * @return string The Mozilla Firefox feed adding URL.
  */
-function add_feed_url() {
+function add_feed_url()
+{
     //$url_path = ($_SERVER['HTTPS'] != "on" ? 'http://' :  'https://') . $_SERVER["HTTP_HOST"] . parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 
     $url_path = get_self_url_prefix() .
@@ -1596,7 +1619,8 @@ function add_feed_url() {
     return $url_path;
 } // function add_feed_url
 
-function encrypt_password($pass, $salt = '', $mode2 = false) {
+function encrypt_password($pass, $salt = '', $mode2 = false)
+{
     if ($salt && $mode2) {
         return "MODE2:" . hash('sha256', $salt . $pass);
     } elseif ($salt) {
@@ -1606,7 +1630,8 @@ function encrypt_password($pass, $salt = '', $mode2 = false) {
     }
 } // function encrypt_password
 
-function load_filters($feed_id, $owner_uid, $action_id = false) {
+function load_filters($feed_id, $owner_uid, $action_id = false)
+{
     $filters = array();
 
     $cat_id = (int)getFeedCategory($feed_id);
@@ -1688,7 +1713,8 @@ function load_filters($feed_id, $owner_uid, $action_id = false) {
     return $filters;
 }
 
-function get_score_pic($score) {
+function get_score_pic($score)
+{
     if ($score > 100) {
         return "score_high.png";
     } elseif ($score > 0) {
@@ -1702,17 +1728,20 @@ function get_score_pic($score) {
     }
 }
 
-function feed_has_icon($id) {
+function feed_has_icon($id)
+{
     return is_file(ICONS_DIR . "/$id.ico") && filesize(ICONS_DIR . "/$id.ico") > 0;
 }
 
-function init_plugins() {
+function init_plugins()
+{
     PluginHost::getInstance()->load(PLUGINS, PluginHost::KIND_ALL);
 
     return true;
 }
 
-function format_tags_string($tags, $id) {
+function format_tags_string($tags, $id)
+{
     if (!is_array($tags) || count($tags) == 0) {
         return __("no tags");
     } else {
@@ -1732,7 +1761,8 @@ function format_tags_string($tags, $id) {
     }
 }
 
-function format_article_labels($labels, $id) {
+function format_article_labels($labels, $id)
+{
 
     if (!is_array($labels)) {
         return '';
@@ -1754,8 +1784,8 @@ function format_article_labels($labels, $id) {
 
 }
 
-function format_article_note($id, $note, $allow_edit = true) {
-
+function format_article_note($id, $note, $allow_edit = true)
+{
     $str = "<div class='articleNote'    onclick=\"editArticleNote($id)\">
         <div class='noteEdit' onclick=\"editArticleNote($id)\">".
         ($allow_edit ? __('(edit note)') : "")."</div>$note</div>";
@@ -1764,7 +1794,8 @@ function format_article_note($id, $note, $allow_edit = true) {
 }
 
 
-function get_feed_category($feed_cat, $parent_cat_id = false) {
+function get_feed_category($feed_cat, $parent_cat_id = false)
+{
     if ($parent_cat_id) {
         $parent_qpart = "parent_cat = '$parent_cat_id'";
         $parent_insert = "'$parent_cat_id'";
@@ -1785,8 +1816,8 @@ function get_feed_category($feed_cat, $parent_cat_id = false) {
     }
 }
 
-function add_feed_category($feed_cat, $parent_cat_id = false) {
-
+function add_feed_category($feed_cat, $parent_cat_id = false)
+{
     if (!$feed_cat) {
         return false;
     }
@@ -1823,7 +1854,8 @@ function add_feed_category($feed_cat, $parent_cat_id = false) {
     return false;
 }
 
-function getArticleFeed($id) {
+function getArticleFeed($id)
+{
     $result = db_query(
         "SELECT feed_id FROM ttrss_user_entries
         WHERE ref_id = '$id' AND owner_uid = " . $_SESSION["uid"]
@@ -1845,7 +1877,8 @@ function getArticleFeed($id) {
  *
  * @return string Fixed URL.
  */
-function fix_url($url) {
+function fix_url($url)
+{
     if (strpos($url, '://') === false) {
         $url = 'http://' . $url;
     } elseif (substr($url, 0, 5) == 'feed:') {
@@ -1865,15 +1898,16 @@ function fix_url($url) {
     }
 }
 
-function validate_feed_url($url) {
+function validate_feed_url($url)
+{
     $parts = parse_url($url);
 
     return ($parts['scheme'] == 'http' || $parts['scheme'] == 'feed' || $parts['scheme'] == 'https');
 
 }
 
-function get_article_enclosures($id) {
-
+function get_article_enclosures($id)
+{
     $query = "SELECT * FROM ttrss_enclosures
         WHERE post_id = '$id' AND content_url != ''";
 
@@ -1890,7 +1924,8 @@ function get_article_enclosures($id) {
     return $rv;
 }
 
-/* function save_email_address($email) {
+/* function save_email_address($email)
+{
     // FIXME: implement persistent storage of emails
 
     if (!$_SESSION['stored_emails'])
@@ -1901,8 +1936,8 @@ function get_article_enclosures($id) {
 } */
 
 
-function get_feed_access_key($feed_id, $is_cat, $owner_uid = false) {
-
+function get_feed_access_key($feed_id, $is_cat, $owner_uid = false)
+{
     if (!$owner_uid) {
         $owner_uid = $_SESSION["uid"];
     }
@@ -1962,16 +1997,18 @@ function get_feeds_from_html($url, $content)
     return $feedUrls;
 }
 
-function is_html($content) {
+function is_html($content)
+{
     return preg_match("/<html|DOCTYPE html/i", substr($content, 0, 20)) !== 0;
 }
 
-function url_is_html($url, $login = false, $pass = false) {
+function url_is_html($url, $login = false, $pass = false)
+{
     return is_html(fetch_file_contents($url, false, $login, $pass));
 }
 
-function print_label_select($name, $value, $attributes = "") {
-
+function print_label_select($name, $value, $attributes = "")
+{
     $result = db_query(
         "SELECT caption FROM ttrss_labels2
         WHERE owner_uid = '".$_SESSION["uid"]."' ORDER BY caption"
@@ -2124,7 +2161,8 @@ function format_article_enclosures(
     return $rv;
 }
 
-function getLastArticleId() {
+function getLastArticleId()
+{
     $result = db_query("SELECT MAX(ref_id) AS id FROM ttrss_user_entries
         WHERE owner_uid = " . $_SESSION["uid"]);
 
@@ -2135,7 +2173,8 @@ function getLastArticleId() {
     }
 }
 
-function build_url($parts) {
+function build_url($parts)
+{
     return $parts['scheme'] . "://" . $parts['host'] . $parts['path'];
 }
 
@@ -2147,7 +2186,8 @@ function build_url($parts) {
  *
  * @return string Absolute URL
  */
-function rewrite_relative_url($url, $rel_url) {
+function rewrite_relative_url($url, $rel_url)
+{
     if (strpos($rel_url, ":") !== false) {
         return $rel_url;
     } elseif (strpos($rel_url, "://") !== false) {
@@ -2177,8 +2217,8 @@ function rewrite_relative_url($url, $rel_url) {
     }
 }
 
-function cleanup_tags($days = 14, $limit = 1000) {
-
+function cleanup_tags($days = 14, $limit = 1000)
+{
     if (DB_TYPE == "pgsql") {
         $interval_query = "date_updated < NOW() - INTERVAL '$days days'";
     } elseif (DB_TYPE == "mysql") {
@@ -2218,7 +2258,8 @@ function cleanup_tags($days = 14, $limit = 1000) {
     return $tags_deleted;
 }
 
-function print_user_stylesheet() {
+function print_user_stylesheet()
+{
     $value = get_pref('USER_STYLESHEET');
 
     if ($value) {
@@ -2229,7 +2270,8 @@ function print_user_stylesheet() {
 
 }
 
-function filter_to_sql($filter, $owner_uid) {
+function filter_to_sql($filter, $owner_uid)
+{
     $query = array();
 
     if (DB_TYPE == "pgsql") {
@@ -2319,7 +2361,8 @@ function filter_to_sql($filter, $owner_uid) {
 }
 
 if (!function_exists('gzdecode')) {
-    function gzdecode($string) { // no support for 2nd argument
+    function gzdecode($string)
+    { // no support for 2nd argument
         return file_get_contents(
             'compress.zlib://data:who/cares;base64,'.
             base64_encode($string)
@@ -2327,7 +2370,8 @@ if (!function_exists('gzdecode')) {
     }
 }
 
-function get_random_bytes($length) {
+function get_random_bytes($length)
+{
     if (function_exists('openssl_random_pseudo_bytes')) {
         return openssl_random_pseudo_bytes($length);
     } else {
@@ -2341,7 +2385,8 @@ function get_random_bytes($length) {
     }
 }
 
-function read_stdin() {
+function read_stdin()
+{
     $fp = fopen("php://stdin", "r");
 
     if ($fp) {
@@ -2353,7 +2398,8 @@ function read_stdin() {
     return null;
 }
 
-function tmpdirname($path, $prefix) {
+function tmpdirname($path, $prefix)
+{
     // Use PHP's tmpfile function to create a temporary
     // directory name. Delete the file and keep the name.
     $tempname = tempnam($path, $prefix);
@@ -2368,7 +2414,8 @@ function tmpdirname($path, $prefix) {
     return $tempname;
 }
 
-function getFeedCategory($feed) {
+function getFeedCategory($feed)
+{
     $result = db_query("SELECT cat_id FROM ttrss_feeds WHERE id = '$feed'");
 
     if (db_num_rows($result) > 0) {
@@ -2379,12 +2426,13 @@ function getFeedCategory($feed) {
 
 }
 
-function implements_interface($class, $interface) {
+function implements_interface($class, $interface)
+{
     return in_array($interface, class_implements($class));
 }
 
-function geturl($url, $depth = 0, $nobody = true){
-
+function geturl($url, $depth = 0, $nobody = true)
+{
     if ($depth == 20) {
         return $url;
     }
@@ -2458,7 +2506,8 @@ function geturl($url, $depth = 0, $nobody = true){
     return $url;
 }
 
-function get_minified_js($files) {
+function get_minified_js($files)
+{
     require_once 'lib/jshrink/Minifier.php';
 
     $rv = '';
@@ -2493,13 +2542,15 @@ function get_minified_js($files) {
     return $rv;
 }
 
-function stylesheet_tag($filename) {
+function stylesheet_tag($filename)
+{
     $timestamp = filemtime($filename);
 
     return "<link rel=\"stylesheet\" type=\"text/css\" href=\"$filename?$timestamp\"/>\n";
 }
 
-function javascript_tag($filename) {
+function javascript_tag($filename)
+{
     $query = "";
 
     if (!(strpos($filename, "?") === false)) {
@@ -2516,7 +2567,8 @@ function javascript_tag($filename) {
     return "<script type=\"text/javascript\" charset=\"utf-8\" src=\"$filename?$timestamp\"></script>\n";
 }
 
-function calculate_dep_timestamp() {
+function calculate_dep_timestamp()
+{
     $files = array_merge(glob("js/*.js"), glob("css/*.css"));
 
     $max_ts = -1;
@@ -2530,7 +2582,8 @@ function calculate_dep_timestamp() {
     return $max_ts;
 }
 
-function T_js_decl($s1, $s2) {
+function T_js_decl($s1, $s2)
+{
     if ($s1 && $s2) {
         $s1 = preg_replace("/\n/", "", $s1);
         $s2 = preg_replace("/\n/", "", $s2);
@@ -2542,8 +2595,8 @@ function T_js_decl($s1, $s2) {
     }
 }
 
-function init_js_translations() {
-
+function init_js_translations()
+{
     print 'var T_messages = new Object();
 
     function __(msg) {
@@ -2574,10 +2627,12 @@ function init_js_translations() {
     }
 }
 
-function label_to_feed_id($label) {
+function label_to_feed_id($label)
+{
     return LABEL_BASE_INDEX - 1 - abs($label);
 }
 
-function feed_to_label_id($feed) {
+function feed_to_label_id($feed)
+{
     return LABEL_BASE_INDEX - 1 + abs($feed);
 }
