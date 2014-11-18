@@ -221,4 +221,3 @@ function ccache_update($feed_id, $owner_uid, $is_cat = false,
 
     }
 } */
-?>
