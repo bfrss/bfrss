@@ -158,7 +158,9 @@ function _debug($msg, $show = true) {
 
     //echo "[$suppress_debugging] $msg $show\n";
 
-    if ($suppress_debugging) return false;
+    if ($suppress_debugging) {
+        return false;
+    }
 
     $ts = strftime("%H:%M:%S", time());
     if (function_exists('posix_getpid')) {
@@ -214,7 +216,9 @@ function _debug($msg, $show = true) {
  */
 function purge_feed($feed_id, $purge_interval, $debug = false) {
 
-    if (!$purge_interval) $purge_interval = feed_purge_interval($feed_id);
+    if (!$purge_interval) {
+        $purge_interval = feed_purge_interval($feed_id);
+    }
 
     $rows = -1;
 
@@ -234,7 +238,9 @@ function purge_feed($feed_id, $purge_interval, $debug = false) {
         return;
     }
 
-    if (!$owner_uid) return;
+    if (!$owner_uid) {
+        return;
+    }
 
     if (FORCE_ARTICLE_PURGE == 0) {
         $purge_unread = get_pref("PURGE_UNREAD_ARTICLES",
@@ -244,7 +250,9 @@ function purge_feed($feed_id, $purge_interval, $debug = false) {
         $purge_interval = FORCE_ARTICLE_PURGE;
     }
 
-    if (!$purge_unread) $query_limit = " unread = false AND ";
+    if (!$purge_unread) {
+        $query_limit = " unread = false AND ";
+    }
 
     if (DB_TYPE == "pgsql") {
         $pg_version = get_pgsql_version();
@@ -305,8 +313,10 @@ function feed_purge_interval($feed_id) {
         $purge_interval = db_fetch_result($result, 0, "purge_interval");
         $owner_uid = db_fetch_result($result, 0, "owner_uid");
 
-        if ($purge_interval == 0) $purge_interval = get_pref(
-            'PURGE_OLD_DAYS', $owner_uid);
+        if ($purge_interval == 0) {
+            $purge_interval = get_pref(
+                'PURGE_OLD_DAYS', $owner_uid);
+        }
 
         return $purge_interval;
 
@@ -403,8 +413,9 @@ function fetch_file_contents($url, $type = false, $login = false, $pass = false,
             curl_setopt($ch, CURLOPT_POSTFIELDS, $post_query);
         }
 
-        if ($login && $pass)
+        if ($login && $pass) {
             curl_setopt($ch, CURLOPT_USERPWD, "$login:$pass");
+        }
 
         $contents = @curl_exec($ch);
 
@@ -533,8 +544,9 @@ function get_favicon_url($url) {
         }
     }
 
-    if (!$favicon_url)
+    if (!$favicon_url) {
         $favicon_url = rewrite_relative_url($url, "/favicon.ico");
+    }
 
     return $favicon_url;
 } // function get_favicon_url
@@ -589,10 +601,11 @@ function check_feed_favicon($site_url, $feed) {
 function print_select($id, $default, $values, $attributes = "") {
     print "<select name=\"$id\" id=\"$id\" $attributes>";
     foreach ($values as $v) {
-        if ($v == $default)
+        if ($v == $default) {
             $sel = "selected=\"1\"";
-        else
+        } else {
             $sel = "";
+        }
 
         $v = trim($v);
 
@@ -604,10 +617,11 @@ function print_select($id, $default, $values, $attributes = "") {
 function print_select_hash($id, $default, $values, $attributes = "") {
     print "<select name=\"$id\" id='$id' $attributes>";
     foreach (array_keys($values) as $v) {
-        if ($v == $default)
+        if ($v == $default) {
             $sel = 'selected="selected"';
-        else
+        } else {
             $sel = "";
+        }
 
         $v = trim($v);
 
@@ -620,10 +634,11 @@ function print_select_hash($id, $default, $values, $attributes = "") {
 function print_radio($id, $default, $true_is, $values, $attributes = "") {
     foreach ($values as $v) {
 
-        if ($v == $default)
+        if ($v == $default) {
             $sel = "checked";
-        else
+        } else {
             $sel = "";
+        }
 
         if ($v == $true_is) {
             $sel .= " value=\"1\"";
@@ -648,7 +663,9 @@ function initialize_user_prefs($uid, $profile = false) {
         $profile_qpart = "AND profile = '$profile'";
     }
 
-    if (get_schema_version() < 63) $profile_qpart = "";
+    if (get_schema_version() < 63) {
+        $profile_qpart = "";
+    }
 
     db_query("BEGIN");
 
@@ -835,7 +852,9 @@ function login_sequence() {
         startup_gettext();
         load_user_plugins($_SESSION["uid"]);
     } else {
-        if (!validate_session()) $_SESSION["uid"] = false;
+        if (!validate_session()) {
+            $_SESSION["uid"] = false;
+        }
 
         if (!$_SESSION["uid"]) {
 
@@ -910,13 +929,19 @@ function convert_timestamp($timestamp, $source_tz, $dest_tz) {
 function make_local_datetime($timestamp, $long, $owner_uid = false,
                 $no_smart_dt = false) {
 
-    if (!$owner_uid) $owner_uid = $_SESSION['uid'];
-    if (!$timestamp) $timestamp = '1970-01-01 0:00';
+    if (!$owner_uid) {
+        $owner_uid = $_SESSION['uid'];
+    }
+    if (!$timestamp) {
+        $timestamp = '1970-01-01 0:00';
+    }
 
     global $utc_tz;
     global $user_tz;
 
-    if (!$utc_tz) $utc_tz = new DateTimeZone('UTC');
+    if (!$utc_tz) {
+        $utc_tz = new DateTimeZone('UTC');
+    }
 
     $timestamp = substr($timestamp, 0, 19);
 
@@ -928,7 +953,9 @@ function make_local_datetime($timestamp, $long, $owner_uid = false,
     if ($user_tz_string != 'Automatic') {
 
         try {
-            if (!$user_tz) $user_tz = new DateTimeZone($user_tz_string);
+            if (!$user_tz) {
+                $user_tz = new DateTimeZone($user_tz_string);
+            }
         } catch (Exception $e) {
             $user_tz = $utc_tz;
         }
@@ -944,17 +971,20 @@ function make_local_datetime($timestamp, $long, $owner_uid = false,
         return smart_date_time($user_timestamp,
             $tz_offset, $owner_uid);
     } else {
-        if ($long)
+        if ($long) {
             $format = get_pref('LONG_DATE_FORMAT', $owner_uid);
-        else
+        } else {
             $format = get_pref('SHORT_DATE_FORMAT', $owner_uid);
+        }
 
         return date($format, $user_timestamp);
     }
 }
 
 function smart_date_time($timestamp, $tz_offset = 0, $owner_uid = false) {
-    if (!$owner_uid) $owner_uid = $_SESSION['uid'];
+    if (!$owner_uid) {
+        $owner_uid = $_SESSION['uid'];
+    }
 
     if (date("Y.m.d", $timestamp) == date("Y.m.d", time() + $tz_offset)) {
         return date("G:i", $timestamp);
@@ -1094,7 +1124,9 @@ function sql_random_function() {
 
 function catchup_feed($feed, $cat_view, $owner_uid = false, $max_id = false, $mode = 'all') {
 
-        if (!$owner_uid) $owner_uid = $_SESSION['uid'];
+        if (!$owner_uid) {
+            $owner_uid = $_SESSION['uid'];
+        }
 
         //if (preg_match("/^-?[0-9][0-9]*$/", $feed) != false) {
 
@@ -1313,7 +1345,9 @@ function getCategoryCounters() {
 
 // only accepts real cats (>= 0)
 function getCategoryChildrenUnread($cat, $owner_uid = false) {
-    if (!$owner_uid) $owner_uid = $_SESSION["uid"];
+    if (!$owner_uid) {
+        $owner_uid = $_SESSION["uid"];
+    }
 
     $result = db_query("SELECT id FROM ttrss_feed_categories WHERE parent_cat = '$cat'
             AND owner_uid = $owner_uid");
@@ -1330,7 +1364,9 @@ function getCategoryChildrenUnread($cat, $owner_uid = false) {
 
 function getCategoryUnread($cat, $owner_uid = false) {
 
-    if (!$owner_uid) $owner_uid = $_SESSION["uid"];
+    if (!$owner_uid) {
+        $owner_uid = $_SESSION["uid"];
+    }
 
     if ($cat >= 0) {
 
@@ -1348,7 +1384,9 @@ function getCategoryUnread($cat, $owner_uid = false) {
             array_push($cat_feeds, "feed_id = " . $line["id"]);
         }
 
-        if (count($cat_feeds) == 0) return 0;
+        if (count($cat_feeds) == 0) {
+            return 0;
+        }
 
         $match_part = implode(" OR ", $cat_feeds);
 
@@ -1387,7 +1425,9 @@ function getFeedUnread($feed, $is_cat = false) {
 }
 
 function getLabelUnread($label_id, $owner_uid = false) {
-    if (!$owner_uid) $owner_uid = $_SESSION["uid"];
+    if (!$owner_uid) {
+        $owner_uid = $_SESSION["uid"];
+    }
 
     $result = db_query("SELECT COUNT(ref_id) AS unread FROM ttrss_user_entries, ttrss_user_labels2
         WHERE owner_uid = '$owner_uid' AND unread = true AND label_id = '$label_id' AND article_id = ref_id");
@@ -1405,7 +1445,9 @@ function getFeedArticles($feed, $is_cat = false, $unread_only = false,
     $n_feed = (int) $feed;
     $need_entries = false;
 
-    if (!$owner_uid) $owner_uid = $_SESSION["uid"];
+    if (!$owner_uid) {
+        $owner_uid = $_SESSION["uid"];
+    }
 
     if ($unread_only) {
         $unread_qpart = "unread = true";
@@ -1540,10 +1582,11 @@ function getVirtCounters() {
 
         $count = getFeedUnread($i);
 
-        if ($i == 0 || $i == -1 || $i == -2)
+        if ($i == 0 || $i == -1 || $i == -2) {
             $auxctr = getFeedArticles($i, false);
-        else
+        } else {
             $auxctr = 0;
+        }
 
         $cv = array("id" => $i,
             "counter" => (int) $count,
@@ -1562,8 +1605,9 @@ function getVirtCounters() {
             $cv = array("id" => PluginHost::pfeed_to_feed_id($feed['id']),
                 "counter" => $feed['sender']->get_unread($feed['id']));
 
-            if (method_exists($feed['sender'], 'get_total'))
+            if (method_exists($feed['sender'], 'get_total')) {
                 $cv["auxcounter"] = $feed['sender']->get_total($feed['id']);
+            }
 
             array_push($ret_arr, $cv);
         }
@@ -1593,8 +1637,9 @@ function getLabelCounters($descriptions = false) {
             "counter" => (int) $line["unread"],
             "auxcounter" => (int) $line["total"]);
 
-        if ($descriptions)
+        if ($descriptions) {
             $cv["description"] = $line["caption"];
+        }
 
         array_push($ret_arr, $cv);
     }
@@ -1627,22 +1672,26 @@ function getFeedCounters($active_feed = false) {
 
         $has_img = feed_has_icon($id);
 
-        if (date('Y') - date('Y', strtotime($line['last_updated'])) > 2)
+        if (date('Y') - date('Y', strtotime($line['last_updated'])) > 2) {
             $last_updated = '';
+        }
 
         $cv = array("id" => $id,
             "updated" => $last_updated,
             "counter" => (int) $count,
             "has_img" => (int) $has_img);
 
-        if ($last_error)
+        if ($last_error) {
             $cv["error"] = $last_error;
+        }
 
-        if (get_pref('EXTENDED_FEEDLIST'))
+        if (get_pref('EXTENDED_FEEDLIST')) {
             $cv["xmsg"] = getFeedArticles($id)." ".__("total");
+        }
 
-        if ($active_feed && $id == $active_feed)
+        if ($active_feed && $id == $active_feed) {
             $cv["title"] = truncate_string($line["title"], 30);
+        }
 
         array_push($ret_arr, $cv);
 
@@ -1679,7 +1728,9 @@ function subscribe_to_feed($url, $cat_id = 0,
 
     $url = fix_url($url);
 
-    if (!$url || !validate_feed_url($url)) return array("code" => 2);
+    if (!$url || !validate_feed_url($url)) {
+        return array("code" => 2);
+    }
 
     $contents = @fetch_file_contents($url, false, $auth_login, $auth_pass);
 
@@ -1760,10 +1811,11 @@ function print_feed_select($id, $default_id = "",
 
     if (get_pref('ENABLE_FEED_CATS')) {
 
-        if ($root_id)
+        if ($root_id) {
             $parent_qpart = "parent_cat = '$root_id'";
-        else
+        } else {
             $parent_qpart = "parent_cat IS NULL";
+        }
 
         $result = db_query("SELECT id,title,
             (SELECT COUNT(id) FROM ttrss_feed_categories AS c2 WHERE
@@ -1773,17 +1825,19 @@ function print_feed_select($id, $default_id = "",
 
         while ($line = db_fetch_assoc($result)) {
 
-            for ($i = 0; $i < $nest_level; $i++)
+            for ($i = 0; $i < $nest_level; $i++) {
                 $line["title"] = " - " . $line["title"];
+            }
 
             $is_selected = ("CAT:".$line["id"] == $default_id) ? "selected=\"1\"" : "";
 
             printf("<option $is_selected value='CAT:%d'>%s</option>",
                 $line["id"], htmlspecialchars($line["title"]));
 
-            if ($line["num_children"] > 0)
+            if ($line["num_children"] > 0) {
                 print_feed_select($id, $default_id, $attributes,
                     $include_all_feeds, $line["id"], $nest_level+1);
+            }
 
             $feed_result = db_query("SELECT id,title FROM ttrss_feeds
                 WHERE cat_id = '".$line["id"]."' AND owner_uid = ".$_SESSION["uid"] . " ORDER BY title");
@@ -1793,8 +1847,9 @@ function print_feed_select($id, $default_id = "",
 
                 $fline["title"] = " + " . $fline["title"];
 
-                for ($i = 0; $i < $nest_level; $i++)
+                for ($i = 0; $i < $nest_level; $i++) {
                     $fline["title"] = " - " . $fline["title"];
+                }
 
                 printf("<option $is_selected value='%d'>%s</option>",
                     $fline["id"], htmlspecialchars($fline["title"]));
@@ -1816,8 +1871,9 @@ function print_feed_select($id, $default_id = "",
 
                 $fline["title"] = " + " . $fline["title"];
 
-                for ($i = 0; $i < $nest_level; $i++)
+                for ($i = 0; $i < $nest_level; $i++) {
                     $fline["title"] = " - " . $fline["title"];
+                }
 
                 printf("<option $is_selected value='%d'>%s</option>",
                     $fline["id"], htmlspecialchars($fline["title"]));
@@ -1849,10 +1905,11 @@ function print_feed_cat_select($id, $default_id,
                 print "<select id=\"$id\" name=\"$id\" default=\"$default_id\" onchange=\"catSelectOnChange(this)\" $attributes>";
         }
 
-        if ($root_id)
+        if ($root_id) {
             $parent_qpart = "parent_cat = '$root_id'";
-        else
+        } else {
             $parent_qpart = "parent_cat IS NULL";
+        }
 
         $result = db_query("SELECT id,title,
             (SELECT COUNT(id) FROM ttrss_feed_categories AS c2 WHERE
@@ -1867,16 +1924,19 @@ function print_feed_cat_select($id, $default_id,
                 $is_selected = "";
             }
 
-            for ($i = 0; $i < $nest_level; $i++)
+            for ($i = 0; $i < $nest_level; $i++) {
                 $line["title"] = " - " . $line["title"];
+            }
 
-            if ($line["title"])
+            if ($line["title"]) {
                 printf("<option $is_selected value='%d'>%s</option>",
                     $line["id"], htmlspecialchars($line["title"]));
+            }
 
-            if ($line["num_children"] > 0)
+            if ($line["num_children"] > 0) {
                 print_feed_cat_select($id, $default_id, $attributes,
                     $include_all_cats, $line["id"], $nest_level+1);
+            }
         }
 
         if (!$root_id) {
@@ -1945,8 +2005,9 @@ function getFeedIcon($id) {
         if ($id < LABEL_BASE_INDEX) {
             return "images/label.png";
         } else {
-            if (file_exists(ICONS_DIR . "/$id.ico"))
+            if (file_exists(ICONS_DIR . "/$id.ico")) {
                 return ICONS_URL . "/$id.ico";
+            }
         }
         break;
     }
