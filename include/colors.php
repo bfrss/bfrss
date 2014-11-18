@@ -293,9 +293,9 @@ function rgb2hsl($arr)
         } elseif ($h > 1) {
             $h--;
         }
-   }
+    }
 
-   return array($h, $s, $v);
+    return array($h, $s, $v);
 }
 
 function hsl2rgb($arr)
@@ -308,10 +308,10 @@ function hsl2rgb($arr)
         $r = $g = $B = $v * 255;
     } else {
         $var_H = $h * 6;
-        $var_i = floor($var_H );
-        $var_1 = $v * (1 - $s );
-        $var_2 = $v * (1 - $s * ($var_H - $var_i ) );
-        $var_3 = $v * (1 - $s * (1 - ($var_H - $var_i ) ) );
+        $var_i = floor($var_H);
+        $var_1 = $v * (1 - $s);
+        $var_2 = $v * (1 - $s * ($var_H - $var_i ));
+        $var_3 = $v * (1 - $s * (1 - ($var_H - $var_i )));
 
         if ($var_i == 0) {
             $var_R = $v;
