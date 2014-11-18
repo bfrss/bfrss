@@ -298,43 +298,51 @@ function search_to_sql($search) {
             break;
         case "note":
             if ($commandpair[1]) {
-                if ($commandpair[1] == "true")
+                if ($commandpair[1] == "true") {
                     array_push($query_keywords, "($not (note IS NOT NULL AND note != ''))");
-                elseif ($commandpair[1] == "false")
+                } elseif ($commandpair[1] == "false") {
                     array_push($query_keywords, "($not (note IS NULL OR note = ''))");
-                else
+                } else {
                     array_push($query_keywords, "($not (LOWER(note) LIKE '%".
                         db_escape_string(mb_strtolower($commandpair[1]))."%'))");
+                }
             } else {
                 array_push($query_keywords, "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
                         OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))");
-                if (!$not) array_push($search_words, $k);
+                if (!$not) {
+                    array_push($search_words, $k);
+                }
             }
             break;
         case "star":
 
             if ($commandpair[1]) {
-                if ($commandpair[1] == "true")
+                if ($commandpair[1] == "true") {
                     array_push($query_keywords, "($not (marked = true))");
-                else
+                } else {
                     array_push($query_keywords, "($not (marked = false))");
+                }
             } else {
                 array_push($query_keywords, "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
                         OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))");
-                if (!$not) array_push($search_words, $k);
+                if (!$not) {
+                    array_push($search_words, $k);
+                }
             }
             break;
         case "pub":
             if ($commandpair[1]) {
-                if ($commandpair[1] == "true")
+                if ($commandpair[1] == "true") {
                     array_push($query_keywords, "($not (published = true))");
-                else
+                } else {
                     array_push($query_keywords, "($not (published = false))");
-
+                }
             } else {
                 array_push($query_keywords, "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
                         OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))");
-                if (!$not) array_push($search_words, $k);
+                if (!$not) {
+                    array_push($search_words, $k);
+                }
             }
             break;
         default:
@@ -351,7 +359,9 @@ function search_to_sql($search) {
                 array_push($query_keywords, "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
                         OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))");
 
-                if (!$not) array_push($search_words, $k);
+                if (!$not) {
+                    array_push($search_words, $k);
+                }
             }
         }
     }
@@ -391,7 +401,9 @@ function getChildCategories($cat, $owner_uid) {
 
 function queryFeedHeadlines($feed, $limit, $view_mode, $cat_view, $search, $search_mode, $override_order = false, $offset = 0, $owner_uid = 0, $filter = false, $since_id = 0, $include_children = false, $ignore_vfeed_group = false, $override_strategy = false, $override_vfeed = false, $start_ts = false) {
 
-    if (!$owner_uid) $owner_uid = $_SESSION["uid"];
+    if (!$owner_uid) {
+        $owner_uid = $_SESSION["uid"];
+    }
 
     $ext_tables_part = "";
     $search_words = array();
@@ -463,11 +475,13 @@ function queryFeedHeadlines($feed, $limit, $view_mode, $cat_view, $search, $sear
 
                 $unread = getFeedUnread($feed, $cat_view);
 
-                if ($cat_view && $feed > 0 && $include_children)
+                if ($cat_view && $feed > 0 && $include_children) {
                     $unread += getCategoryChildrenUnread($feed);
+                }
 
-                if ($unread > 0)
-                $view_query_part = " unread = true AND ";
+                if ($unread > 0) {
+                    $view_query_part = " unread = true AND ";
+                }
 
             }
         }
@@ -590,7 +604,9 @@ function queryFeedHeadlines($feed, $limit, $view_mode, $cat_view, $search, $sear
             $allow_archived = true;
             $ignore_vfeed_group = true;
 
-            if (!$override_order) $override_order = "last_read DESC";
+            if (!$override_order) {
+                $override_order = "last_read DESC";
+            }
 
         /*} elseif ($feed == -7) { // shared
             $query_strategy_part = "uuid != ''";
@@ -701,8 +717,9 @@ function queryFeedHeadlines($feed, $limit, $view_mode, $cat_view, $search, $sear
                     LEFT JOIN ttrss_feeds ON (feed_id = ttrss_feeds.id)";
             }
 
-            if ($vfeed_query_part)
+            if ($vfeed_query_part) {
                 $vfeed_query_part .= "favicon_avg_color,";
+            }
 
             if ($start_ts) {
                 $start_ts_formatted = date("Y/m/d H:i:s", strtotime($start_ts));
@@ -746,7 +763,9 @@ function queryFeedHeadlines($feed, $limit, $view_mode, $cat_view, $search, $sear
                 $query_strategy_part ORDER BY $order_by
                 $limit_query_part $offset_query_part";
 
-            if ($_REQUEST["debug"]) print $query;
+            if ($_REQUEST["debug"]) {
+                print $query;
+            }
 
             $result = db_query($query);
 
@@ -827,15 +846,23 @@ function queryFeedHeadlines($feed, $limit, $view_mode, $cat_view, $search, $sear
 }
 
 function sanitize($str, $force_remove_images = false, $owner = false, $site_url = false, $highlight_words = false, $article_id = false) {
-    if (!$owner) $owner = $_SESSION["uid"];
+    if (!$owner) {
+        $owner = $_SESSION["uid"];
+    }
 
-    $res = trim($str); if (!$res) return '';
+    $res = trim($str);
+    if (!$res) {
+        return '';
+    }
 
     $charset_hack = '<head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     </head>';
 
-    $res = trim($res); if (!$res) return '';
+    $res = trim($res);
+    if (!$res) {
+        return '';
+    }
 
     libxml_use_internal_errors(true);
 
@@ -910,7 +937,9 @@ function sanitize($str, $force_remove_images = false, $owner = false, $site_url 
         'sup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'time',
         'tr', 'track', 'tt', 'u', 'ul', 'var', 'wbr', 'video' );
 
-    if ($_SESSION['hasSandbox']) $allowed_elements[] = 'iframe';
+    if ($_SESSION['hasSandbox']) {
+        $allowed_elements[] = 'iframe';
+    }
 
     $disallowed_attributes = array('id', 'style', 'class');
 
@@ -950,7 +979,9 @@ function sanitize($str, $force_remove_images = false, $owner = false, $site_url 
                     $text = mb_substr($text, $pos + mb_strlen($word));
                 }
 
-                if (!empty($text)) $fragment->appendChild(new DomText($text));
+                if (!empty($text)) {
+                    $fragment->appendChild(new DomText($text));
+                }
 
                 $child->parentNode->replaceChild($fragment, $child);
             }
@@ -1015,8 +1046,12 @@ function check_for_update() {
 
 function catchupArticlesById($ids, $cmode, $owner_uid = false) {
 
-    if (!$owner_uid) $owner_uid = $_SESSION["uid"];
-    if (count($ids) == 0) return;
+    if (!$owner_uid) {
+        $owner_uid = $_SESSION["uid"];
+    }
+    if (count($ids) == 0) {
+        return;
+    }
 
     $tmp_ids = array();
 
@@ -1054,7 +1089,9 @@ function get_article_tags($id, $owner_uid = 0, $tag_cache = false) {
 
     $a_id = db_escape_string($id);
 
-    if (!$owner_uid) $owner_uid = $_SESSION["uid"];
+    if (!$owner_uid) {
+        $owner_uid = $_SESSION["uid"];
+    }
 
     $query = "SELECT DISTINCT tag_name,
         owner_uid as owner FROM
@@ -1103,11 +1140,19 @@ function trim_array($array) {
 }
 
 function tag_is_valid($tag) {
-    if ($tag == '') return false;
-    if (preg_match("/^[0-9]*$/", $tag)) return false;
-    if (mb_strlen($tag) > 250) return false;
+    if ($tag == '') {
+        return false;
+    }
+    if (preg_match("/^[0-9]*$/", $tag)) {
+        return false;
+    }
+    if (mb_strlen($tag) > 250) {
+        return false;
+    }
 
-    if (!$tag) return false;
+    if (!$tag) {
+        return false;
+    }
 
     return true;
 }
@@ -1177,8 +1222,10 @@ function format_inline_player($url, $ctype) {
                 </object>";
         }
 
-        if ($entry) $entry .= "&nbsp; <a target=\"_blank\"
-            href=\"$url\">" . basename($url) . "</a>";
+        if ($entry) {
+            $entry .= "&nbsp; <a target=\"_blank\"
+                href=\"$url\">" . basename($url) . "</a>";
+        }
 
         return $entry;
 
@@ -1194,7 +1241,9 @@ function format_inline_player($url, $ctype) {
 }
 
 function format_article($id, $mark_as_read = true, $zoom_mode = false, $owner_uid = false) {
-    if (!$owner_uid) $owner_uid = $_SESSION["uid"];
+    if (!$owner_uid) {
+        $owner_uid = $_SESSION["uid"];
+    }
 
     $rv = array();
 
@@ -1311,8 +1360,9 @@ function format_article($id, $mark_as_read = true, $zoom_mode = false, $owner_ui
         $parsed_updated = make_local_datetime($line["updated"], true,
             $owner_uid, true);
 
-        if (!$zoom_mode)
+        if (!$zoom_mode) {
             $rv['content'] .= "<div class=\"postDate\">$parsed_updated</div>";
+        }
 
         if ($line["link"]) {
             $rv['content'] .= "<div class='postTitle'><a target='_blank'
@@ -1338,9 +1388,13 @@ function format_article($id, $mark_as_read = true, $zoom_mode = false, $owner_ui
         $tags_str = format_tags_string($line["tags"], $id);
         $tags_str_full = join(", ", $line["tags"]);
 
-        if (!$tags_str_full) $tags_str_full = __("no tags");
+        if (!$tags_str_full) {
+            $tags_str_full = __("no tags");
+        }
 
-        if (!$entry_comments) $entry_comments = "&nbsp;"; # placeholder
+        if (!$entry_comments) {
+            $entry_comments = "&nbsp;"; # placeholder
+        }
 
         $rv['content'] .= "<div class='postTags' style='float : right'>
             <img src='images/tag.png'
@@ -1407,7 +1461,9 @@ function format_article($id, $mark_as_read = true, $zoom_mode = false, $owner_ui
             }
         $rv['content'] .= "</div>";
 
-        if (!$line['lang']) $line['lang'] = 'en';
+        if (!$line['lang']) {
+            $line['lang'] = 'en';
+        }
 
         $rv['content'] .= "<div class=\"postContent\" lang=\"".$line['lang']."\">";
 
@@ -1491,10 +1547,11 @@ function load_filters($feed_id, $owner_uid, $action_id = false) {
 
     $cat_id = (int)getFeedCategory($feed_id);
 
-    if ($cat_id == 0)
+    if ($cat_id == 0) {
         $null_cat_qpart = "cat_id IS NULL OR";
-    else
+    } else {
         $null_cat_qpart = "";
+    }
 
     $result = db_query("SELECT * FROM ttrss_filters2 WHERE
         owner_uid = $owner_uid AND enabled = true ORDER BY order_id, title");
@@ -1596,8 +1653,9 @@ function format_tags_string($tags, $id) {
 
         $tags_str = mb_substr($tags_str, 0, mb_strlen($tags_str)-2);
 
-        if (count($tags) > $maxtags)
+        if (count($tags) > $maxtags) {
             $tags_str .= ", &hellip;";
+        }
 
         return $tags_str;
     }
@@ -1605,7 +1663,9 @@ function format_tags_string($tags, $id) {
 
 function format_article_labels($labels, $id) {
 
-    if (!is_array($labels)) return '';
+    if (!is_array($labels)) {
+        return '';
+    }
 
     $labels_str = "";
 
@@ -1651,7 +1711,9 @@ function get_feed_category($feed_cat, $parent_cat_id = false) {
 
 function add_feed_category($feed_cat, $parent_cat_id = false) {
 
-    if (!$feed_cat) return false;
+    if (!$feed_cat) {
+        return false;
+    }
 
     db_query("BEGIN");
 
@@ -1716,10 +1778,11 @@ function fix_url($url) {
         $url .= '/';
     }
 
-    if ($url != "http:///")
+    if ($url != "http:///") {
         return $url;
-    else
+    } else {
         return '';
+    }
 }
 
 function validate_feed_url($url) {
@@ -1760,7 +1823,9 @@ function get_article_enclosures($id) {
 
 function get_feed_access_key($feed_id, $is_cat, $owner_uid = false) {
 
-    if (!$owner_uid) $owner_uid = $_SESSION["uid"];
+    if (!$owner_uid) {
+        $owner_uid = $_SESSION["uid"];
+    }
 
     $sql_is_cat = bool_to_sql_bool($is_cat);
 
@@ -1871,13 +1936,17 @@ function format_article_enclosures($id, $always_display_enclosures,
             $width = $line["width"];
             $height = $line["height"];
 
-            if (!$ctype) $ctype = __("unknown type");
+            if (!$ctype) {
+                $ctype = __("unknown type");
+            }
 
             $filename = substr($url, strrpos($url, "/")+1);
 
             $player = format_inline_player($url, $ctype);
 
-            if ($player) array_push($entries_inline, $player);
+            if ($player) {
+                array_push($entries_inline, $player);
+            }
 
             #$entry .= " <a target=\"_blank\" href=\"" . htmlspecialchars($url) . "\">" .
                 #$filename . " (" . $ctype . ")" . "</a>";
@@ -1910,10 +1979,12 @@ function format_article_enclosures($id, $always_display_enclosures,
 
                             if (!$hide_images) {
                                 $encsize = '';
-                                if ($entry['height'] > 0)
+                                if ($entry['height'] > 0) {
                                     $encsize .= ' height="' . intval($entry['width']) . '"';
-                                if ($entry['width'] > 0)
+                                }
+                                if ($entry['width'] > 0) {
                                     $encsize .= ' width="' . intval($entry['height']) . '"';
+                                }
                                 $rv .= "<p><img
                                 alt=\"".htmlspecialchars($entry["filename"])."\"
                                 src=\"" .htmlspecialchars($entry["url"]) . "\"
@@ -1942,10 +2013,11 @@ function format_article_enclosures($id, $always_display_enclosures,
             "<option value=''>" . __('Attachments')."</option>";
 
         foreach ($entries as $entry) {
-            if ($entry["title"])
+            if ($entry["title"]) {
                 $title = "&mdash; " . truncate_string($entry["title"], 30);
-            else
+            } else {
                 $title = "";
+            }
 
             $rv .= "<option value=\"".htmlspecialchars($entry["url"])."\">" . htmlspecialchars($entry["filename"]) . "$title</option>";
 
@@ -2066,10 +2138,11 @@ function print_user_stylesheet() {
 function filter_to_sql($filter, $owner_uid) {
     $query = array();
 
-    if (DB_TYPE == "pgsql")
+    if (DB_TYPE == "pgsql") {
         $reg_qpart = "~";
-    else
+    } else {
         $reg_qpart = "REGEXP";
+    }
 
     foreach ($filter["rules"] AS $rule) {
         $rule['reg_exp'] = str_replace('/', '\/', $rule["reg_exp"]);
@@ -2108,7 +2181,9 @@ function filter_to_sql($filter, $owner_uid) {
                     break;
             }
 
-            if (isset($rule['inverse'])) $qpart = "NOT ($qpart)";
+            if (isset($rule['inverse'])) {
+                $qpart = "NOT ($qpart)";
+            }
 
             if (isset($rule["feed_id"]) && $rule["feed_id"] > 0) {
                 $qpart .= " AND feed_id = " . db_escape_string($rule["feed_id"]);
@@ -2143,7 +2218,9 @@ function filter_to_sql($filter, $owner_uid) {
         $fullquery = "(false)";
     }
 
-    if ($filter['inverse']) $fullquery = "(NOT $fullquery)";
+    if ($filter['inverse']) {
+        $fullquery = "(NOT $fullquery)";
+    }
 
     return $fullquery;
 }
@@ -2161,8 +2238,9 @@ function get_random_bytes($length) {
     } else {
         $output = "";
 
-        for ($i = 0; $i < $length; $i++)
+        for ($i = 0; $i < $length; $i++) {
             $output .= chr(mt_rand(0, 255));
+        }
 
         return $output;
     }
@@ -2184,11 +2262,13 @@ function tmpdirname($path, $prefix) {
     // Use PHP's tmpfile function to create a temporary
     // directory name. Delete the file and keep the name.
     $tempname = tempnam($path,$prefix);
-    if (!$tempname)
+    if (!$tempname) {
         return false;
+    }
 
-    if (!unlink($tempname))
+    if (!unlink($tempname)) {
         return false;
+    }
 
     return $tempname;
 }
@@ -2211,10 +2291,13 @@ function implements_interface($class, $interface) {
 
 function geturl($url, $depth = 0, $nobody = true){
 
-    if ($depth == 20) return $url;
+    if ($depth == 20) {
+        return $url;
+    }
 
-    if (!function_exists('curl_init'))
+    if (!function_exists('curl_init')) {
         return user_error('CURL Must be installed for geturl function to work. Ask your host to enable it or uncomment extension=php_curl.dll in php.ini', E_USER_ERROR);
+    }
 
     $curl = curl_init();
     $header[0] = "Accept: text/xml,application/xml,application/xhtml+xml,";
@@ -2332,7 +2415,9 @@ function javascript_tag($filename) {
 
     $timestamp = filemtime($filename);
 
-    if ($query) $timestamp .= "&$query";
+    if ($query) {
+        $timestamp .= "&$query";
+    }
 
     return "<script type=\"text/javascript\" charset=\"utf-8\" src=\"$filename?$timestamp\"></script>\n";
 }
@@ -2343,7 +2428,9 @@ function calculate_dep_timestamp() {
     $max_ts = -1;
 
     foreach ($files as $file) {
-        if (filemtime($file) > $max_ts) $max_ts = filemtime($file);
+        if (filemtime($file) > $max_ts) {
+            $max_ts = filemtime($file);
+        }
     }
 
     return $max_ts;
