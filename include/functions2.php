@@ -434,8 +434,24 @@ function getChildCategories($cat, $owner_uid)
     return $rv;
 }
 
-function queryFeedHeadlines($feed, $limit, $view_mode, $cat_view, $search, $search_mode, $override_order = false, $offset = 0, $owner_uid = 0, $filter = false, $since_id = 0, $include_children = false, $ignore_vfeed_group = false, $override_strategy = false, $override_vfeed = false, $start_ts = false) {
-
+function queryFeedHeadlines(
+    $feed,
+    $limit,
+    $view_mode,
+    $cat_view,
+    $search,
+    $search_mode,
+    $override_order = false,
+    $offset = 0,
+    $owner_uid = 0,
+    $filter = false,
+    $since_id = 0,
+    $include_children = false,
+    $ignore_vfeed_group = false,
+    $override_strategy = false,
+    $override_vfeed = false,
+    $start_ts = false
+) {
     if (!$owner_uid) {
         $owner_uid = $_SESSION["uid"];
     }
@@ -856,7 +872,12 @@ function queryFeedHeadlines($feed, $limit, $view_mode, $cat_view, $search, $sear
             $sub_selects = array();
             $sub_ands = array();
             foreach ($all_tags as $term) {
-                array_push($sub_selects, "(SELECT post_int_id from ttrss_tags WHERE tag_name = " . db_quote($term) . " AND owner_uid = $owner_uid) as A$i");
+                array_push(
+                    $sub_selects,
+                    "(SELECT post_int_id from ttrss_tags WHERE tag_name = " .
+                    db_quote($term) .
+                    " AND owner_uid = $owner_uid) as A$i"
+                );
                 $i++;
             }
             if ($i > 2) {
@@ -868,7 +889,10 @@ function queryFeedHeadlines($feed, $limit, $view_mode, $cat_view, $search, $sear
                     $y++;
                 } while ($y < $i);
             }
-            array_push($sub_ands, "A1.post_int_id = ttrss_user_entries.int_id and ttrss_user_entries.owner_uid = $owner_uid");
+            array_push(
+                $sub_ands,
+                "A1.post_int_id = ttrss_user_entries.int_id and ttrss_user_entries.owner_uid = $owner_uid"
+            );
             array_push($sub_ands, "ttrss_user_entries.ref_id = ttrss_entries.id");
             $from_qpart = " FROM " . implode(", ", $sub_selects) . ", ttrss_user_entries, ttrss_entries";
             $where_qpart = " WHERE " . implode(" AND ", $sub_ands);
@@ -884,7 +908,14 @@ function queryFeedHeadlines($feed, $limit, $view_mode, $cat_view, $search, $sear
 
 }
 
-function sanitize($str, $force_remove_images = false, $owner = false, $site_url = false, $highlight_words = false, $article_id = false) {
+function sanitize(
+    $str,
+    $force_remove_images = false,
+    $owner = false,
+    $site_url = false,
+    $highlight_words = false,
+    $article_id = false
+) {
     if (!$owner) {
         $owner = $_SESSION["uid"];
     }
@@ -1390,7 +1421,8 @@ function format_article($id, $mark_as_read = true, $zoom_mode = false, $owner_ui
 
         } else {
             if ($line["comments"] && $line["link"] != $line["comments"]) {
-                $entry_comments = "<a class=\"postComments\" target='_blank' href=\"".htmlspecialchars($line["comments"])."\">".__("comments")."</a>";
+                $entry_comments = "<a class=\"postComments\" target='_blank' href=\"".
+                    htmlspecialchars($line["comments"])."\">".__("comments")."</a>";
             }
         }
 
@@ -1612,7 +1644,8 @@ function get_self_url_prefix()
  */
 function add_feed_url()
 {
-    //$url_path = ($_SERVER['HTTPS'] != "on" ? 'http://' :  'https://') . $_SERVER["HTTP_HOST"] . parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
+    //$url_path = ($_SERVER['HTTPS'] != "on" ? 'http://' :  'https://') .
+        //$_SERVER["HTTP_HOST"] . parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 
     $url_path = get_self_url_prefix() .
         "/public.php?op=subscribe&feed_url=%s";
@@ -2044,7 +2077,14 @@ function format_article_enclosures(
     $rv = '';
 
     foreach (PluginHost::getInstance()->get_hooks(PluginHost::HOOK_FORMAT_ENCLOSURES) as $plugin) {
-        $retval = $plugin->hook_format_enclosures($rv, $result, $id, $always_display_enclosures, $article_content, $hide_images);
+        $retval = $plugin->hook_format_enclosures(
+            $rv,
+            $result,
+            $id,
+            $always_display_enclosures,
+            $article_content,
+            $hide_images
+        );
         if (is_array($retval)) {
             $rv = $retval[0];
             $result = $retval[1];
@@ -2151,8 +2191,8 @@ function format_article_enclosures(
                 $title = "";
             }
 
-            $rv .= "<option value=\"".htmlspecialchars($entry["url"])."\">" . htmlspecialchars($entry["filename"]) . "$title</option>";
-
+            $rv .= "<option value=\"".htmlspecialchars($entry["url"])."\">" .
+                htmlspecialchars($entry["filename"]) . "$title</option>";
         };
 
         $rv .= "</select>";
@@ -2438,7 +2478,11 @@ function geturl($url, $depth = 0, $nobody = true)
     }
 
     if (!function_exists('curl_init')) {
-        return user_error('CURL Must be installed for geturl function to work. Ask your host to enable it or uncomment extension=php_curl.dll in php.ini', E_USER_ERROR);
+        return user_error(
+            'CURL Must be installed for geturl function to work. Ask your host'.
+            ' to enable it or uncomment extension=php_curl.dll in php.ini',
+            E_USER_ERROR
+        );
     }
 
     $curl = curl_init();
@@ -2452,7 +2496,11 @@ function geturl($url, $depth = 0, $nobody = true)
     $header[] = "Pragma: ";
 
     curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0 Firefox/5.0');
+    curl_setopt(
+        $curl,
+        CURLOPT_USERAGENT,
+        'Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0 Firefox/5.0'
+    );
     curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
     curl_setopt($curl, CURLOPT_HEADER, true);
     curl_setopt($curl, CURLOPT_NOBODY, $nobody);
@@ -2516,7 +2564,8 @@ function get_minified_js($files)
         if (!isset($_GET['debug'])) {
             $cached_file = CACHE_DIR . "/js/".basename($js).".js";
 
-            if (file_exists($cached_file) && is_readable($cached_file) && filemtime($cached_file) >= filemtime("js/$js.js")) {
+            if (file_exists($cached_file) && is_readable($cached_file) &&
+                filemtime($cached_file) >= filemtime("js/$js.js")) {
 
                 list($header, $contents) = explode("\n", file_get_contents($cached_file), 2);
 
