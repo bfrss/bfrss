@@ -2098,7 +2098,9 @@ function format_article_enclosures(
 
         if (count($entries_inline) > 0) {
             $rv .= "<hr clear='both'/>";
-            foreach ($entries_inline as $entry) { $rv .= $entry; };
+            foreach ($entries_inline as $entry) {
+                $rv .= $entry;
+            };
             $rv .= "<hr clear='both'/>";
         }
 
@@ -2153,8 +2155,7 @@ function rewrite_relative_url($url, $rel_url) {
     } elseif (strpos($rel_url, "//") === 0) {
         # protocol-relative URL (rare but they exist)
         return $rel_url;
-    } elseif (strpos($rel_url, "/") === 0)
-    {
+    } elseif (strpos($rel_url, "/") === 0) {
         $parts = parse_url($url);
         $parts['path'] = $rel_url;
 
@@ -2355,7 +2356,7 @@ function read_stdin() {
 function tmpdirname($path, $prefix) {
     // Use PHP's tmpfile function to create a temporary
     // directory name. Delete the file and keep the name.
-    $tempname = tempnam($path,$prefix);
+    $tempname = tempnam($path, $prefix);
     if (!$tempname) {
         return false;
     }
@@ -2423,20 +2424,20 @@ function geturl($url, $depth = 0, $nobody = true){
 
     $status = curl_getinfo($curl);
 
-    if($status['http_code']!=200){
+    if ($status['http_code']!=200) {
 
         // idiot site not allowing http head
-        if($status['http_code'] == 405) {
+        if ($status['http_code'] == 405) {
             curl_close($curl);
             return geturl($url, $depth +1, false);
         }
 
-        if($status['http_code'] == 301 || $status['http_code'] == 302) {
+        if ($status['http_code'] == 301 || $status['http_code'] == 302) {
             curl_close($curl);
             list($header) = explode("\r\n\r\n", $html, 2);
             $matches = array();
             preg_match("/(Location:|URI:)[^(\n)]*/", $header, $matches);
-            $url = trim(str_replace($matches[1],"",$matches[0]));
+            $url = trim(str_replace($matches[1], "", $matches[0]));
             $url_parsed = parse_url($url);
             return (isset($url_parsed))? geturl($url, $depth + 1):'';
         }
@@ -2561,7 +2562,8 @@ function init_js_translations() {
 
     for ($i = 0; $i < $l10n->total; $i++) {
         $orig = $l10n->get_original_string($i);
-        if(strpos($orig, "\000") !== false) { // Plural forms
+        if (strpos($orig, "\000") !== false) {
+            // Plural forms
             $key = explode(chr(0), $orig);
             print T_js_decl($key[0], _ngettext($key[0], $key[1], 1)); // Singular
             print T_js_decl($key[1], _ngettext($key[0], $key[1], 2)); // Plural
