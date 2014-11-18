@@ -2237,9 +2237,9 @@ function filter_to_sql($filter, $owner_uid) {
         $reg_qpart = "REGEXP";
     }
 
-    foreach ($filter["rules"] AS $rule) {
+    foreach ($filter["rules"] as $rule) {
         $rule['reg_exp'] = str_replace('/', '\/', $rule["reg_exp"]);
-        $regexp_valid = preg_match('/' . $rule['reg_exp'] . '/', $rule['reg_exp']) !== FALSE;
+        $regexp_valid = preg_match('/' . $rule['reg_exp'] . '/', $rule['reg_exp']) !== false;
 
         if ($regexp_valid) {
 
@@ -2451,7 +2451,7 @@ function geturl($url, $depth = 0, $nobody = true){
         #$line =$oline." \r\n ".$url."\r\n-----------------\r\n";
         #$handle = @fopen('./curl.error.log', 'a');
         #fwrite($handle, $line);
-        return FALSE;
+        return false;
     }
     curl_close($curl);
     return $url;
@@ -2501,7 +2501,7 @@ function stylesheet_tag($filename) {
 function javascript_tag($filename) {
     $query = "";
 
-    if (!(strpos($filename, "?") === FALSE)) {
+    if (!(strpos($filename, "?") === false)) {
         $query = substr($filename, strpos($filename, "?")+1);
         $filename = substr($filename, 0, strpos($filename, "?"));
     }
@@ -2561,7 +2561,7 @@ function init_js_translations() {
 
     for ($i = 0; $i < $l10n->total; $i++) {
         $orig = $l10n->get_original_string($i);
-        if(strpos($orig, "\000") !== FALSE) { // Plural forms
+        if(strpos($orig, "\000") !== false) { // Plural forms
             $key = explode(chr(0), $orig);
             print T_js_decl($key[0], _ngettext($key[0], $key[1], 1)); // Singular
             print T_js_decl($key[1], _ngettext($key[0], $key[1], 2)); // Plural
