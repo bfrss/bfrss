@@ -6,23 +6,27 @@
  * @param integer $limit The maximum number of articles by digest.
  * @return boolean Return false if digests are not enabled.
  */
-function send_headlines_digests($debug = false) {
-
+function send_headlines_digests($debug = false)
+{
     require_once 'classes/ttrssmailer.php';
 
     $user_limit = 15; // amount of users to process (e.g. emails to send out)
     $limit = 1000; // maximum amount of headlines to include
 
-    if ($debug) _debug("Sending digests, batch of max $user_limit users, headline limit = $limit");
+    if ($debug) {
+        _debug("Sending digests, batch of max $user_limit users, headline limit = $limit");
+    }
 
     if (DB_TYPE == "pgsql") {
         $interval_query = "last_digest_sent < NOW() - INTERVAL '1 days'";
-    } else if (DB_TYPE == "mysql") {
+    } elseif (DB_TYPE == "mysql") {
         $interval_query = "last_digest_sent < DATE_SUB(NOW(), INTERVAL 1 DAY)";
     }
 
-    $result = db_query("SELECT id,email FROM ttrss_users
-            WHERE email != '' AND (last_digest_sent IS NULL OR $interval_query)");
+    $result = db_query(
+        "SELECT id,email FROM ttrss_users
+        WHERE email != '' AND (last_digest_sent IS NULL OR $interval_query)"
+    );
 
     while ($line = db_fetch_assoc($result)) {
 
@@ -33,7 +37,9 @@ function send_headlines_digests($debug = false) {
             if ($preferred_ts && time() >= $preferred_ts &&
                     time() - $preferred_ts <= 7200) {
 
-                if ($debug) _debug("Sending digest for UID:" . $line['id'] . " - " . $line["email"]);
+                if ($debug) {
+                    _debug("Sending digest for UID:" . $line['id'] . " - " . $line["email"]);
+                }
 
                 $do_catchup = get_pref('DIGEST_CATCHUP', $line['id'], false);
 
@@ -52,33 +58,41 @@ function send_headlines_digests($debug = false) {
 
                     $mail = new ttrssMailer();
 
-                    $rc = $mail->quickMail($line["email"], $line["login"] , DIGEST_SUBJECT, $digest, $digest_text);
+                    $rc = $mail->quickMail($line["email"], $line["login"], DIGEST_SUBJECT, $digest, $digest_text);
 
-                    if (!$rc && $debug) _debug("ERROR: " . $mail->ErrorInfo);
+                    if (!$rc && $debug) {
+                        _debug("ERROR: " . $mail->ErrorInfo);
+                    }
 
-                    if ($debug) _debug("RC=$rc");
+                    if ($debug) {
+                        _debug("RC=$rc");
+                    }
 
                     if ($rc && $do_catchup) {
-                        if ($debug) _debug("Marking affected articles as read...");
+                        if ($debug) {
+                            _debug("Marking affected articles as read...");
+                        }
                         catchupArticlesById($affected_ids, 0, $line["id"]);
                     }
-                } else {
-                    if ($debug) _debug("No headlines");
+                } elseif ($debug) {
+                    _debug("No headlines");
                 }
 
-                db_query("UPDATE ttrss_users SET last_digest_sent = NOW()
-                    WHERE id = " . $line["id"]);
-
+                db_query(
+                    "UPDATE ttrss_users SET last_digest_sent = NOW()
+                    WHERE id = " . $line["id"]
+                );
             }
         }
     }
 
-    if ($debug) _debug("All done.");
-
+    if ($debug) {
+        _debug("All done.");
+    }
 }
 
-function prepare_headlines_digest($user_id, $days = 1, $limit = 1000) {
-
+function prepare_headlines_digest($user_id, $days = 1, $limit = 1000)
+{
     require_once "lib/MiniTemplator.class.php";
 
     $tpl = new MiniTemplator;
@@ -100,11 +114,12 @@ function prepare_headlines_digest($user_id, $days = 1, $limit = 1000) {
 
     if (DB_TYPE == "pgsql") {
         $interval_query = "ttrss_entries.date_updated > NOW() - INTERVAL '$days days'";
-    } else if (DB_TYPE == "mysql") {
+    } elseif (DB_TYPE == "mysql") {
         $interval_query = "ttrss_entries.date_updated > DATE_SUB(NOW(), INTERVAL $days DAY)";
     }
 
-    $result = db_query("SELECT ttrss_entries.title,
+    $result = db_query(
+        "SELECT ttrss_entries.title,
             ttrss_feeds.title AS feed_title,
             COALESCE(ttrss_feed_categories.title, '".__('Uncategorized')."') AS cat_title,
             date_updated,
@@ -125,7 +140,8 @@ function prepare_headlines_digest($user_id, $days = 1, $limit = 1000) {
             AND unread = true
             AND score >= 0
         ORDER BY ttrss_feed_categories.title, ttrss_feeds.title, score DESC, date_updated DESC
-        LIMIT $limit");
+        LIMIT $limit"
+    );
 
     $headlines_count = db_num_rows($result);
 
@@ -141,8 +157,7 @@ function prepare_headlines_digest($user_id, $days = 1, $limit = 1000) {
 
         array_push($affected_ids, $line["ref_id"]);
 
-        $updated = make_local_datetime($line['last_updated'], false,
-            $user_id);
+        $updated = make_local_datetime($line['last_updated'], false, $user_id);
 
         /*if ($line["score"] != 0) {
             if ($line["score"] > 0) $line["score"] = '+' . $line["score"];
@@ -158,8 +173,10 @@ function prepare_headlines_digest($user_id, $days = 1, $limit = 1000) {
         $tpl->setVariable('ARTICLE_TITLE', $line["title"]);
         $tpl->setVariable('ARTICLE_LINK', $line["link"]);
         $tpl->setVariable('ARTICLE_UPDATED', $updated);
-        $tpl->setVariable('ARTICLE_EXCERPT',
-            truncate_string(strip_tags($line["content"]), 300));
+        $tpl->setVariable(
+            'ARTICLE_EXCERPT',
+            truncate_string(strip_tags($line["content"]), 300)
+        );
         //$tpl->setVariable('ARTICLE_CONTENT',
             //strip_tags($article_content));
 

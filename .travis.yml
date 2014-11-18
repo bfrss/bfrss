@@ -12,6 +12,7 @@ script:
   - phpcs --report-full --standard=PSR2 include/ccache.php
   - phpcs --report-full --standard=PSR2 include/crypt.php
   - phpcs --report-full --standard=PSR2 include/db.php
+  - phpcs --report-full --standard=PSR2 include/digest.php
   - phpcs --report-full --standard=PSR2 include/functions2.php
   - phpcs --report-full --standard=PSR2 -n include/colors.php
   - phpcs --report-full --standard=PSR2 -n include/db.php
