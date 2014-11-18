@@ -1,6 +1,6 @@
 <?php
-function make_feed_browser($search, $limit, $mode = 1) {
-
+function make_feed_browser($search, $limit, $mode = 1)
+{
     $owner_uid = $_SESSION["uid"];
     $rv = '';
 
@@ -18,27 +18,31 @@ function make_feed_browser($search, $limit, $mode = 1) {
         AND owner_uid = '$owner_uid') $search_qpart
         ORDER BY subscribers DESC LIMIT $limit"); */
 
-        $result = db_query("SELECT feed_url, site_url, title, SUM(subscribers) AS subscribers FROM
-                    (SELECT feed_url, site_url, title, subscribers FROM ttrss_feedbrowser_cache UNION ALL
-                        SELECT feed_url, site_url, title, subscribers FROM ttrss_linked_feeds) AS qqq
-                    WHERE
-                        (SELECT COUNT(id) = 0 FROM ttrss_feeds AS tf
-                            WHERE tf.feed_url = qqq.feed_url
-                                AND owner_uid = '$owner_uid') $search_qpart
-                    GROUP BY feed_url, site_url, title ORDER BY subscribers DESC LIMIT $limit");
+        $result = db_query(
+            "SELECT feed_url, site_url, title, SUM(subscribers) AS subscribers FROM
+                (SELECT feed_url, site_url, title, subscribers FROM ttrss_feedbrowser_cache UNION ALL
+                    SELECT feed_url, site_url, title, subscribers FROM ttrss_linked_feeds) AS qqq
+                WHERE
+                    (SELECT COUNT(id) = 0 FROM ttrss_feeds AS tf
+                        WHERE tf.feed_url = qqq.feed_url
+                            AND owner_uid = '$owner_uid') $search_qpart
+                GROUP BY feed_url, site_url, title ORDER BY subscribers DESC LIMIT $limit"
+        );
 
-    } else if ($mode == 2) {
-        $result = db_query("SELECT *,
-                    (SELECT COUNT(*) FROM ttrss_user_entries WHERE
-                        orig_feed_id = ttrss_archived_feeds.id) AS articles_archived
-                    FROM
-                        ttrss_archived_feeds
-                    WHERE
-                    (SELECT COUNT(*) FROM ttrss_feeds
-                        WHERE ttrss_feeds.feed_url = ttrss_archived_feeds.feed_url AND
-                            owner_uid = '$owner_uid') = 0    AND
-                    owner_uid = '$owner_uid' $search_qpart
-                    ORDER BY id DESC LIMIT $limit");
+    } elseif ($mode == 2) {
+        $result = db_query(
+            "SELECT *,
+                (SELECT COUNT(*) FROM ttrss_user_entries WHERE
+                    orig_feed_id = ttrss_archived_feeds.id) AS articles_archived
+                FROM
+                    ttrss_archived_feeds
+                WHERE
+                (SELECT COUNT(*) FROM ttrss_feeds
+                    WHERE ttrss_feeds.feed_url = ttrss_archived_feeds.feed_url AND
+                        owner_uid = '$owner_uid') = 0    AND
+                owner_uid = '$owner_uid' $search_qpart
+                ORDER BY id DESC LIMIT $limit"
+        );
     }
 
     $feedctr = 0;
@@ -69,7 +73,7 @@ function make_feed_browser($search, $limit, $mode = 1) {
             $rv .= "<li>$check_box $feed_url $site_url".
                         "&nbsp;<span class='subscribers'>($subscribers)</span></li>";
 
-        } else if ($mode == 2) {
+        } elseif ($mode == 2) {
             $feed_url = htmlspecialchars($line["feed_url"]);
             $site_url = htmlspecialchars($line["site_url"]);
 
@@ -79,7 +83,10 @@ function make_feed_browser($search, $limit, $mode = 1) {
             $class = ($feedctr % 2) ? "even" : "odd";
 
             if ($line['articles_archived'] > 0) {
-                $archived = sprintf(_ngettext("%d archived article", "%d archived articles", $line['articles_archived']), $line['articles_archived']);
+                $archived = sprintf(
+                    _ngettext("%d archived article", "%d archived articles", $line['articles_archived']),
+                    $line['articles_archived']
+                );
                 $archived = "&nbsp;<span class='subscribers'>($archived)</span>";
             } else {
                 $archived = '';
@@ -108,4 +115,3 @@ function make_feed_browser($search, $limit, $mode = 1) {
 
     return $rv;
 }
-?>
