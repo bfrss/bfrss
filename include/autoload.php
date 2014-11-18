@@ -1,14 +1,13 @@
 <?php
-	require_once "functions.php";
+require_once "functions.php";
 
-	function __autoload($class) {
-		$class_file = str_replace("_", "/", strtolower(basename($class)));
+function __autoload($class)
+{
+    $class_file = str_replace("_", "/", strtolower(basename($class)));
 
-		$file = dirname(__FILE__)."/../classes/$class_file.php";
+    $file = dirname(__FILE__)."/../classes/$class_file.php";
 
-		if (file_exists($file)) {
-			require $file;
-		}
-
-	}
-?>
+    if (file_exists($file)) {
+        require $file;
+    }
+}
