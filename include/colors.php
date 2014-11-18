@@ -415,4 +415,3 @@ function calculate_avg_color($iconFile)
     }
     return '';
 }
-?>
