@@ -2203,5 +2203,3 @@ function getFeedTitle($id, $cat = false) {
 
 // TODO: less dumb splitting
 require_once "functions2.php";
-
-?>
