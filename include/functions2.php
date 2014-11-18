@@ -1632,9 +1632,8 @@ function get_self_url_prefix()
 {
     if (strrpos(SELF_URL_PATH, "/") === strlen(SELF_URL_PATH)-1) {
         return substr(SELF_URL_PATH, 0, strlen(SELF_URL_PATH)-1);
-    } else {
-        return SELF_URL_PATH;
     }
+    return SELF_URL_PATH;
 }
 
 /**
@@ -1656,11 +1655,11 @@ function encrypt_password($pass, $salt = '', $mode2 = false)
 {
     if ($salt && $mode2) {
         return "MODE2:" . hash('sha256', $salt . $pass);
-    } elseif ($salt) {
-        return "SHA1X:" . sha1("$salt:$pass");
-    } else {
-        return "SHA1:" . sha1($pass);
     }
+    if ($salt) {
+        return "SHA1X:" . sha1("$salt:$pass");
+    }
+    return "SHA1:" . sha1($pass);
 } // function encrypt_password
 
 function load_filters($feed_id, $owner_uid, $action_id = false)
@@ -1750,15 +1749,17 @@ function get_score_pic($score)
 {
     if ($score > 100) {
         return "score_high.png";
-    } elseif ($score > 0) {
-        return "score_half_high.png";
-    } elseif ($score < -100) {
-        return "score_low.png";
-    } elseif ($score < 0) {
-        return "score_half_low.png";
-    } else {
-        return "score_neutral.png";
     }
+    if ($score > 0) {
+        return "score_half_high.png";
+    }
+    if ($score < -100) {
+        return "score_low.png";
+    }
+    if ($score < 0) {
+        return "score_half_low.png";
+    }
+    return "score_neutral.png";
 }
 
 function feed_has_icon($id)
@@ -1777,21 +1778,21 @@ function format_tags_string($tags, $id)
 {
     if (!is_array($tags) || count($tags) == 0) {
         return __("no tags");
-    } else {
-        $maxtags = min(5, count($tags));
-
-        for ($i = 0; $i < $maxtags; $i++) {
-            $tags_str .= "<a class=\"tag\" href=\"#\" onclick=\"viewfeed('".$tags[$i]."')\">" . $tags[$i] . "</a>, ";
-        }
-
-        $tags_str = mb_substr($tags_str, 0, mb_strlen($tags_str)-2);
-
-        if (count($tags) > $maxtags) {
-            $tags_str .= ", &hellip;";
-        }
-
-        return $tags_str;
     }
+
+    $maxtags = min(5, count($tags));
+
+    for ($i = 0; $i < $maxtags; $i++) {
+        $tags_str .= "<a class=\"tag\" href=\"#\" onclick=\"viewfeed('".$tags[$i]."')\">" . $tags[$i] . "</a>, ";
+    }
+
+    $tags_str = mb_substr($tags_str, 0, mb_strlen($tags_str)-2);
+
+    if (count($tags) > $maxtags) {
+        $tags_str .= ", &hellip;";
+    }
+
+    return $tags_str;
 }
 
 function format_article_labels($labels, $id)
@@ -1844,9 +1845,8 @@ function get_feed_category($feed_cat, $parent_cat_id = false)
 
     if (db_num_rows($result) == 0) {
         return false;
-    } else {
-        return db_fetch_result($result, 0, "id");
     }
+    return db_fetch_result($result, 0, "id");
 }
 
 function add_feed_category($feed_cat, $parent_cat_id = false)
@@ -1896,9 +1896,9 @@ function getArticleFeed($id)
 
     if (db_num_rows($result) != 0) {
         return db_fetch_result($result, 0, "feed_id");
-    } else {
-        return 0;
     }
+
+    return 0;
 }
 
 /**
@@ -1926,9 +1926,9 @@ function fix_url($url)
 
     if ($url != "http:///") {
         return $url;
-    } else {
-        return '';
     }
+
+    return '';
 }
 
 function validate_feed_url($url)
@@ -1936,7 +1936,6 @@ function validate_feed_url($url)
     $parts = parse_url($url);
 
     return ($parts['scheme'] == 'http' || $parts['scheme'] == 'feed' || $parts['scheme'] == 'https');
-
 }
 
 function get_article_enclosures($id)
@@ -1985,18 +1984,17 @@ function get_feed_access_key($feed_id, $is_cat, $owner_uid = false)
 
     if (db_num_rows($result) == 1) {
         return db_fetch_result($result, 0, "access_key");
-    } else {
-        $key = db_escape_string(uniqid(base_convert(rand(), 10, 36)));
-
-        $result = db_query(
-            "INSERT INTO ttrss_access_keys
-            (access_key, feed_id, is_cat, owner_uid)
-            VALUES ('$key', '$feed_id', $sql_is_cat, '$owner_uid')"
-        );
-
-        return $key;
     }
-    return false;
+
+    $key = db_escape_string(uniqid(base_convert(rand(), 10, 36)));
+
+    $result = db_query(
+        "INSERT INTO ttrss_access_keys
+        (access_key, feed_id, is_cat, owner_uid)
+        VALUES ('$key', '$feed_id', $sql_is_cat, '$owner_uid')"
+    );
+
+    return $key;
 }
 
 function get_feeds_from_html($url, $content)
@@ -2208,9 +2206,9 @@ function getLastArticleId()
 
     if (db_num_rows($result) == 1) {
         return db_fetch_result($result, 0, "id");
-    } else {
-        return -1;
     }
+
+    return -1;
 }
 
 function build_url($parts)
@@ -2230,31 +2228,33 @@ function rewrite_relative_url($url, $rel_url)
 {
     if (strpos($rel_url, ":") !== false) {
         return $rel_url;
-    } elseif (strpos($rel_url, "://") !== false) {
+    }
+    if (strpos($rel_url, "://") !== false) {
         return $rel_url;
-    } elseif (strpos($rel_url, "//") === 0) {
+    }
+    if (strpos($rel_url, "//") === 0) {
         # protocol-relative URL (rare but they exist)
         return $rel_url;
-    } elseif (strpos($rel_url, "/") === 0) {
+    }
+    if (strpos($rel_url, "/") === 0) {
         $parts = parse_url($url);
         $parts['path'] = $rel_url;
 
         return build_url($parts);
-
-    } else {
-        $parts = parse_url($url);
-        if (!isset($parts['path'])) {
-            $parts['path'] = '/';
-        }
-        $dir = $parts['path'];
-        if (substr($dir, -1) !== '/') {
-            $dir = dirname($parts['path']);
-            $dir !== '/' && $dir .= '/';
-        }
-        $parts['path'] = $dir . $rel_url;
-
-        return build_url($parts);
     }
+
+    $parts = parse_url($url);
+    if (!isset($parts['path'])) {
+        $parts['path'] = '/';
+    }
+    $dir = $parts['path'];
+    if (substr($dir, -1) !== '/') {
+        $dir = dirname($parts['path']);
+        $dir !== '/' && $dir .= '/';
+    }
+    $parts['path'] = $dir . $rel_url;
+
+    return build_url($parts);
 }
 
 function cleanup_tags($days = 14, $limit = 1000)
@@ -2414,15 +2414,15 @@ function get_random_bytes($length)
 {
     if (function_exists('openssl_random_pseudo_bytes')) {
         return openssl_random_pseudo_bytes($length);
-    } else {
-        $output = "";
-
-        for ($i = 0; $i < $length; $i++) {
-            $output .= chr(mt_rand(0, 255));
-        }
-
-        return $output;
     }
+
+    $output = "";
+
+    for ($i = 0; $i < $length; $i++) {
+        $output .= chr(mt_rand(0, 255));
+    }
+
+    return $output;
 }
 
 function read_stdin()
@@ -2460,10 +2460,9 @@ function getFeedCategory($feed)
 
     if (db_num_rows($result) > 0) {
         return db_fetch_result($result, 0, "cat_id");
-    } else {
-        return false;
     }
 
+    return false;
 }
 
 function implements_interface($class, $interface)
