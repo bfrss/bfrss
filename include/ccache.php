@@ -65,7 +65,9 @@ function ccache_update_all($owner_uid)
 
 function ccache_find($feed_id, $owner_uid, $is_cat = false, $no_update = false)
 {
-    if (!is_numeric($feed_id)) return;
+    if (!is_numeric($feed_id)) {
+        return;
+    }
 
     if (!$is_cat) {
         $table = "ttrss_counters_cache";
@@ -109,7 +111,9 @@ function ccache_update(
     $update_pcat = true,
     $pcat_fast = false
 ) {
-    if (!is_numeric($feed_id)) return;
+    if (!is_numeric($feed_id)) {
+        return;
+    }
 
     /* if (!$is_cat && $feed_id > 0) {
         $tmp_result = db_query("SELECT owner_uid FROM ttrss_feeds
