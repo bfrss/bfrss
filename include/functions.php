@@ -557,20 +557,16 @@ function check_feed_favicon($site_url, $feed) {
                 if (preg_match('/^\x00\x00\x01\x00/', $contents)) {
                     // 0       string  \000\000\001\000        MS Windows icon resource
                     //error_log("check_feed_favicon: favicon_url=$favicon_url isa MS Windows icon resource");
-                }
-                elseif (preg_match('/^GIF8/', $contents)) {
+                } elseif (preg_match('/^GIF8/', $contents)) {
                     // 0       string          GIF8            GIF image data
                     //error_log("check_feed_favicon: favicon_url=$favicon_url isa GIF image");
-                }
-                elseif (preg_match('/^\x89PNG\x0d\x0a\x1a\x0a/', $contents)) {
+                } elseif (preg_match('/^\x89PNG\x0d\x0a\x1a\x0a/', $contents)) {
                     // 0       string          \x89PNG\x0d\x0a\x1a\x0a         PNG image data
                     //error_log("check_feed_favicon: favicon_url=$favicon_url isa PNG image");
-                }
-                elseif (preg_match('/^\xff\xd8/', $contents)) {
+                } elseif (preg_match('/^\xff\xd8/', $contents)) {
                     // 0       beshort         0xffd8          JPEG image data
                     //error_log("check_feed_favicon: favicon_url=$favicon_url isa JPG image");
-                }
-                else {
+                } else {
                     //error_log("check_feed_favicon: favicon_url=$favicon_url isa UNKNOWN type");
                     $contents = "";
                 }
