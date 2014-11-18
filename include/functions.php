@@ -169,7 +169,7 @@ function _debug($msg, $show = true) {
         print "[$ts] $msg\n";
     }
 
-    if (defined('LOGFILE'))  {
+    if (defined('LOGFILE')) {
         $fp = fopen(LOGFILE, 'a+');
 
         if ($fp) {
@@ -442,7 +442,7 @@ function fetch_file_contents($url, $type = false, $login = false, $pass = false,
 
         $fetch_curl_used = false;
 
-        if ($login && $pass){
+        if ($login && $pass) {
             $url_parts = array();
 
             preg_match("/(^[^:]*):\/\/(.*)/", $url, $url_parts);
