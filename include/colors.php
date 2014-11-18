@@ -165,12 +165,21 @@ function _resolve_htmlcolor($color)
 ### RGB >> HSL
 function _color_rgb2hsl($rgb)
 {
-    $r = $rgb[0]; $g = $rgb[1]; $b = $rgb[2];
-    $min = min($r, min($g, $b)); $max = max($r, max($g, $b));
-    $delta = $max - $min; $l = ($min + $max) / 2; $s = 0;
+    $r = $rgb[0];
+    $g = $rgb[1];
+    $b = $rgb[2];
+
+    $min = min($r, min($g, $b));
+    $max = max($r, max($g, $b));
+
+    $delta = $max - $min;
+    $l = ($min + $max) / 2;
+    $s = 0;
+
     if ($l > 0 && $l < 1) {
         $s = $delta / ($l < 0.5 ? (2 * $l) : (2 - 2 * $l));
     }
+
     $h = 0;
     if ($delta > 0) {
         if ($max == $r && $max != $g) {
@@ -190,9 +199,13 @@ function _color_rgb2hsl($rgb)
 ### HSL >> RGB
 function _color_hsl2rgb($hsl)
 {
-    $h = $hsl[0]; $s = $hsl[1]; $l = $hsl[2];
+    $h = $hsl[0];
+    $s = $hsl[1];
+    $l = $hsl[2];
+
     $m2 = ($l <= 0.5) ? $l * ($s + 1) : $l + $s - $l*$s;
     $m1 = $l * 2 - $m2;
+
     return array(_color_hue2rgb($m1, $m2, $h + 0.33333),
         _color_hue2rgb($m1, $m2, $h),
         _color_hue2rgb($m1, $m2, $h - 0.33333));
