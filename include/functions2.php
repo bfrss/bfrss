@@ -2579,5 +2579,3 @@ function label_to_feed_id($label) {
 function feed_to_label_id($feed) {
     return LABEL_BASE_INDEX - 1 + abs($feed);
 }
-
-?>
