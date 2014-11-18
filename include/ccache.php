@@ -1,11 +1,13 @@
 <?php
-/* function ccache_zero($feed_id, $owner_uid) {
+/* function ccache_zero($feed_id, $owner_uid)
+{
     db_query("UPDATE ttrss_counters_cache SET
         value = 0, updated = NOW() WHERE
         feed_id = '$feed_id' AND owner_uid = '$owner_uid'");
 } */
 
-function ccache_zero_all($owner_uid) {
+function ccache_zero_all($owner_uid)
+{
     db_query("UPDATE ttrss_counters_cache SET
         value = 0 WHERE owner_uid = '$owner_uid'");
 
@@ -13,8 +15,8 @@ function ccache_zero_all($owner_uid) {
         value = 0 WHERE owner_uid = '$owner_uid'");
 }
 
-function ccache_remove($feed_id, $owner_uid, $is_cat = false) {
-
+function ccache_remove($feed_id, $owner_uid, $is_cat = false)
+{
     if (!$is_cat) {
         $table = "ttrss_counters_cache";
     } else {
@@ -26,8 +28,8 @@ function ccache_remove($feed_id, $owner_uid, $is_cat = false) {
 
 }
 
-function ccache_update_all($owner_uid) {
-
+function ccache_update_all($owner_uid)
+{
     if (get_pref('ENABLE_FEED_CATS', $owner_uid)) {
 
         $result = db_query("SELECT feed_id FROM ttrss_cat_counters_cache
@@ -190,8 +192,8 @@ function ccache_update($feed_id, $owner_uid, $is_cat = false,
     return $unread;
 }
 
-/* function ccache_cleanup($owner_uid) {
-
+/* function ccache_cleanup($owner_uid)
+{
     if (DB_TYPE == "pgsql") {
         db_query("DELETE FROM ttrss_counters_cache AS c1 WHERE
             (SELECT count(*) FROM ttrss_counters_cache AS c2
