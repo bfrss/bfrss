@@ -13,12 +13,13 @@
 <?php
 
 // could be needed because of existing config.php
-function define_default($param, $value) {
+function define_default($param, $value)
+{
     //
 }
 
-function make_password($length = 8) {
-
+function make_password($length = 8)
+{
     $password = "";
     $possible = "0123456789abcdfghjkmnpqrstvwxyzABCDFGHJKMNPQRSTVWXYZ*%+^";
 
@@ -36,7 +37,8 @@ function make_password($length = 8) {
 }
 
 
-function sanity_check($db_type) {
+function sanity_check($db_type)
+{
     $errors = array();
 
     if (version_compare(PHP_VERSION, '5.3.0', '<')) {
@@ -44,7 +46,12 @@ function sanity_check($db_type) {
     }
 
     if (!function_exists("curl_init") && !ini_get("allow_url_fopen")) {
-        array_push($errors, "PHP configuration option allow_url_fopen is disabled, and CURL functions are not present. Either enable allow_url_fopen or install PHP extension for CURL.");
+        array_push(
+            $errors,
+            "PHP configuration option allow_url_fopen is disabled, and CURL ".
+            "functions are not present. Either enable allow_url_fopen or ".
+            "install PHP extension for CURL."
+        );
     }
 
     if (!function_exists("json_encode")) {
@@ -86,17 +93,20 @@ function sanity_check($db_type) {
     return $errors;
 }
 
-function print_error($msg) {
+function print_error($msg)
+{
     print "<div class='error'><span><img src='../images/alert.png'></span>
         <span>$msg</span></div>";
 }
 
-function print_notice($msg) {
+function print_notice($msg)
+{
     print "<div class=\"notice\">
         <span><img src=\"../images/information.png\"></span><span>$msg</span></div>";
 }
 
-function db_connect($host, $user, $pass, $db, $type, $port = false) {
+function db_connect($host, $user, $pass, $db, $type, $port = false)
+{
     if ($type == "pgsql") {
 
         $string = "dbname=$db user=$user";
@@ -117,26 +127,34 @@ function db_connect($host, $user, $pass, $db, $type, $port = false) {
 
         return $link;
 
-    } else if ($type == "mysql") {
+    } elseif ($type == "mysql") {
         if (function_exists("mysqli_connect")) {
-            if ($port)
+            if ($port) {
                 return mysqli_connect($host, $user, $pass, $db, $port);
-            else
+            } else {
                 return mysqli_connect($host, $user, $pass, $db);
-
+            }
         } else {
             $link = mysql_connect($host, $user, $pass);
             if ($link) {
                 $result = mysql_select_db($db, $link);
-                if ($result) return $link;
+                if ($result) {
+                    return $link;
+                }
             }
         }
     }
 }
 
-function make_config($DB_TYPE, $DB_HOST, $DB_USER, $DB_NAME, $DB_PASS,
-    $DB_PORT, $SELF_URL_PATH) {
-
+function make_config(
+    $DB_TYPE,
+    $DB_HOST,
+    $DB_USER,
+    $DB_NAME,
+    $DB_PASS,
+    $DB_PORT,
+    $SELF_URL_PATH
+) {
     $data = explode("\n", file_get_contents("../config.php-dist"));
 
     $rv = "";
@@ -152,21 +170,21 @@ function make_config($DB_TYPE, $DB_HOST, $DB_USER, $DB_NAME, $DB_PASS,
     foreach ($data as $line) {
         if (preg_match("/define\('DB_TYPE'/", $line)) {
             $rv .= "\tdefine('DB_TYPE', '$DB_TYPE');\n";
-        } else if (preg_match("/define\('DB_HOST'/", $line)) {
+        } elseif (preg_match("/define\('DB_HOST'/", $line)) {
             $rv .= "\tdefine('DB_HOST', '$DB_HOST');\n";
-        } else if (preg_match("/define\('DB_USER'/", $line)) {
+        } elseif (preg_match("/define\('DB_USER'/", $line)) {
             $rv .= "\tdefine('DB_USER', '$DB_USER');\n";
-        } else if (preg_match("/define\('DB_NAME'/", $line)) {
+        } elseif (preg_match("/define\('DB_NAME'/", $line)) {
             $rv .= "\tdefine('DB_NAME', '$DB_NAME');\n";
-        } else if (preg_match("/define\('DB_PASS'/", $line)) {
+        } elseif (preg_match("/define\('DB_PASS'/", $line)) {
             $rv .= "\tdefine('DB_PASS', '$DB_PASS');\n";
-        } else if (preg_match("/define\('DB_PORT'/", $line)) {
+        } elseif (preg_match("/define\('DB_PORT'/", $line)) {
             $rv .= "\tdefine('DB_PORT', '$DB_PORT');\n";
-        } else if (preg_match("/define\('SELF_URL_PATH'/", $line)) {
+        } elseif (preg_match("/define\('SELF_URL_PATH'/", $line)) {
             $rv .= "\tdefine('SELF_URL_PATH', '$SELF_URL_PATH');\n";
-        } else if (preg_match("/define\('FEED_CRYPT_KEY'/", $line)) {
+        } elseif (preg_match("/define\('FEED_CRYPT_KEY'/", $line)) {
             $rv .= "\tdefine('FEED_CRYPT_KEY', '$crypt_key');\n";
-        } else if (!$finished) {
+        } elseif (!$finished) {
             $rv .= "$line\n";
         }
 
@@ -178,7 +196,8 @@ function make_config($DB_TYPE, $DB_HOST, $DB_USER, $DB_NAME, $DB_PASS,
     return $rv;
 }
 
-function db_query($link, $query, $type, $die_on_error = true) {
+function db_query($link, $query, $type, $die_on_error = true)
+{
     if ($type == "pgsql") {
         $result = pg_query($link, $query);
         if (!$result) {
@@ -188,7 +207,7 @@ function db_query($link, $query, $type, $die_on_error = true) {
             }
         }
         return $result;
-    } else if ($type == "mysql") {
+    } elseif ($type == "mysql") {
 
         if (function_exists("mysqli_connect")) {
             $result = mysqli_query($link, $query);
@@ -198,15 +217,22 @@ function db_query($link, $query, $type, $die_on_error = true) {
         if (!$result) {
             $query = htmlspecialchars($query);
             if ($die_on_error) {
-                die("Query <i>$query</i> failed: " . ($link ? function_exists("mysqli_connect") ? mysqli_error($link) : mysql_error($link) : "No connection"));
+                die(
+                    "Query <i>$query</i> failed: " .
+                    ($link ?
+                        (function_exists("mysqli_connect") ? mysqli_error($link) : mysql_error($link)) :
+                        "No connection")
+                );
             }
         }
         return $result;
     }
 }
 
-function make_self_url_path() {
-    $url_path = ((!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] != "on") ? 'http://' :  'https://') . $_SERVER["HTTP_HOST"] . parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
+function make_self_url_path()
+{
+    $url_path = ((!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] != "on") ? 'http://' :  'https://') .
+        $_SERVER["HTTP_HOST"] . parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 
     return $url_path;
 }
@@ -296,7 +322,8 @@ $issel_mysql = $DB_TYPE == "mysql" ? "selected" : "";
 
 <fieldset>
 	<label>Tiny Tiny RSS URL</label>
-	<input type="url" name="SELF_URL_PATH" placeholder="<?php echo $SELF_URL_PATH; ?>" size="60" value="<?php echo $SELF_URL_PATH ?>"/>
+	<input type="url" name="SELF_URL_PATH" placeholder="<?php echo $SELF_URL_PATH; ?>"
+		size="60" value="<?php echo $SELF_URL_PATH ?>"/>
 </fieldset>
 
 
@@ -366,7 +393,10 @@ if ($op == 'testconfig') {
     $result = @db_query($link, "SELECT true FROM ttrss_feeds", $DB_TYPE, false);
 
     if ($result) {
-        print_error("Existing tt-rss tables will be removed from the database. If you would like to keep your data, skip database initialization.");
+        print_error(
+            "Existing tt-rss tables will be removed from the database. ".
+            "If you would like to keep your data, skip database initialization."
+        );
         $need_confirm = true;
     } else {
         $need_confirm = false;
@@ -388,7 +418,8 @@ if ($op == 'testconfig') {
     <?php
     if ($need_confirm) {
         ?>
-        <p><input onclick="return confirm('Please read the warning above. Continue?')" type="submit" value="Initialize database" style="color : red"></p>
+        <p><input onclick="return confirm('Please read the warning above. Continue?')"
+            type="submit" value="Initialize database" style="color : red"></p>
         <?php
     } else {
         ?>
@@ -415,7 +446,7 @@ if ($op == 'testconfig') {
     </td></tr></table>
 
     <?php
-} else if ($op == 'installschema' || $op == 'skipschema') {
+} elseif ($op == 'installschema' || $op == 'skipschema') {
 
     $link = db_connect($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME, $DB_TYPE, $DB_PORT);
 
@@ -428,7 +459,10 @@ if ($op == 'testconfig') {
 
         print "<h2>Initializing database...</h2>";
 
-        $lines = explode(";", preg_replace("/[\r\n]/", "", file_get_contents("../schema/ttrss_schema_".basename($DB_TYPE).".sql")));
+        $lines = explode(
+            ";",
+            preg_replace("/[\r\n]/", "", file_get_contents("../schema/ttrss_schema_".basename($DB_TYPE).".sql"))
+        );
 
         foreach ($lines as $line) {
             if (strpos($line, "--") !== 0 && $line) {
@@ -444,9 +478,13 @@ if ($op == 'testconfig') {
 
     print "<h2>Generated configuration file</h2>";
 
-    print "<p>Copy following text and save as <code>config.php</code> in tt-rss main directory. It is suggested to read through the file to the end in case you need any options changed fom default values.</p>";
+    print "<p>Copy following text and save as <code>config.php</code> in tt-rss ".
+        "main directory. It is suggested to read through the file to the end in ".
+        "case you need any options changed fom default values.</p>";
 
-    print "<p>After copying the file, you will be able to login with default username and password combination: <code>admin</code> and <code>password</code>. Don't forget to change the password immediately!</p>";
+    print "<p>After copying the file, you will be able to login with default ".
+        "username and password combination: <code>admin</code> and ".
+        "<code>password</code>. Don't forget to change the password immediately!</p>";
     ?>
 
     <form action="" method="post">
@@ -461,8 +499,15 @@ if ($op == 'testconfig') {
     <?php
 
     print "<textarea cols=\"80\" rows=\"20\">";
-    echo make_config($DB_TYPE, $DB_HOST, $DB_USER, $DB_NAME, $DB_PASS,
-        $DB_PORT, $SELF_URL_PATH);
+    echo make_config(
+        $DB_TYPE,
+        $DB_HOST,
+        $DB_USER,
+        $DB_NAME,
+        $DB_PASS,
+        $DB_PORT,
+        $SELF_URL_PATH
+    );
     print "</textarea>";
 
     if (is_writable("..")) {
@@ -473,12 +518,15 @@ if ($op == 'testconfig') {
         </form>
         <?php
     } else {
-        print_error("Unfortunately, parent directory is not writable, so we're unable to save config.php automatically.");
+        print_error(
+            "Unfortunately, parent directory is not writable, so we're ".
+            "unable to save config.php automatically."
+        );
     }
 
     print_notice("You can generate the file again by changing the form above.");
 
-} else if ($op == "saveconfig") {
+} elseif ($op == "saveconfig") {
 
     print "<h2>Saving configuration file to parent directory...</h2>";
 
@@ -487,9 +535,18 @@ if ($op == 'testconfig') {
         $fp = fopen("../config.php", "w");
 
         if ($fp) {
-            $written = fwrite($fp, make_config($DB_TYPE, $DB_HOST,
-                $DB_USER, $DB_NAME, $DB_PASS,
-                $DB_PORT, $SELF_URL_PATH));
+            $written = fwrite(
+                $fp,
+                make_config(
+                    $DB_TYPE,
+                    $DB_HOST,
+                    $DB_USER,
+                    $DB_NAME,
+                    $DB_PASS,
+                    $DB_PORT,
+                    $SELF_URL_PATH
+                )
+            );
 
             if ($written > 0) {
                 print_notice("Successfully saved config.php. You can try <a href=\"..\">loading tt-rss now</a>.");
