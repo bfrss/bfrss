@@ -17,6 +17,7 @@ class Auth_Internal extends Plugin implements IAuthModule {
 
 	function authenticate($login, $password) {
 
+		$pwd_hash0 = hash_password($password);
 		$pwd_hash1 = encrypt_password($password);
 		$pwd_hash2 = encrypt_password($password, $login);
 		$login = db_escape_string($login);
@@ -77,12 +78,25 @@ class Auth_Internal extends Plugin implements IAuthModule {
 			}
 		}
 
+		$result = db_query("SELECT id,pwd_hash FROM ttrss_users WHERE
+			login = '$login'");
+
+		if (db_num_rows($result) === 1) {
+			if (version_compare(PHP_VERSION, '5.5.0', '<')) {
+				require_once 'vendor/ircmaxell/password-compat/lib/password.php';
+			}
+			$pwd_hash_dp = db_fetch_result($result, 0, "pwd_hash");
+			if (password_verify($password, $pwd_hash_dp)) {
+				return db_fetch_result($result, 0, "id");
+			}
+		}
+
 		if (get_schema_version() > 87) {
 
 			$result = db_query("SELECT salt FROM ttrss_users WHERE
 				login = '$login'");
 
-			if (db_num_rows($result) != 1) {
+			if (db_num_rows($result) !== 1) {
 				return false;
 			}
 
@@ -91,7 +105,7 @@ class Auth_Internal extends Plugin implements IAuthModule {
 			if ($salt == "") {
 
 				$query = "SELECT id
-	            FROM ttrss_users WHERE
+					FROM ttrss_users WHERE
 					login = '$login' AND (pwd_hash = '$pwd_hash1' OR
 					pwd_hash = '$pwd_hash2')";
 
@@ -99,7 +113,7 @@ class Auth_Internal extends Plugin implements IAuthModule {
 
 				$result = db_query($query);
 
-				if (db_num_rows($result) == 1) {
+				if (db_num_rows($result) === 1) {
 					// upgrade password to MODE2
 
 					$salt = substr(bin2hex(get_random_bytes(125)), 0, 250);
@@ -109,7 +123,7 @@ class Auth_Internal extends Plugin implements IAuthModule {
 						pwd_hash = '$pwd_hash', salt = '$salt' WHERE login = '$login'");
 
 					$query = "SELECT id
-		            FROM ttrss_users WHERE
+						FROM ttrss_users WHERE
 						login = '$login' AND pwd_hash = '$pwd_hash'";
 
 				} else {
@@ -121,21 +135,26 @@ class Auth_Internal extends Plugin implements IAuthModule {
 				$pwd_hash = encrypt_password($password, $salt, true);
 
 				$query = "SELECT id
-		         FROM ttrss_users WHERE
+					FROM ttrss_users WHERE
 					login = '$login' AND pwd_hash = '$pwd_hash'";
 
 			}
 
 		} else {
 			$query = "SELECT id
-	         FROM ttrss_users WHERE
+				FROM ttrss_users WHERE
 				login = '$login' AND (pwd_hash = '$pwd_hash1' OR
 					pwd_hash = '$pwd_hash2')";
 		}
 
 		$result = db_query($query);
 
-		if (db_num_rows($result) == 1) {
+		if (db_num_rows($result) === 1) {
+			// Authentication was successful, but the hash in the database
+			// is not secure. We need to update it.
+			db_query("UPDATE ttrss_users SET
+				pwd_hash = '$pwd_hash0' WHERE login = '$login'");
+
 			return db_fetch_result($result, 0, "id");
 		}
 
@@ -151,19 +170,22 @@ class Auth_Internal extends Plugin implements IAuthModule {
 		$salt = db_fetch_result($result, 0, "salt");
 		$login = db_fetch_result($result, 0, "login");
 
+		$password_hash0 = hash_password($password);
+
 		if (!$salt) {
 			$password_hash1 = encrypt_password($password);
 			$password_hash2 = encrypt_password($password, $login);
 
 			$query = "SELECT id FROM ttrss_users WHERE
-				id = '$owner_uid' AND (pwd_hash = '$password_hash1' OR
-				pwd_hash = '$password_hash2')";
+				id = '$owner_uid' AND (pwd_hash = '$password_hash0' OR
+				pwd_hash = '$password_hash1' OR pwd_hash = '$password_hash2')";
 
 		} else {
-			$password_hash = encrypt_password($password, $salt, true);
+			$password_hash3 = encrypt_password($password, $salt, true);
 
 			$query = "SELECT id FROM ttrss_users WHERE
-				id = '$owner_uid' AND pwd_hash = '$password_hash'";
+				id = '$owner_uid' AND (pwd_hash = '$password_hash0' OR
+				pwd_hash = '$password_hash3')";
 		}
 
 		$result = db_query($query);
@@ -176,12 +198,11 @@ class Auth_Internal extends Plugin implements IAuthModule {
 
 		if ($this->check_password($owner_uid, $old_password)) {
 
-			$new_salt = substr(bin2hex(get_random_bytes(125)), 0, 250);
-			$new_password_hash = encrypt_password($new_password, $new_salt, true);
+			$new_password_hash = hash_password($new_password);
 
 			db_query("UPDATE ttrss_users SET
-				pwd_hash = '$new_password_hash', salt = '$new_salt', otp_enabled = false
-					WHERE id = '$owner_uid'");
+				pwd_hash = '$new_password_hash', salt = '', otp_enabled = false
+				WHERE id = '$owner_uid'");
 
 			$_SESSION["pwd_hash"] = $new_password_hash;
 

@@ -1662,6 +1662,15 @@ function encrypt_password($pass, $salt = '', $mode2 = false)
     return "SHA1:" . sha1($pass);
 } // function encrypt_password
 
+function hash_password($pass)
+{
+    if (version_compare(PHP_VERSION, '5.5.0', '<')) {
+        require_once 'vendor/ircmaxell/password-compat/lib/password.php';
+    }
+
+    return password_hash($pass, PASSWORD_DEFAULT);
+}
+
 function load_filters($feed_id, $owner_uid, $action_id = false)
 {
     $filters = array();
