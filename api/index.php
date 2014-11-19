@@ -3,10 +3,12 @@ error_reporting(E_ERROR | E_PARSE);
 
 require_once "../config.php";
 
-set_include_path(dirname(__FILE__) . PATH_SEPARATOR .
+set_include_path(
+    dirname(__FILE__) . PATH_SEPARATOR .
     dirname(dirname(__FILE__)) . PATH_SEPARATOR .
     dirname(dirname(__FILE__)) . "/include" . PATH_SEPARATOR .
-    get_include_path());
+    get_include_path()
+);
 
 chdir("..");
 
@@ -38,7 +40,9 @@ if (defined('_API_DEBUG_HTTP_ENABLED') && _API_DEBUG_HTTP_ENABLED) {
     // fallback on HTTP parameters
     if ($input) {
         $input = json_decode($input, true);
-        if ($input) $_REQUEST = $input;
+        if ($input) {
+            $_REQUEST = $input;
+        }
     }
 } else {
     // Accept JSON only
@@ -49,11 +53,13 @@ if (defined('_API_DEBUG_HTTP_ENABLED') && _API_DEBUG_HTTP_ENABLED) {
 if ($_REQUEST["sid"]) {
     session_id($_REQUEST["sid"]);
     @session_start();
-} else if (defined('_API_DEBUG_HTTP_ENABLED')) {
+} elseif (defined('_API_DEBUG_HTTP_ENABLED')) {
     @session_start();
 }
 
-if (!init_plugins()) return;
+if (!init_plugins()) {
+    return;
+}
 
 $method = strtolower($_REQUEST["op"]);
 
@@ -62,7 +68,7 @@ $handler = new API($_REQUEST);
 if ($handler->before($method)) {
     if ($method && method_exists($handler, $method)) {
         $handler->$method();
-    } else if (method_exists($handler, 'index')) {
+    } elseif (method_exists($handler, 'index')) {
         $handler->index($method);
     }
     $handler->after();
