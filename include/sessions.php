@@ -23,7 +23,8 @@ ini_set("session.use_only_cookies", true);
 ini_set("session.gc_maxlifetime", $session_expire);
 ini_set("session.cookie_lifetime", min(0, SESSION_COOKIE_LIFETIME));
 
-function session_get_schema_version($nocache = false) {
+function session_get_schema_version($nocache = false)
+{
     global $schema_version;
 
     if (!$schema_version) {
@@ -31,30 +32,34 @@ function session_get_schema_version($nocache = false) {
         $version = Db::get()->fetch_result($result, 0, "schema_version");
         $schema_version = $version;
         return $version;
-    } else {
-        return $schema_version;
     }
+    return $schema_version;
 }
 
-function validate_session() {
-    if (SINGLE_USER_MODE) return true;
+function validate_session()
+{
+    if (SINGLE_USER_MODE) {
+        return true;
+    }
 
-    if (VERSION_STATIC != $_SESSION["version"]) return false;
+    if (VERSION_STATIC != $_SESSION["version"]) {
+        return false;
+    }
 
     $check_ip = $_SESSION['ip_address'];
 
     switch (SESSION_CHECK_ADDRESS) {
-    case 0:
-        $check_ip = '';
-        break;
-    case 1:
-        $check_ip = substr($check_ip, 0, strrpos($check_ip, '.')+1);
-        break;
-    case 2:
-        $check_ip = substr($check_ip, 0, strrpos($check_ip, '.'));
-        $check_ip = substr($check_ip, 0, strrpos($check_ip, '.')+1);
-        break;
-    };
+        case 0:
+            $check_ip = '';
+            break;
+        case 1:
+            $check_ip = substr($check_ip, 0, strrpos($check_ip, '.')+1);
+            break;
+        case 2:
+            $check_ip = substr($check_ip, 0, strrpos($check_ip, '.'));
+            $check_ip = substr($check_ip, 0, strrpos($check_ip, '.')+1);
+            break;
+    }
 
     if ($check_ip && strpos($_SERVER['REMOTE_ADDR'], $check_ip) !== 0) {
         $_SESSION["login_error_msg"] =
@@ -76,7 +81,8 @@ function validate_session() {
 
     if ($_SESSION["uid"]) {
         $result = Db::get()->query(
-            "SELECT pwd_hash FROM ttrss_users WHERE id = '".$_SESSION["uid"]."'");
+            "SELECT pwd_hash FROM ttrss_users WHERE id = '".$_SESSION["uid"]."'"
+        );
 
         // user not found
         if (Db::get()->num_rows($result) == 0) {
@@ -102,11 +108,13 @@ function validate_session() {
 }
 
 
-function ttrss_open ($s, $n) {
+function ttrss_open($s, $n)
+{
     return true;
 }
 
-function ttrss_read ($id){
+function ttrss_read($id)
+{
     global $session_expire;
 
     $res = Db::get()->query("SELECT data FROM ttrss_sessions WHERE id='$id'");
@@ -115,8 +123,10 @@ function ttrss_read ($id){
 
         $expire = time() + $session_expire;
 
-        Db::get()->query("INSERT INTO ttrss_sessions (id, data, expire)
-                VALUES ('$id', '', '$expire')");
+        Db::get()->query(
+            "INSERT INTO ttrss_sessions (id, data, expire)
+            VALUES ('$id', '', '$expire')"
+        );
 
         return "";
     } else {
@@ -125,7 +135,8 @@ function ttrss_read ($id){
 
 }
 
-function ttrss_write ($id, $data) {
+function ttrss_write($id, $data)
+{
     global $session_expire;
 
     $data = base64_encode($data);
@@ -136,24 +147,32 @@ function ttrss_write ($id, $data) {
     return true;
 }
 
-function ttrss_close () {
+function ttrss_close()
+{
     return true;
 }
 
-function ttrss_destroy($id) {
+function ttrss_destroy($id)
+{
     Db::get()->query("DELETE FROM ttrss_sessions WHERE id = '$id'");
 
     return true;
 }
 
-function ttrss_gc ($expire) {
+function ttrss_gc($expire)
+{
     Db::get()->query("DELETE FROM ttrss_sessions WHERE expire < " . time());
 }
 
 if (!SINGLE_USER_MODE /* && DB_TYPE == "pgsql" */) {
-    session_set_save_handler("ttrss_open",
-        "ttrss_close", "ttrss_read", "ttrss_write",
-        "ttrss_destroy", "ttrss_gc");
+    session_set_save_handler(
+        "ttrss_open",
+        "ttrss_close",
+        "ttrss_read",
+        "ttrss_write",
+        "ttrss_destroy",
+        "ttrss_gc"
+    );
     register_shutdown_function('session_write_close');
 }
 
