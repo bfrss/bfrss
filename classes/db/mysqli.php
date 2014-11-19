@@ -1,12 +1,15 @@
 <?php
-class Db_Mysqli implements IDb {
+class Db_Mysqli implements IDb
+{
     private $link;
 
-    function connect($host, $user, $pass, $db, $port) {
-        if ($port)
+    function connect($host, $user, $pass, $db, $port)
+    {
+        if ($port) {
             $this->link = mysqli_connect($host, $user, $pass, $db, $port);
-        else
+        } else {
             $this->link = mysqli_connect($host, $user, $pass, $db);
+        }
 
         if ($this->link) {
             $this->init();
@@ -17,35 +20,44 @@ class Db_Mysqli implements IDb {
         }
     }
 
-    function escape_string($s, $strip_tags = true) {
-        if ($strip_tags) $s = strip_tags($s);
+    function escape_string($s, $strip_tags = true)
+    {
+        if ($strip_tags) {
+            $s = strip_tags($s);
+        }
 
         return mysqli_real_escape_string($this->link, $s);
     }
 
-    function query($query, $die_on_error = true) {
+    function query($query, $die_on_error = true)
+    {
         $result = @mysqli_query($this->link, $query);
         if (!$result) {
             $error = @mysqli_error($this->link);
 
             @mysqli_query($this->link, "ROLLBACK");
-            user_error("Query $query failed: " . ($this->link ? $error : "No connection"),
-                $die_on_error ? E_USER_ERROR : E_USER_WARNING);
+            user_error(
+                "Query $query failed: " . ($this->link ? $error : "No connection"),
+                $die_on_error ? E_USER_ERROR : E_USER_WARNING
+            );
         }
 
         return $result;
     }
 
-    function fetch_assoc($result) {
+    function fetch_assoc($result)
+    {
         return mysqli_fetch_assoc($result);
     }
 
 
-    function num_rows($result) {
+    function num_rows($result)
+    {
         return mysqli_num_rows($result);
     }
 
-    function fetch_result($result, $row, $param) {
+    function fetch_result($result, $row, $param)
+    {
         if (mysqli_data_seek($result, $row)) {
             $line = mysqli_fetch_assoc($result);
             return $line[$param];
@@ -54,19 +66,23 @@ class Db_Mysqli implements IDb {
         }
     }
 
-    function close() {
+    function close()
+    {
         return mysqli_close($this->link);
     }
 
-    function affected_rows($result) {
+    function affected_rows($result)
+    {
         return mysqli_affected_rows($this->link);
     }
 
-    function last_error() {
+    function last_error()
+    {
         return mysqli_error();
     }
 
-    function init() {
+    function init()
+    {
         $this->query("SET time_zone = '+0:0'");
 
         if (defined('MYSQL_CHARSET') && MYSQL_CHARSET) {

@@ -1,8 +1,10 @@
 <?php
-class Db_PDO implements IDb {
+class Db_PDO implements IDb
+{
     private $pdo;
 
-    function connect($host, $user, $pass, $db, $port) {
+    function connect($host, $user, $pass, $db, $port)
+    {
         $connstr = DB_TYPE . ":host=$host;dbname=$db";
 
         if (DB_TYPE == "mysql") $connstr .= ";charset=utf8";
@@ -18,7 +20,8 @@ class Db_PDO implements IDb {
         return $this->pdo;
     }
 
-    function escape_string($s, $strip_tags = true) {
+    function escape_string($s, $strip_tags = true)
+    {
         if ($strip_tags) $s = strip_tags($s);
 
         $qs = $this->pdo->quote($s);
@@ -26,7 +29,8 @@ class Db_PDO implements IDb {
         return mb_substr($qs, 1, mb_strlen($qs)-2);
     }
 
-    function query($query, $die_on_error = true) {
+    function query($query, $die_on_error = true)
+    {
         try {
             return new Db_Stmt($this->pdo->query($query));
         } catch (PDOException $e) {
@@ -34,7 +38,8 @@ class Db_PDO implements IDb {
         }
     }
 
-    function fetch_assoc($result) {
+    function fetch_assoc($result)
+    {
         try {
             if ($result) {
                 return $result->fetch();
@@ -46,7 +51,8 @@ class Db_PDO implements IDb {
         }
     }
 
-    function num_rows($result) {
+    function num_rows($result)
+    {
         try {
             if ($result) {
                 return $result->rowCount();
@@ -58,15 +64,18 @@ class Db_PDO implements IDb {
         }
     }
 
-    function fetch_result($result, $row, $param) {
+    function fetch_result($result, $row, $param)
+    {
         return $result->fetch_result($row, $param);
     }
 
-    function close() {
+    function close()
+    {
         $this->pdo = null;
     }
 
-    function affected_rows($result) {
+    function affected_rows($result)
+    {
         try {
             if ($result) {
                 return $result->rowCount();
@@ -78,19 +87,21 @@ class Db_PDO implements IDb {
         }
     }
 
-    function last_error() {
+    function last_error()
+    {
         return join(" ", $this->pdo->errorInfo());
     }
 
-    function init() {
+    function init()
+    {
         switch (DB_TYPE) {
-        case "pgsql":
-            $this->query("set client_encoding = 'UTF-8'");
-            $this->query("set datestyle = 'ISO, european'");
-            $this->query("set TIME ZONE 0");
-        case "mysql":
-            $this->query("SET time_zone = '+0:0'");
-            return;
+            case "pgsql":
+                $this->query("set client_encoding = 'UTF-8'");
+                $this->query("set datestyle = 'ISO, european'");
+                $this->query("set TIME ZONE 0");
+            case "mysql":
+                $this->query("SET time_zone = '+0:0'");
+                return;
         }
 
         return true;

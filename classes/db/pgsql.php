@@ -1,8 +1,10 @@
 <?php
-class Db_Pgsql implements IDb {
+class Db_Pgsql implements IDb
+{
     private $link;
 
-    function connect($host, $user, $pass, $db, $port) {
+    function connect($host, $user, $pass, $db, $port)
+    {
         $string = "dbname=$db user=$user";
 
         if ($pass) {
@@ -28,13 +30,17 @@ class Db_Pgsql implements IDb {
         return $this->link;
     }
 
-    function escape_string($s, $strip_tags = true) {
-        if ($strip_tags) $s = strip_tags($s);
+    function escape_string($s, $strip_tags = true)
+    {
+        if ($strip_tags) {
+            $s = strip_tags($s);
+        }
 
         return pg_escape_string($s);
     }
 
-    function query($query, $die_on_error = true) {
+    function query($query, $die_on_error = true)
+    {
         $result = @pg_query($this->link, $query);
 
         if (!$result) {
@@ -42,22 +48,27 @@ class Db_Pgsql implements IDb {
 
             @pg_query($this->link, "ROLLBACK");
             $query = htmlspecialchars($query); // just in case
-            user_error("Query $query failed: " . ($this->link ? $error : "No connection"),
-                $die_on_error ? E_USER_ERROR : E_USER_WARNING);
+            user_error(
+                "Query $query failed: " . ($this->link ? $error : "No connection"),
+                $die_on_error ? E_USER_ERROR : E_USER_WARNING
+            );
         }
         return $result;
     }
 
-    function fetch_assoc($result) {
+    function fetch_assoc($result)
+    {
         return pg_fetch_assoc($result);
     }
 
 
-    function num_rows($result) {
+    function num_rows($result)
+    {
         return pg_num_rows($result);
     }
 
-    function fetch_result($result, $row, $param) {
+    function fetch_result($result, $row, $param)
+    {
         return pg_fetch_result($result, $row, $param);
     }
 
@@ -65,15 +76,18 @@ class Db_Pgsql implements IDb {
         return pg_close($this->link);
     }
 
-    function affected_rows($result) {
+    function affected_rows($result)
+    {
         return pg_affected_rows($result);
     }
 
-    function last_error() {
+    function last_error()
+    {
         return pg_last_error($this->link);
     }
 
-    function init() {
+    function init()
+    {
         $this->query("set client_encoding = 'UTF-8'");
         pg_set_client_encoding("UNICODE");
         $this->query("set datestyle = 'ISO, european'");

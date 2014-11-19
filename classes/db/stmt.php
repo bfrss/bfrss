@@ -1,14 +1,17 @@
 <?php
-class Db_Stmt {
+class Db_Stmt
+{
     private $stmt;
     private $cache;
 
-    function __construct($stmt) {
+    function __construct($stmt)
+    {
         $this->stmt = $stmt;
         $this->cache = false;
     }
 
-    function fetch_result($row, $param) {
+    function fetch_result($row, $param)
+    {
         if (!$this->cache) {
             $this->cache = $this->stmt->fetchAll();
         }
@@ -21,11 +24,13 @@ class Db_Stmt {
         }
     }
 
-    function rowCount() {
+    function rowCount()
+    {
         return $this->stmt->rowCount();
     }
 
-    function fetch() {
+    function fetch()
+    {
         return $this->stmt->fetch();
     }
 }
