@@ -54,16 +54,13 @@ function reap_children()
     $tmp = array();
 
     foreach ($children as $pid) {
-        if (pcntl_waitpid($pid, $status, WNOHANG) != $pid) {
-
-            if (file_is_locked("update_daemon-$pid.lock")) {
-                array_push($tmp, $pid);
-            } else {
-                _debug("[reap_children] child $pid seems active but lockfile is unlocked.");
-                unset($ctimes[$pid]);
-            }
-        } else {
+        if (pcntl_waitpid($pid, $status, WNOHANG) == $pid) {
             _debug("[reap_children] child $pid reaped.");
+            unset($ctimes[$pid]);
+        } elseif (file_is_locked("update_daemon-$pid.lock")) {
+            array_push($tmp, $pid);
+        } else {
+            _debug("[reap_children] child $pid seems active but lockfile is unlocked.");
             unset($ctimes[$pid]);
         }
     }
@@ -98,11 +95,11 @@ function sigchld_handler($signal)
 
 function shutdown($caller_pid)
 {
-    if ($caller_pid == posix_getpid()) {
-        if (file_exists(LOCK_DIRECTORY . "/update_daemon.lock")) {
-            _debug("removing lockfile (master)...");
-            unlink(LOCK_DIRECTORY . "/update_daemon.lock");
-        }
+    if ($caller_pid == posix_getpid() &&
+        file_exists(LOCK_DIRECTORY . "/update_daemon.lock")) {
+
+        _debug("removing lockfile (master)...");
+        unlink(LOCK_DIRECTORY . "/update_daemon.lock");
     }
 }
 
@@ -206,48 +203,52 @@ while (true) {
         _debug("[MASTER] active jobs: $running_jobs, next spawn at $next_spawn sec.");
     }
 
-    if ($last_checkpoint + $spawn_interval < time()) {
-        check_ctimes();
-        reap_children();
-
-        for ($j = count($children); $j < $max_jobs; $j++) {
-            $pid = pcntl_fork();
-            if ($pid == -1) {
-                die("fork failed!\n");
-
-            } elseif ($pid) {
-                if (!$master_handlers_installed) {
-                    _debug("[MASTER] installing shutdown handlers");
-                    pcntl_signal(SIGINT, 'sigint_handler');
-                    pcntl_signal(SIGTERM, 'sigint_handler');
-                    register_shutdown_function('shutdown', posix_getpid());
-                    $master_handlers_installed = true;
-                }
-
-                _debug("[MASTER] spawned client $j [PID:$pid]...");
-                array_push($children, $pid);
-                $ctimes[$pid] = time();
-
-            } else {
-                pcntl_signal(SIGCHLD, SIG_IGN);
-                pcntl_signal(SIGINT, 'task_sigint_handler');
-
-                register_shutdown_function('task_shutdown');
-
-                $quiet = (isset($options["quiet"])) ? "--quiet" : "";
-                $log = function_exists("flock") && isset($options['log']) ? '--log '.$options['log'] : '';
-
-                $my_pid = posix_getpid();
-
-                passthru(PHP_EXECUTABLE . " update.php --daemon-loop $quiet $log --task $j --pidlock $my_pid");
-
-                sleep(1);
-
-                // We exit in order to avoid fork bombing.
-                exit(0);
-            }
-        }
-        $last_checkpoint = time();
+    if ($last_checkpoint + $spawn_interval >= time()) {
+        sleep(1);
+        continue
     }
+
+    check_ctimes();
+    reap_children();
+
+    for ($j = count($children); $j < $max_jobs; $j++) {
+        $pid = pcntl_fork();
+        if ($pid == -1) {
+            die("fork failed!\n");
+
+        } elseif ($pid) {
+            if (!$master_handlers_installed) {
+                _debug("[MASTER] installing shutdown handlers");
+                pcntl_signal(SIGINT, 'sigint_handler');
+                pcntl_signal(SIGTERM, 'sigint_handler');
+                register_shutdown_function('shutdown', posix_getpid());
+                $master_handlers_installed = true;
+            }
+
+            _debug("[MASTER] spawned client $j [PID:$pid]...");
+            array_push($children, $pid);
+            $ctimes[$pid] = time();
+
+        } else {
+            pcntl_signal(SIGCHLD, SIG_IGN);
+            pcntl_signal(SIGINT, 'task_sigint_handler');
+
+            register_shutdown_function('task_shutdown');
+
+            $quiet = (isset($options["quiet"])) ? "--quiet" : "";
+            $log = function_exists("flock") && isset($options['log']) ? '--log '.$options['log'] : '';
+
+            $my_pid = posix_getpid();
+
+            passthru(PHP_EXECUTABLE . " update.php --daemon-loop $quiet $log --task $j --pidlock $my_pid");
+
+            sleep(1);
+
+            // We exit in order to avoid fork bombing.
+            exit(0);
+        }
+    }
+    $last_checkpoint = time();
+
     sleep(1);
 }
