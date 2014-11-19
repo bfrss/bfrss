@@ -1,7 +1,8 @@
 <?php
 define('VERSION_STATIC', '1.14');
 
-function get_version() {
+function get_version()
+{
     date_default_timezone_set('UTC');
     $root_dir = dirname(dirname(__FILE__));
 
