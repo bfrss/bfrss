@@ -126,21 +126,21 @@ function db_connect($host, $user, $pass, $db, $type, $port = false)
         $link = pg_connect($string);
 
         return $link;
+    }
 
-    } elseif ($type == "mysql") {
+    if ($type == "mysql") {
         if (function_exists("mysqli_connect")) {
             if ($port) {
                 return mysqli_connect($host, $user, $pass, $db, $port);
-            } else {
-                return mysqli_connect($host, $user, $pass, $db);
             }
-        } else {
-            $link = mysql_connect($host, $user, $pass);
-            if ($link) {
-                $result = mysql_select_db($db, $link);
-                if ($result) {
-                    return $link;
-                }
+            return mysqli_connect($host, $user, $pass, $db);
+        }
+
+        $link = mysql_connect($host, $user, $pass);
+        if ($link) {
+            $result = mysql_select_db($db, $link);
+            if ($result) {
+                return $link;
             }
         }
     }
@@ -207,8 +207,9 @@ function db_query($link, $query, $type, $die_on_error = true)
             }
         }
         return $result;
-    } elseif ($type == "mysql") {
+    }
 
+    if ($type == "mysql") {
         if (function_exists("mysqli_connect")) {
             $result = mysqli_query($link, $query);
         } else {
