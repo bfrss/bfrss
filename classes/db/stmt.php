@@ -18,10 +18,10 @@ class Db_Stmt
 
         if (isset($this->cache[$row])) {
             return $this->cache[$row][$param];
-        } else {
-            user_error("Unable to jump to row $row", E_USER_WARNING);
-            return false;
         }
+
+        user_error("Unable to jump to row $row", E_USER_WARNING);
+        return false;
     }
 
     function rowCount()

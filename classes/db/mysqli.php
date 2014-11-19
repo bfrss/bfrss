@@ -15,9 +15,9 @@ class Db_Mysqli implements IDb
             $this->init();
 
             return $this->link;
-        } else {
-            die("Unable to connect to database (as $user to $host, database $db): " . mysqli_connect_error());
         }
+
+        die("Unable to connect to database (as $user to $host, database $db): " . mysqli_connect_error());
     }
 
     function escape_string($s, $strip_tags = true)
@@ -61,9 +61,8 @@ class Db_Mysqli implements IDb
         if (mysqli_data_seek($result, $row)) {
             $line = mysqli_fetch_assoc($result);
             return $line[$param];
-        } else {
-            return false;
         }
+        return false;
     }
 
     function close()

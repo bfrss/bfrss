@@ -119,24 +119,26 @@ class Db_Prefs
 
             return $this->convert($value, $type_name);
 
-        } else {
-            user_error(
-                "Fatal error, unknown preferences key: $pref_name (owner: $user_id)",
-                $die_on_error ? E_USER_ERROR : E_USER_WARNING
-            );
-            return null;
         }
+
+        user_error(
+            "Fatal error, unknown preferences key: $pref_name (owner: $user_id)",
+            $die_on_error ? E_USER_ERROR : E_USER_WARNING
+        );
+        return null;
     }
 
     function convert($value, $type_name)
     {
         if ($type_name == "bool") {
             return $value == "true";
-        } elseif ($type_name == "integer") {
-            return (int)$value;
-        } else {
-            return $value;
         }
+
+        if ($type_name == "integer") {
+            return (int)$value;
+        }
+
+        return $value;
     }
 
     function write($pref_name, $value, $user_id = false, $strip_tags = true)

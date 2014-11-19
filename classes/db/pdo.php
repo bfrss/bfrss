@@ -43,9 +43,8 @@ class Db_PDO implements IDb
         try {
             if ($result) {
                 return $result->fetch();
-            } else {
-                return null;
             }
+            return null;
         } catch (PDOException $e) {
             user_error($e->getMessage(), E_USER_WARNING);
         }
@@ -56,9 +55,8 @@ class Db_PDO implements IDb
         try {
             if ($result) {
                 return $result->rowCount();
-            } else {
-                return false;
             }
+            return false;
         } catch (PDOException $e) {
             user_error($e->getMessage(), E_USER_WARNING);
         }
@@ -79,9 +77,8 @@ class Db_PDO implements IDb
         try {
             if ($result) {
                 return $result->rowCount();
-            } else {
-                return null;
             }
+            return null;
         } catch (PDOException $e) {
             user_error($e->getMessage(), E_USER_WARNING);
         }

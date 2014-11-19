@@ -16,9 +16,9 @@ class Db_Mysql implements IDb
             $this->init();
 
             return $this->link;
-        } else {
-            die("Unable to connect to database (as $user to $host, database $db): " . mysql_error());
         }
+
+        die("Unable to connect to database (as $user to $host, database $db): " . mysql_error());
     }
 
     function escape_string($s, $strip_tags = true)
