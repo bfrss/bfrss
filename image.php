@@ -27,23 +27,22 @@ if ($hash) {
 
     $filename = CACHE_DIR . '/images/' . $hash . '.png';
 
-    if (file_exists($filename)) {
-        /* See if we can use X-Sendfile */
-        if (function_exists('apache_get_modules') &&
-            array_search('mod_xsendfile', apache_get_modules())) {
-
-            header("X-Sendfile: $filename");
-            header("Content-type: application/octet-stream");
-            header('Content-Disposition: attachment; filename="' . basename($filename) . '"');
-
-        } else {
-            header("Content-type: image/png");
-            $stamp = gmdate("D, d M Y H:i:s", filemtime($filename)). " GMT";
-            header("Last-Modified: $stamp", true);
-            readfile($filename);
-        }
-    } else {
+    if (!file_exists($filename)) {
         header($_SERVER["SERVER_PROTOCOL"]." 404 Not Found");
         echo "File not found.";
+
+    } elseif (function_exists('apache_get_modules') &&
+        array_search('mod_xsendfile', apache_get_modules())) {
+
+        // We can use X-Sendfile
+        header("X-Sendfile: $filename");
+        header("Content-type: application/octet-stream");
+        header('Content-Disposition: attachment; filename="' . basename($filename) . '"');
+
+    } else {
+        header("Content-type: image/png");
+        $stamp = gmdate("D, d M Y H:i:s", filemtime($filename)). " GMT";
+        header("Last-Modified: $stamp", true);
+        readfile($filename);
     }
 }
