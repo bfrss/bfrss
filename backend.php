@@ -1,11 +1,13 @@
 <?php
-set_include_path(dirname(__FILE__) ."/include" . PATH_SEPARATOR .
-    get_include_path());
+set_include_path(
+    dirname(__FILE__) ."/include" . PATH_SEPARATOR . get_include_path()
+);
 
 /* remove ill effects of magic quotes */
 
 if (get_magic_quotes_gpc()) {
-    function stripslashes_deep($value) {
+    function stripslashes_deep($value)
+    {
         $value = is_array($value) ?
             array_map('stripslashes_deep', $value) : stripslashes($value);
             return $value;
@@ -20,10 +22,11 @@ if (get_magic_quotes_gpc()) {
 $op = $_REQUEST["op"];
 @$method = $_REQUEST['subop'] ? $_REQUEST['subop'] : $_REQUEST["method"];
 
-if (!$method)
+if (!$method) {
     $method = 'index';
-else
+} else {
     $method = strtolower($method);
+}
 
 /* Public calls compatibility shim */
 
@@ -48,7 +51,9 @@ startup_gettext();
 
 $script_started = microtime(true);
 
-if (!init_plugins()) return;
+if (!init_plugins()) {
+    return;
+}
 
 header("Content-Type: text/json; charset=utf-8");
 
@@ -57,7 +62,7 @@ if (ENABLE_GZIP_OUTPUT && function_exists("ob_gzhandler")) {
 }
 
 if (SINGLE_USER_MODE) {
-    authenticate_user( "admin", null);
+    authenticate_user("admin", null);
 }
 
 if ($_SESSION["uid"]) {
@@ -66,7 +71,7 @@ if ($_SESSION["uid"]) {
         print json_encode(array("error" => array("code" => 6)));
         return;
     }
-    load_user_plugins( $_SESSION["uid"]);
+    load_user_plugins($_SESSION["uid"]);
 }
 
 $purge_intervals = array(
