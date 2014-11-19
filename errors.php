@@ -1,16 +1,21 @@
 <?php
-set_include_path(dirname(__FILE__) ."/include" . PATH_SEPARATOR .
-    get_include_path());
+set_include_path(
+    dirname(__FILE__) ."/include" . PATH_SEPARATOR . get_include_path()
+);
 
 require_once "functions.php";
 
 $ERRORS[0] = "";
 
-$ERRORS[1] = __("This program requires XmlHttpRequest " .
-    "to function properly. Your browser doesn't seem to support it.");
+$ERRORS[1] = __(
+    "This program requires XmlHttpRequest " .
+    "to function properly. Your browser doesn't seem to support it."
+);
 
-$ERRORS[2] = __("This program requires cookies " .
-    "to function properly. Your browser doesn't seem to support them.");
+$ERRORS[2] = __(
+    "This program requires cookies " .
+    "to function properly. Your browser doesn't seem to support them."
+);
 
 $ERRORS[3] = __("Backend sanity check failed.");
 
