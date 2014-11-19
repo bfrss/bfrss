@@ -19,11 +19,13 @@ function calculate_article_hash($article, $pluginhost)
 
 function update_feedbrowser_cache()
 {
-    $result = db_query("SELECT feed_url, site_url, title, COUNT(id) AS subscribers
+    $result = db_query(
+        "SELECT feed_url, site_url, title, COUNT(id) AS subscribers
         FROM ttrss_feeds WHERE (SELECT COUNT(id) = 0 FROM ttrss_feeds AS tf
             WHERE tf.feed_url = ttrss_feeds.feed_url
             AND (private IS true OR auth_login != '' OR auth_pass != '' OR feed_url LIKE '%:%@%/%'))
-            GROUP BY feed_url, site_url, title ORDER BY subscribers DESC LIMIT 1000");
+            GROUP BY feed_url, site_url, title ORDER BY subscribers DESC LIMIT 1000"
+    );
 
     db_query("BEGIN");
 
@@ -37,14 +39,18 @@ function update_feedbrowser_cache()
         $title = db_escape_string($line["title"]);
         $site_url = db_escape_string($line["site_url"]);
 
-        $tmp_result = db_query("SELECT subscribers FROM
-            ttrss_feedbrowser_cache WHERE feed_url = '$feed_url'");
+        $tmp_result = db_query(
+            "SELECT subscribers FROM
+            ttrss_feedbrowser_cache WHERE feed_url = '$feed_url'"
+        );
 
         if (db_num_rows($tmp_result) == 0) {
 
-            db_query("INSERT INTO ttrss_feedbrowser_cache
+            db_query(
+                "INSERT INTO ttrss_feedbrowser_cache
                 (feed_url, site_url, title, subscribers) VALUES ('$feed_url',
-                    '$site_url', '$title', '$subscribers')");
+                    '$site_url', '$title', '$subscribers')"
+            );
 
             ++$count;
 
@@ -85,9 +91,11 @@ function update_daemon_common($limit = DAEMON_FEED_LIMIT, $from_http = false, $d
     // Test if the user has loggued in recently. If not, it does not update its feeds.
     if (!SINGLE_USER_MODE && DAEMON_UPDATE_LOGIN_LIMIT > 0) {
         if (DB_TYPE == "pgsql") {
-            $login_thresh_qpart = "AND ttrss_users.last_login >= NOW() - INTERVAL '".DAEMON_UPDATE_LOGIN_LIMIT." days'";
+            $login_thresh_qpart = "AND ttrss_users.last_login >= NOW() - INTERVAL '".
+                DAEMON_UPDATE_LOGIN_LIMIT." days'";
         } else {
-            $login_thresh_qpart = "AND ttrss_users.last_login >= DATE_SUB(NOW(), INTERVAL ".DAEMON_UPDATE_LOGIN_LIMIT." DAY)";
+            $login_thresh_qpart = "AND ttrss_users.last_login >= DATE_SUB(NOW(), INTERVAL ".
+                DAEMON_UPDATE_LOGIN_LIMIT." DAY)";
         }
     } else {
         $login_thresh_qpart = "";
@@ -122,14 +130,18 @@ function update_daemon_common($limit = DAEMON_FEED_LIMIT, $from_http = false, $d
 
     // Test if feed is currently being updated by another process.
     if (DB_TYPE == "pgsql") {
-        $updstart_thresh_qpart = "AND (ttrss_feeds.last_update_started IS NULL OR ttrss_feeds.last_update_started < NOW() - INTERVAL '10 minutes')";
+        $updstart_thresh_qpart = "AND (ttrss_feeds.last_update_started IS NULL ".
+            "OR ttrss_feeds.last_update_started < NOW() - INTERVAL '10 minutes')";
     } else {
-        $updstart_thresh_qpart = "AND (ttrss_feeds.last_update_started IS NULL OR ttrss_feeds.last_update_started < DATE_SUB(NOW(), INTERVAL 10 MINUTE))";
+        $updstart_thresh_qpart = "AND (ttrss_feeds.last_update_started IS NULL ".
+            "OR ttrss_feeds.last_update_started < DATE_SUB(NOW(), INTERVAL 10 MINUTE))";
     }
 
     // Test if there is a limit to number of updated feeds
     $query_limit = "";
-    if($limit) $query_limit = sprintf("LIMIT %d", $limit);
+    if ($limit) {
+        $query_limit = sprintf("LIMIT %d", $limit);
+    }
 
     $query = "SELECT DISTINCT ttrss_feeds.feed_url, ttrss_feeds.last_updated
         FROM
@@ -146,7 +158,9 @@ function update_daemon_common($limit = DAEMON_FEED_LIMIT, $from_http = false, $d
     // We search for feed needing update.
     $result = db_query($query);
 
-    if($debug) _debug(sprintf("Scheduled %d feeds to update...", db_num_rows($result)));
+    if ($debug) {
+        _debug(sprintf("Scheduled %d feeds to update...", db_num_rows($result)));
+    }
 
     // Here is a little cache magic in order to minimize risk of double feed updates.
     $feeds_to_update = array();
@@ -158,7 +172,7 @@ function update_daemon_common($limit = DAEMON_FEED_LIMIT, $from_http = false, $d
     // There is no lag due to feed contents downloads
     // It prevent an other process to update the same feed.
 
-    if(count($feeds_to_update) > 0) {
+    if (count($feeds_to_update) > 0) {
         $feeds_quoted = array();
 
         foreach ($feeds_to_update as $feed) {
@@ -174,29 +188,35 @@ function update_daemon_common($limit = DAEMON_FEED_LIMIT, $from_http = false, $d
 
     // For each feed, we call the feed update function.
     foreach ($feeds_to_update as $feed) {
-        if($debug) _debug("Base feed: $feed");
+        if ($debug) {
+            _debug("Base feed: $feed");
+        }
 
         //update_rss_feed($line["id"], true);
 
         // since we have the data cached, we can deal with other feeds with the same url
 
-        $tmp_result = db_query("SELECT DISTINCT ttrss_feeds.id,last_updated,ttrss_feeds.owner_uid
-        FROM ttrss_feeds, ttrss_users, ttrss_user_prefs WHERE
-            ttrss_user_prefs.owner_uid = ttrss_feeds.owner_uid AND
-            ttrss_users.id = ttrss_user_prefs.owner_uid AND
-            ttrss_user_prefs.pref_name = 'DEFAULT_UPDATE_INTERVAL' AND
-            ttrss_user_prefs.profile IS NULL AND
-            feed_url = '".db_escape_string($feed)."' AND
-            (ttrss_feeds.update_interval > 0 OR
-                ttrss_user_prefs.value != '-1')
-            $login_thresh_qpart
-        ORDER BY ttrss_feeds.id $query_limit");
+        $tmp_result = db_query(
+            "SELECT DISTINCT ttrss_feeds.id,last_updated,ttrss_feeds.owner_uid
+            FROM ttrss_feeds, ttrss_users, ttrss_user_prefs WHERE
+                ttrss_user_prefs.owner_uid = ttrss_feeds.owner_uid AND
+                ttrss_users.id = ttrss_user_prefs.owner_uid AND
+                ttrss_user_prefs.pref_name = 'DEFAULT_UPDATE_INTERVAL' AND
+                ttrss_user_prefs.profile IS NULL AND
+                feed_url = '".db_escape_string($feed)."' AND
+                (ttrss_feeds.update_interval > 0 OR
+                    ttrss_user_prefs.value != '-1')
+                $login_thresh_qpart
+            ORDER BY ttrss_feeds.id $query_limit"
+        );
 
         if (db_num_rows($tmp_result) > 0) {
             $rss = false;
 
             while ($tline = db_fetch_assoc($tmp_result)) {
-                if($debug) _debug(" => " . $tline["last_updated"] . ", " . $tline["id"] . " " . $tline["owner_uid"]);
+                if ($debug) {
+                    _debug(" => " . $tline["last_updated"] . ", " . $tline["id"] . " " . $tline["owner_uid"]);
+                }
 
                 $fstarted = microtime(true);
                 $rss = update_rss_feed($tline["id"], true, false);
@@ -210,8 +230,14 @@ function update_daemon_common($limit = DAEMON_FEED_LIMIT, $from_http = false, $d
     }
 
     if ($nf > 0) {
-        _debug(sprintf("Processed %d feeds in %.4f (sec), %.4f (sec/feed avg)", $nf,
-            microtime(true) - $bstarted, (microtime(true) - $bstarted) / $nf));
+        _debug(
+            sprintf(
+                "Processed %d feeds in %.4f (sec), %.4f (sec/feed avg)",
+                $nf,
+                microtime(true) - $bstarted,
+                (microtime(true) - $bstarted) / $nf
+            )
+        );
     }
 
     require_once "digest.php";
@@ -231,13 +257,15 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
     _debug_suppress(!$debug_enabled);
     _debug("start", $debug_enabled);
 
-    $result = db_query("SELECT id,update_interval,auth_login,
+    $result = db_query(
+        "SELECT id,update_interval,auth_login,
         feed_url,auth_pass,cache_images,
         mark_unread_on_update, owner_uid,
         pubsub_state, auth_pass_encrypted,
         (SELECT max(date_entered) FROM
             ttrss_entries, ttrss_user_entries where ref_id = id AND feed_id = '$feed') AS last_article_timestamp
-        FROM ttrss_feeds WHERE id = '$feed'");
+        FROM ttrss_feeds WHERE id = '$feed'"
+    );
 
     if (db_num_rows($result) == 0) {
         _debug("feed $feed NOT FOUND/SKIPPED", $debug_enabled);
@@ -246,18 +274,20 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
 
     $last_article_timestamp = @strtotime(db_fetch_result($result, 0, "last_article_timestamp"));
 
-    if (defined('_DISABLE_HTTP_304'))
+    if (defined('_DISABLE_HTTP_304')) {
         $last_article_timestamp = 0;
+    }
 
     $owner_uid = db_fetch_result($result, 0, "owner_uid");
-    $mark_unread_on_update = sql_bool_to_bool(db_fetch_result($result,
-        0, "mark_unread_on_update"));
+    $mark_unread_on_update = sql_bool_to_bool(
+        db_fetch_result($result, 0, "mark_unread_on_update")
+    );
     $pubsub_state = db_fetch_result($result, 0, "pubsub_state");
-    $auth_pass_encrypted = sql_bool_to_bool(db_fetch_result($result,
-        0, "auth_pass_encrypted"));
+    $auth_pass_encrypted = sql_bool_to_bool(
+        db_fetch_result($result, 0, "auth_pass_encrypted")
+    );
 
-    db_query("UPDATE ttrss_feeds SET last_update_started = NOW()
-        WHERE id = '$feed'");
+    db_query("UPDATE ttrss_feeds SET last_update_started = NOW() WHERE id = '$feed'");
 
     $auth_login = db_fetch_result($result, 0, "auth_login");
     $auth_pass = db_fetch_result($result, 0, "auth_pass");
@@ -292,7 +322,15 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
         $force_refetch = isset($_REQUEST["force_refetch"]);
 
         foreach ($pluginhost->get_hooks(PluginHost::HOOK_FETCH_FEED) as $plugin) {
-            $feed_data = $plugin->hook_fetch_feed($feed_data, $fetch_url, $owner_uid, $feed, $last_article_timestamp, $auth_login, $auth_pass);
+            $feed_data = $plugin->hook_fetch_feed(
+                $feed_data,
+                $fetch_url,
+                $owner_uid,
+                $feed,
+                $last_article_timestamp,
+                $auth_login,
+                $auth_pass
+            );
         }
 
         // try cache
@@ -319,17 +357,24 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
             _debug("fetching [$fetch_url]...", $debug_enabled);
             _debug("If-Modified-Since: ".gmdate('D, d M Y H:i:s \G\M\T', $last_article_timestamp), $debug_enabled);
 
-            $feed_data = fetch_file_contents($fetch_url, false,
-                $auth_login, $auth_pass, false,
+            $feed_data = fetch_file_contents(
+                $fetch_url,
+                false,
+                $auth_login,
+                $auth_pass,
+                false,
                 $no_cache ? FEED_FETCH_NO_CACHE_TIMEOUT : FEED_FETCH_TIMEOUT,
-                $force_refetch ? 0 : $last_article_timestamp);
+                $force_refetch ? 0 : $last_article_timestamp
+            );
 
             global $fetch_curl_used;
 
             if (!$fetch_curl_used) {
                 $tmp = @gzdecode($feed_data);
 
-                if ($tmp) $feed_data = $tmp;
+                if ($tmp) {
+                    $feed_data = $tmp;
+                }
             }
 
             $feed_data = trim($feed_data);
@@ -382,7 +427,8 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
 
             db_query(
                 "UPDATE ttrss_feeds SET last_error = '$error_escaped',
-                    last_updated = NOW() WHERE id = '$feed'");
+                    last_updated = NOW() WHERE id = '$feed'"
+            );
 
             return;
         }
@@ -427,15 +473,18 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
             $favicon_interval_qpart = "favicon_last_checked < DATE_SUB(NOW(), INTERVAL 12 HOUR)";
         }
 
-        $result = db_query("SELECT title,site_url,owner_uid,favicon_avg_color,
+        $result = db_query(
+            "SELECT title,site_url,owner_uid,favicon_avg_color,
             (favicon_last_checked IS NULL OR $favicon_interval_qpart) AS
                     favicon_needs_check
-            FROM ttrss_feeds WHERE id = '$feed'");
+            FROM ttrss_feeds WHERE id = '$feed'"
+        );
 
         $registered_title = db_fetch_result($result, 0, "title");
         $orig_site_url = db_fetch_result($result, 0, "site_url");
-        $favicon_needs_check = sql_bool_to_bool(db_fetch_result($result, 0,
-            "favicon_needs_check"));
+        $favicon_needs_check = sql_bool_to_bool(
+            db_fetch_result($result, 0, "favicon_needs_check")
+        );
         $favicon_avg_color = db_fetch_result($result, 0, "favicon_avg_color");
 
         $owner_uid = db_fetch_result($result, 0, "owner_uid");
@@ -458,26 +507,32 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
             check_feed_favicon($site_url, $feed);
             $favicon_modified_new = @filemtime($favicon_file);
 
-            if ($favicon_modified_new > $favicon_modified)
+            if ($favicon_modified_new > $favicon_modified) {
                 $favicon_avg_color = '';
+            }
 
             if (file_exists($favicon_file) && function_exists("imagecreatefromstring") && $favicon_avg_color == '') {
                     require_once "colors.php";
 
-                    db_query("UPDATE ttrss_feeds SET favicon_avg_color = 'fail' WHERE
-                        id = '$feed'");
+                    db_query(
+                        "UPDATE ttrss_feeds SET favicon_avg_color = 'fail' WHERE
+                        id = '$feed'"
+                    );
 
                     $favicon_color = db_escape_string(
-                        calculate_avg_color($favicon_file));
+                        calculate_avg_color($favicon_file)
+                    );
 
                     $favicon_colorstring = ",favicon_avg_color = '".$favicon_color."'";
-            } else if ($favicon_avg_color == 'fail') {
+            } elseif ($favicon_avg_color == 'fail') {
                 _debug("floicon failed on this file, not trying to recalculate avg color", $debug_enabled);
             }
 
-            db_query("UPDATE ttrss_feeds SET favicon_last_checked = NOW()
+            db_query(
+                "UPDATE ttrss_feeds SET favicon_last_checked = NOW()
                 $favicon_colorstring
-                WHERE id = '$feed'");
+                WHERE id = '$feed'"
+            );
         }
 
         if (!$registered_title || $registered_title == "[Unknown]") {
@@ -487,14 +542,18 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
             if ($feed_title) {
                 _debug("registering title: $feed_title", $debug_enabled);
 
-                db_query("UPDATE ttrss_feeds SET
-                    title = '$feed_title' WHERE id = '$feed'");
+                db_query(
+                    "UPDATE ttrss_feeds SET
+                    title = '$feed_title' WHERE id = '$feed'"
+                );
             }
         }
 
         if ($site_url && $orig_site_url != $site_url) {
-            db_query("UPDATE ttrss_feeds SET
-                site_url = '$site_url' WHERE id = '$feed'");
+            db_query(
+                "UPDATE ttrss_feeds SET
+                site_url = '$site_url' WHERE id = '$feed'"
+            );
         }
 
         _debug("loading filters & labels...", $debug_enabled);
@@ -509,8 +568,10 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
         if (!is_array($items)) {
             _debug("no articles found.", $debug_enabled);
 
-            db_query("UPDATE ttrss_feeds
-                SET last_updated = NOW(), last_error = '' WHERE id = '$feed'");
+            db_query(
+                "UPDATE ttrss_feeds
+                SET last_updated = NOW(), last_error = '' WHERE id = '$feed'"
+            );
 
             return; // no articles
         }
@@ -559,8 +620,7 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
 
                 _debug("feed hub url found, subscribe request sent. [rc=$rc]", $debug_enabled);
 
-                db_query("UPDATE ttrss_feeds SET pubsub_state = 1
-                    WHERE id = '$feed'");
+                db_query("UPDATE ttrss_feeds SET pubsub_state = 1 WHERE id = '$feed'");
             }
         }
 
@@ -572,9 +632,15 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
             }
 
             $entry_guid = $item->get_id();
-            if (!$entry_guid) $entry_guid = $item->get_link();
-            if (!$entry_guid) $entry_guid = make_guid_from_title($item->get_title());
-            if (!$entry_guid) continue;
+            if (!$entry_guid) {
+                $entry_guid = $item->get_link();
+            }
+            if (!$entry_guid) {
+                $entry_guid = make_guid_from_title($item->get_title());
+            }
+            if (!$entry_guid) {
+                continue;
+            }
 
             $entry_guid = "$owner_uid,$entry_guid";
 
@@ -605,10 +671,14 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
             _debug("title $entry_title", $debug_enabled);
             _debug("link $entry_link", $debug_enabled);
 
-            if (!$entry_title) $entry_title = date("Y-m-d H:i:s", $entry_timestamp);;
+            if (!$entry_title) {
+                $entry_title = date("Y-m-d H:i:s", $entry_timestamp);
+            }
 
             $entry_content = $item->get_content();
-            if (!$entry_content) $entry_content = $item->get_description();
+            if (!$entry_content) {
+                $entry_content = $item->get_description();
+            }
 
             if ($_REQUEST["xdebug"] == 2) {
                 print "content: ";
@@ -659,8 +729,9 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
 
             $entry_tags = array_unique($additional_tags);
 
-            for ($i = 0; $i < count($entry_tags); $i++)
+            for ($i = 0; $i < count($entry_tags); $i++) {
                 $entry_tags[$i] = mb_strtolower($entry_tags[$i], 'utf-8');
+            }
 
             _debug("tags found: " . join(",", $entry_tags), $debug_enabled);
 
@@ -677,7 +748,8 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
                 $entry_stored_hash = "";
             }
 
-            $article = array("owner_uid" => $owner_uid, // read only
+            $article = array(
+                "owner_uid" => $owner_uid, // read only
                 "guid" => $entry_guid, // read only
                 "title" => $entry_title,
                 "content" => $entry_content,
@@ -685,10 +757,12 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
                 "tags" => $entry_tags,
                 "author" => $entry_author,
                 "language" => $entry_language, // read only
-                "feed" => array("id" => $feed,
+                "feed" => array(
+                    "id" => $feed,
                     "fetch_url" => $fetch_url,
-                    "site_url" => $site_url)
-                );
+                    "site_url" => $site_url
+                )
+            );
 
             $entry_plugin_data = "";
             $entry_current_hash = calculate_article_hash($article, $pluginhost);
@@ -696,7 +770,10 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
             _debug("article hash: $entry_current_hash [stored=$entry_stored_hash]", $debug_enabled);
 
             if ($entry_current_hash == $entry_stored_hash && !isset($_REQUEST["force_rehash"])) {
-                _debug("stored article seems up to date [IID: $base_entry_id], updating timestamp only", $debug_enabled);
+                _debug(
+                    "stored article seems up to date [IID: $base_entry_id], updating timestamp only",
+                    $debug_enabled
+                );
 
                 // we keep encountering the entry in feeds, so we need to
                 // update date_updated column so that we don't get horrible
@@ -705,8 +782,10 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
 
                 $base_entry_id = db_fetch_result($result, 0, "id");
 
-                db_query("UPDATE ttrss_entries SET date_updated = NOW()
-                    WHERE id = '$base_entry_id'");
+                db_query(
+                    "UPDATE ttrss_entries SET date_updated = NOW()
+                    WHERE id = '$base_entry_id'"
+                );
 
                 // if we allow duplicate posts, we have to continue to
                 // create the user entries for this feed
@@ -739,15 +818,18 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
             $entry_link = db_escape_string($article["link"]);
             $entry_content = $article["content"]; // escaped below
 
-            if ($cache_images && is_writable(CACHE_DIR . '/images'))
+            if ($cache_images && is_writable(CACHE_DIR . '/images')) {
                 cache_images($entry_content, $site_url, $debug_enabled);
+            }
 
             $entry_content = db_escape_string($entry_content, false);
 
             db_query("BEGIN");
 
-            $result = db_query("SELECT id FROM    ttrss_entries
-                WHERE (guid = '$entry_guid' OR guid = '$entry_guid_hashed')");
+            $result = db_query(
+                "SELECT id FROM    ttrss_entries
+                WHERE (guid = '$entry_guid' OR guid = '$entry_guid_hashed')"
+            );
 
             if (db_num_rows($result) == 0) {
 
@@ -785,7 +867,8 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
                         '$num_comments',
                         '$entry_plugin_data',
                         '$entry_language',
-                        '$entry_author')");
+                        '$entry_author')"
+                );
 
                 $article_labels = array();
 
@@ -797,8 +880,10 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
 
             // now it should exist, if not - bad luck then
 
-            $result = db_query("SELECT id FROM ttrss_entries
-                WHERE guid = '$entry_guid' OR guid = '$entry_guid_hashed'");
+            $result = db_query(
+                "SELECT id FROM ttrss_entries
+                WHERE guid = '$entry_guid' OR guid = '$entry_guid_hashed'"
+            );
 
             $entry_ref_id = 0;
             $entry_int_id = 0;
@@ -829,9 +914,15 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
 
                 /* Collect article tags here so we could filter by them: */
 
-                $article_filters = get_article_filters($filters, $entry_title,
-                    $entry_content, $entry_link, $entry_timestamp, $entry_author,
-                    $entry_tags);
+                $article_filters = get_article_filters(
+                    $filters,
+                    $entry_title,
+                    $entry_content,
+                    $entry_link,
+                    $entry_timestamp,
+                    $entry_author,
+                    $entry_tags
+                );
 
                 if ($debug_enabled) {
                     _debug("article filters: ", $debug_enabled);
@@ -886,11 +977,13 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
 
                     if (DB_TYPE == "pgsql" and defined('_NGRAM_TITLE_DUPLICATE_THRESHOLD')) {
 
-                        $result = db_query("SELECT COUNT(*) AS similar FROM
+                        $result = db_query(
+                            "SELECT COUNT(*) AS similar FROM
                                 ttrss_entries,ttrss_user_entries
                             WHERE ref_id = id AND updated >= NOW() - INTERVAL '7 day'
                                 AND similarity(title, '$entry_title') >= "._NGRAM_TITLE_DUPLICATE_THRESHOLD."
-                                AND owner_uid = $owner_uid");
+                                AND owner_uid = $owner_uid"
+                        );
 
                         $ngram_similar = db_fetch_result($result, 0, "similar");
 
@@ -911,7 +1004,8 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
                             last_marked, last_published)
                         VALUES ('$ref_id', '$owner_uid', '$feed', $unread,
                             $last_read_qpart, $marked, $published, '$score', '', '',
-                            '', $last_marked, $last_published)");
+                            '', $last_marked, $last_published)"
+                    );
 
                     if (PUBSUBHUBBUB_HUB && $published == 'true') {
                         $rss_link = get_self_url_prefix() .
@@ -926,7 +1020,8 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
                     $result = db_query(
                         "SELECT int_id FROM ttrss_user_entries WHERE
                             ref_id = '$ref_id' AND owner_uid = '$owner_uid' AND
-                            feed_id = '$feed' LIMIT 1");
+                            feed_id = '$feed' LIMIT 1"
+                    );
 
                     if (db_num_rows($result) == 1) {
                         $entry_int_id = db_fetch_result($result, 0, "int_id");
@@ -940,7 +1035,8 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
 
                 _debug("RID: $entry_ref_id, IID: $entry_int_id", $debug_enabled);
 
-                db_query("UPDATE ttrss_entries
+                db_query(
+                    "UPDATE ttrss_entries
                     SET title = '$entry_title',
                         content = '$entry_content',
                         content_hash = '$entry_current_hash',
@@ -949,11 +1045,14 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
                         plugin_data = '$entry_plugin_data',
                         author = '$entry_author',
                         lang = '$entry_language'
-                    WHERE id = '$ref_id'");
+                    WHERE id = '$ref_id'"
+                );
 
                 if ($mark_unread_on_update) {
-                    db_query("UPDATE ttrss_user_entries
-                        SET last_read = null, unread = true WHERE ref_id = '$ref_id'");
+                    db_query(
+                        "UPDATE ttrss_user_entries
+                        SET last_read = null, unread = true WHERE ref_id = '$ref_id'"
+                    );
                 }
             }
 
@@ -961,8 +1060,12 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
 
             _debug("assigning labels...", $debug_enabled);
 
-            assign_article_to_label_filters($entry_ref_id, $article_filters,
-                $owner_uid, $article_labels);
+            assign_article_to_label_filters(
+                $entry_ref_id,
+                $article_filters,
+                $owner_uid,
+                $article_labels
+            );
 
             _debug("looking for enclosures...", $debug_enabled);
 
@@ -998,13 +1101,17 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
                 $enc_width = intval($enc[4]);
                 $enc_height = intval($enc[5]);
 
-                $result = db_query("SELECT id FROM ttrss_enclosures
-                    WHERE content_url = '$enc_url' AND post_id = '$entry_ref_id'");
+                $result = db_query(
+                    "SELECT id FROM ttrss_enclosures
+                    WHERE content_url = '$enc_url' AND post_id = '$entry_ref_id'"
+                );
 
                 if (db_num_rows($result) == 0) {
-                    db_query("INSERT INTO ttrss_enclosures
+                    db_query(
+                        "INSERT INTO ttrss_enclosures
                         (content_url, content_type, title, duration, post_id, width, height) VALUES
-                        ('$enc_url', '$enc_type', '$enc_title', '$enc_dur', '$entry_ref_id', $enc_width, $enc_height)");
+                        ('$enc_url', '$enc_type', '$enc_title', '$enc_dur', '$entry_ref_id', $enc_width, $enc_height)"
+                    );
                 }
             }
 
@@ -1027,8 +1134,9 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
 
             // Skip boring tags
 
-            $boring_tags = trim_array(explode(",", mb_strtolower(get_pref(
-                'BLACKLISTED_TAGS', $owner_uid, ''), 'utf-8')));
+            $boring_tags = trim_array(
+                explode(",", mb_strtolower(get_pref('BLACKLISTED_TAGS', $owner_uid, ''), 'utf-8'))
+            );
 
             $filtered_tags = array();
             $tags_to_cache = array();
@@ -1059,18 +1167,23 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
                     $tag = sanitize_tag($tag);
                     $tag = db_escape_string($tag);
 
-                    if (!tag_is_valid($tag)) continue;
+                    if (!tag_is_valid($tag)) {
+                        continue;
+                    }
 
-                    $result = db_query("SELECT id FROM ttrss_tags
+                    $result = db_query(
+                        "SELECT id FROM ttrss_tags
                         WHERE tag_name = '$tag' AND post_int_id = '$entry_int_id' AND
-                        owner_uid = '$owner_uid' LIMIT 1");
+                        owner_uid = '$owner_uid' LIMIT 1"
+                    );
 
-                        if ($result && db_num_rows($result) == 0) {
-
-                            db_query("INSERT INTO ttrss_tags
-                                (owner_uid,tag_name,post_int_id)
-                                VALUES ('$owner_uid','$tag', '$entry_int_id')");
-                        }
+                    if ($result && db_num_rows($result) == 0) {
+                        db_query(
+                            "INSERT INTO ttrss_tags
+                            (owner_uid,tag_name,post_int_id)
+                            VALUES ('$owner_uid','$tag', '$entry_int_id')"
+                        );
+                    }
 
                     array_push($tags_to_cache, $tag);
                 }
@@ -1081,9 +1194,11 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
 
                 $tags_str = db_escape_string(join(",", $tags_to_cache));
 
-                db_query("UPDATE ttrss_user_entries
+                db_query(
+                    "UPDATE ttrss_user_entries
                     SET tag_cache = '$tags_str' WHERE ref_id = '$entry_ref_id'
-                    AND owner_uid = $owner_uid");
+                    AND owner_uid = $owner_uid"
+                );
 
                 db_query("COMMIT");
             }
@@ -1094,7 +1209,8 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
                 foreach ($labels as $label) {
                     $caption = preg_quote($label["caption"]);
 
-                    if ($caption && preg_match("/\b$caption\b/i", "$tags_str " . strip_tags($entry_content) . " $entry_title")) {
+                    if ($caption &&
+                        preg_match("/\b$caption\b/i", "$tags_str " . strip_tags($entry_content) . " $entry_title")) {
                         if (!labels_contains_caption($article_labels, $caption)) {
                             label_add_article($entry_ref_id, $caption, $owner_uid);
                         }
@@ -1109,8 +1225,10 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
 
         purge_feed($feed, 0, $debug_enabled);
 
-        db_query("UPDATE ttrss_feeds
-            SET last_updated = NOW(), last_error = '' WHERE id = '$feed'");
+        db_query(
+            "UPDATE ttrss_feeds
+            SET last_updated = NOW(), last_error = '' WHERE id = '$feed'"
+        );
 
         //db_query("COMMIT");
 
@@ -1128,7 +1246,8 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
 
         db_query(
             "UPDATE ttrss_feeds SET last_error = '$error_msg',
-            last_updated = NOW() WHERE id = '$feed'");
+            last_updated = NOW() WHERE id = '$feed'"
+        );
 
         unset($rss);
     }
@@ -1158,7 +1277,9 @@ function cache_images($html, $site_url, $debug)
 
             $local_filename = CACHE_DIR . "/images/" . sha1($src) . ".png";
 
-            if ($debug) _debug("cache_images: downloading: $src to $local_filename");
+            if ($debug) {
+                _debug("cache_images: downloading: $src to $local_filename");
+            }
 
             if (!file_exists($local_filename)) {
                 $file_content = fetch_file_contents($src);
@@ -1181,14 +1302,20 @@ function cache_images($html, $site_url, $debug)
 
 function expire_error_log($debug)
 {
-    if ($debug) _debug("Removing old error log entries...");
+    if ($debug) {
+        _debug("Removing old error log entries...");
+    }
 
     if (DB_TYPE == "pgsql") {
-        db_query("DELETE FROM ttrss_error_log
-            WHERE created_at < NOW() - INTERVAL '7 days'");
+        db_query(
+            "DELETE FROM ttrss_error_log
+            WHERE created_at < NOW() - INTERVAL '7 days'"
+        );
     } else {
-        db_query("DELETE FROM ttrss_error_log
-            WHERE created_at < DATE_SUB(NOW(), INTERVAL 7 DAY)");
+        db_query(
+            "DELETE FROM ttrss_error_log
+            WHERE created_at < DATE_SUB(NOW(), INTERVAL 7 DAY)"
+        );
     }
 
 }
@@ -1212,7 +1339,9 @@ function expire_lock_files($debug)
         }
     }
 
-    if ($debug) _debug("Removed $num_deleted old lock files.");
+    if ($debug) {
+        _debug("Removed $num_deleted old lock files.");
+    }
 }
 
 function expire_cached_files($debug)
@@ -1238,7 +1367,9 @@ function expire_cached_files($debug)
             }
         }
 
-        if ($debug) _debug("$cache_dir: removed $num_deleted files.");
+        if ($debug) {
+            _debug("$cache_dir: removed $num_deleted files.");
+        }
     }
 }
 
@@ -1277,42 +1408,43 @@ function get_article_filters($filters, $title, $content, $link, $timestamp, $aut
             $reg_exp = str_replace('/', '\/', $rule["reg_exp"]);
             $rule_inverse = $rule["inverse"];
 
-            if (!$reg_exp)
+            if (!$reg_exp) {
                 continue;
-
-            switch ($rule["type"]) {
-            case "title":
-                $match = @preg_match("/$reg_exp/i", $title);
-                break;
-            case "content":
-                // we don't need to deal with multiline regexps
-                $content = preg_replace("/[\r\n\t]/", "", $content);
-
-                $match = @preg_match("/$reg_exp/i", $content);
-                break;
-            case "both":
-                // we don't need to deal with multiline regexps
-                $content = preg_replace("/[\r\n\t]/", "", $content);
-
-                $match = (@preg_match("/$reg_exp/i", $title) || @preg_match("/$reg_exp/i", $content));
-                break;
-            case "link":
-                $match = @preg_match("/$reg_exp/i", $link);
-                break;
-            case "author":
-                $match = @preg_match("/$reg_exp/i", $author);
-                break;
-            case "tag":
-                foreach ($tags as $tag) {
-                    if (@preg_match("/$reg_exp/i", $tag)) {
-                        $match = true;
-                        break;
-                    }
-                }
-                break;
             }
 
-            if ($rule_inverse) $match = !$match;
+            switch ($rule["type"]) {
+                case "title":
+                    $match = @preg_match("/$reg_exp/i", $title);
+                    break;
+                case "content":
+                    // we don't need to deal with multiline regexps
+                    $content = preg_replace("/[\r\n\t]/", "", $content);
+                    $match = @preg_match("/$reg_exp/i", $content);
+                    break;
+                case "both":
+                    // we don't need to deal with multiline regexps
+                    $content = preg_replace("/[\r\n\t]/", "", $content);
+                    $match = (@preg_match("/$reg_exp/i", $title) || @preg_match("/$reg_exp/i", $content));
+                    break;
+                case "link":
+                    $match = @preg_match("/$reg_exp/i", $link);
+                    break;
+                case "author":
+                    $match = @preg_match("/$reg_exp/i", $author);
+                    break;
+                case "tag":
+                    foreach ($tags as $tag) {
+                        if (@preg_match("/$reg_exp/i", $tag)) {
+                            $match = true;
+                            break;
+                        }
+                    }
+                    break;
+            }
+
+            if ($rule_inverse) {
+                $match = !$match;
+            }
 
             if ($match_any_rule) {
                 if ($match) {
@@ -1327,14 +1459,18 @@ function get_article_filters($filters, $title, $content, $link, $timestamp, $aut
             }
         }
 
-        if ($inverse) $filter_match = !$filter_match;
+        if ($inverse) {
+            $filter_match = !$filter_match;
+        }
 
         if ($filter_match) {
-            foreach ($filter["actions"] AS $action) {
+            foreach ($filter["actions"] as $action) {
                 array_push($matches, $action);
 
                 // if Stop action encountered, perform no further processing
-                if ($action["type"] == "stop") return $matches;
+                if ($action["type"] == "stop") {
+                    return $matches;
+                }
             }
         }
     }
@@ -1347,7 +1483,7 @@ function find_article_filter($filters, $filter_name)
     foreach ($filters as $f) {
         if ($f["type"] == $filter_name) {
             return $f;
-        };
+        }
     }
     return false;
 }
@@ -1359,7 +1495,7 @@ function find_article_filters($filters, $filter_name)
     foreach ($filters as $f) {
         if ($f["type"] == $filter_name) {
             array_push($results, $f);
-        };
+        }
     }
     return $results;
 }
@@ -1371,7 +1507,7 @@ function calculate_article_score($filters)
     foreach ($filters as $f) {
         if ($f["type"] == "score") {
             $score += $f["param"];
-        };
+        }
     }
     return $score;
 }
@@ -1400,8 +1536,11 @@ function assign_article_to_label_filters($id, $filters, $owner_uid, $article_lab
 
 function make_guid_from_title($title)
 {
-    return preg_replace("/[ \"\',.:;]/", "-",
-        mb_strtolower(strip_tags($title), 'utf-8'));
+    return preg_replace(
+        "/[ \"\',.:;]/",
+        "-",
+        mb_strtolower(strip_tags($title), 'utf-8')
+    );
 }
 
 /* function verify_feed_xml($feed_data)
@@ -1423,11 +1562,10 @@ function housekeeping_common($debug)
     $count = update_feedbrowser_cache();
     _debug("Feedbrowser updated, $count feeds processed.");
 
-    purge_orphans( true);
-    $rc = cleanup_tags( 14, 50000);
+    purge_orphans(true);
+    $rc = cleanup_tags(14, 50000);
 
     _debug("Cleaned $rc cached tags.");
 
     PluginHost::getInstance()->run_hooks(PluginHost::HOOK_HOUSE_KEEPING, "hook_house_keeping", "");
-
 }

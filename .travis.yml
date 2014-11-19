@@ -20,3 +20,4 @@ script:
   - phpcs --report-full --standard=PSR2 -n include/db.php
   - phpcs --report-full --standard=PSR2 -n include/errorhandler.php
   - phpcs --report-full --standard=PSR2 -n include/functions.php
+  - phpcs --report-full --standard=PSR2 -n include/rssfuncs.php
