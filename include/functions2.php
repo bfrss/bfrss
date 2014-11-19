@@ -1329,7 +1329,7 @@ function format_inline_player($url, $ctype)
 
     return "";
 
-    $filename = substr($url, strrpos($url, "/")+1);
+    /*$filename = substr($url, strrpos($url, "/")+1);
 
     $entry .= " <a target=\"_blank\" href=\"" . htmlspecialchars($url) . "\">" .
         $filename . " (" . $ctype . ")" . "</a>"; */

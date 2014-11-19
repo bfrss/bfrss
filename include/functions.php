@@ -1988,7 +1988,7 @@ function print_feed_select(
 
             $is_selected = ("CAT:".$line["id"] == $default_id) ? "selected=\"1\"" : "";
 
-            printf
+            printf(
                 "<option $is_selected value='CAT:%d'>%s</option>",
                 $line["id"],
                 htmlspecialchars($line["title"])
