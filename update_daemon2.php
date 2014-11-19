@@ -1,7 +1,8 @@
 #!/usr/bin/env php
 <?php
-set_include_path(dirname(__FILE__) ."/include" . PATH_SEPARATOR .
-    get_include_path());
+set_include_path(
+    dirname(__FILE__) ."/include" . PATH_SEPARATOR . get_include_path()
+);
 
 declare(ticks = 1);
 chdir(dirname(__FILE__));
@@ -45,7 +46,8 @@ $ctimes = array();
 
 $last_checkpoint = -1;
 
-function reap_children() {
+function reap_children()
+{
     global $children;
     global $ctimes;
 
@@ -71,7 +73,8 @@ function reap_children() {
     return count($tmp);
 }
 
-function check_ctimes() {
+function check_ctimes()
+{
     global $ctimes;
 
     foreach (array_keys($ctimes) as $pid) {
@@ -84,7 +87,8 @@ function check_ctimes() {
     }
 }
 
-function sigchld_handler($signal) {
+function sigchld_handler($signal)
+{
     $running_jobs = reap_children();
 
     _debug("[SIGCHLD] jobs left: $running_jobs");
@@ -92,7 +96,8 @@ function sigchld_handler($signal) {
     pcntl_waitpid(-1, $status, WNOHANG);
 }
 
-function shutdown($caller_pid) {
+function shutdown($caller_pid)
+{
     if ($caller_pid == posix_getpid()) {
         if (file_exists(LOCK_DIRECTORY . "/update_daemon.lock")) {
             _debug("removing lockfile (master)...");
@@ -101,7 +106,8 @@ function shutdown($caller_pid) {
     }
 }
 
-function task_shutdown() {
+function task_shutdown()
+{
     $pid = posix_getpid();
 
     if (file_exists(LOCK_DIRECTORY . "/update_daemon-$pid.lock")) {
@@ -110,13 +116,15 @@ function task_shutdown() {
     }
 }
 
-function sigint_handler() {
+function sigint_handler()
+{
     _debug("[MASTER] SIG_INT received.\n");
     shutdown(posix_getpid());
     die;
 }
 
-function task_sigint_handler() {
+function task_sigint_handler()
+{
     _debug("[TASK] SIG_INT received.\n");
     task_shutdown();
     die;
@@ -132,7 +140,7 @@ $longopts = array("log:",
 
 $options = getopt("", $longopts);
 
-if (isset($options["help"]) ) {
+if (isset($options["help"])) {
     print "Tiny Tiny RSS update daemon.\n\n";
     print "Options:\n";
     print "  --log FILE           - log messages to FILE\n";
@@ -206,8 +214,8 @@ while (true) {
             $pid = pcntl_fork();
             if ($pid == -1) {
                 die("fork failed!\n");
-            } else if ($pid) {
 
+            } elseif ($pid) {
                 if (!$master_handlers_installed) {
                     _debug("[MASTER] installing shutdown handlers");
                     pcntl_signal(SIGINT, 'sigint_handler');
@@ -219,6 +227,7 @@ while (true) {
                 _debug("[MASTER] spawned client $j [PID:$pid]...");
                 array_push($children, $pid);
                 $ctimes[$pid] = time();
+
             } else {
                 pcntl_signal(SIGCHLD, SIG_IGN);
                 pcntl_signal(SIGINT, 'task_sigint_handler');
