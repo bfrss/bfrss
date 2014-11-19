@@ -340,15 +340,18 @@ if ($op == 'testconfig') {
     $errors = sanity_check($DB_TYPE);
 
     if (count($errors) > 0) {
-        print "<p>Some configuration tests failed. Please correct them before continuing.</p>";
+        ?>
+        <p>Some configuration tests failed. Please correct them before continuing.</p>
 
-        print "<ul>";
+        <ul>
+        <?php
 
         foreach ($errors as $error) {
             print "<li style='color : red'>$error</li>";
         }
-
-        print "</ul>";
+        ?>
+        </ul>
+        <?php
 
         exit;
     }
@@ -362,13 +365,17 @@ if ($op == 'testconfig') {
     if (count($notices) > 0) {
         print_notice("Configuration check succeeded with minor problems:");
 
-        print "<ul>";
+        ?>
+        <ul>
+        <?php
 
         foreach ($notices as $notice) {
             print "<li>$notice</li>";
         }
 
-        print "</ul>";
+        ?>
+        </ul>
+        <?php
     } else {
         print_notice("Configuration check succeeded.");
     }
@@ -457,7 +464,9 @@ if ($op == 'testconfig') {
 
     if ($op == 'installschema') {
 
-        print "<h2>Initializing database...</h2>";
+        ?>
+        <h2>Initializing database...</h2>
+        <?php
 
         $lines = explode(
             ";",
@@ -476,16 +485,16 @@ if ($op == 'testconfig') {
         print_notice("Database initialization skipped.");
     }
 
-    print "<h2>Generated configuration file</h2>";
-
-    print "<p>Copy following text and save as <code>config.php</code> in tt-rss ".
-        "main directory. It is suggested to read through the file to the end in ".
-        "case you need any options changed fom default values.</p>";
-
-    print "<p>After copying the file, you will be able to login with default ".
-        "username and password combination: <code>admin</code> and ".
-        "<code>password</code>. Don't forget to change the password immediately!</p>";
     ?>
+    <h2>Generated configuration file</h2>
+
+    <p>Copy following text and save as <code>config.php</code> in tt-rss
+    main directory. It is suggested to read through the file to the end in
+    case you need any options changed fom default values.</p>
+
+    <p>After copying the file, you will be able to login with default
+    username and password combination: <code>admin</code> and
+    <code>password</code>. Don't forget to change the password immediately!</p>
 
     <form action="" method="post">
     <input type="hidden" name="op" value="saveconfig">
@@ -528,7 +537,9 @@ if ($op == 'testconfig') {
 
 } elseif ($op == "saveconfig") {
 
-    print "<h2>Saving configuration file to parent directory...</h2>";
+    ?>
+    <h2>Saving configuration file to parent directory...</h2>
+    <?php
 
     if (!file_exists("../config.php")) {
 
