@@ -1,14 +1,16 @@
 <?php
-set_include_path(dirname(__FILE__) ."/include" . PATH_SEPARATOR .
-    get_include_path());
+set_include_path(
+    dirname(__FILE__) ."/include" . PATH_SEPARATOR . get_include_path()
+);
 
 /* remove ill effects of magic quotes */
 
 if (get_magic_quotes_gpc()) {
-    function stripslashes_deep($value) {
+    function stripslashes_deep($value)
+    {
         $value = is_array($value) ?
             array_map('stripslashes_deep', $value) : stripslashes($value);
-            return $value;
+        return $value;
     }
 
     $_POST = array_map('stripslashes_deep', $_POST);
@@ -29,7 +31,9 @@ startup_gettext();
 
 $script_started = microtime(true);
 
-if (!init_plugins()) return;
+if (!init_plugins()) {
+    return;
+}
 
 if (ENABLE_GZIP_OUTPUT && function_exists("ob_gzhandler")) {
     ob_start("ob_gzhandler");
@@ -48,7 +52,7 @@ if ($override) {
 if (implements_interface($handler, "IHandler") && $handler->before($method)) {
     if ($method && method_exists($handler, $method)) {
         $handler->$method();
-    } else if (method_exists($handler, 'index')) {
+    } elseif (method_exists($handler, 'index')) {
         $handler->index();
     }
     $handler->after();
