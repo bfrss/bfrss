@@ -140,16 +140,14 @@ if (class_exists($op) || $override) {
                 }
                 $handler->after();
                 return;
-            } else {
-                header("Content-Type: text/json");
-                print json_encode(array("error" => array("code" => 6)));
-                return;
             }
-        } else {
             header("Content-Type: text/json");
             print json_encode(array("error" => array("code" => 6)));
             return;
         }
+        header("Content-Type: text/json");
+        print json_encode(array("error" => array("code" => 6)));
+        return;
     }
 }
 
