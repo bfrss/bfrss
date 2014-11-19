@@ -4,7 +4,8 @@ define_default('DAEMON_FEED_LIMIT', 500);
 define_default('DAEMON_SLEEP_INTERVAL', 120);
 define_default('_MIN_CACHE_IMAGE_SIZE', 1024);
 
-function calculate_article_hash($article, $pluginhost) {
+function calculate_article_hash($article, $pluginhost)
+{
     $tmp = "";
 
     foreach ($article as $k => $v) {
@@ -16,8 +17,8 @@ function calculate_article_hash($article, $pluginhost) {
     return sha1(implode(",", $pluginhost->get_plugin_names()) . $tmp);
 }
 
-function update_feedbrowser_cache() {
-
+function update_feedbrowser_cache()
+{
     $result = db_query("SELECT feed_url, site_url, title, COUNT(id) AS subscribers
         FROM ttrss_feeds WHERE (SELECT COUNT(id) = 0 FROM ttrss_feeds AS tf
             WHERE tf.feed_url = ttrss_feeds.feed_url
@@ -54,7 +55,6 @@ function update_feedbrowser_cache() {
     db_query("COMMIT");
 
     return $count;
-
 }
 
 
@@ -70,7 +70,8 @@ function update_feedbrowser_cache() {
  * @param boolean $debug Set to false to disable debug output. Default to true.
  * @return void
  */
-function update_daemon_common($limit = DAEMON_FEED_LIMIT, $from_http = false, $debug = true) {
+function update_daemon_common($limit = DAEMON_FEED_LIMIT, $from_http = false, $debug = true)
+{
     // Process all other feeds using last_updated and interval parameters
 
     $schema_version = get_schema_version();
@@ -223,8 +224,8 @@ function update_daemon_common($limit = DAEMON_FEED_LIMIT, $from_http = false, $d
 } // function update_daemon_common
 
 // ignore_daemon is not used
-function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss = false) {
-
+function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss = false)
+{
     $debug_enabled = defined('DAEMON_EXTENDED_DEBUG') || $_REQUEST['xdebug'];
 
     _debug_suppress(!$debug_enabled);
@@ -1137,7 +1138,8 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
     return $rss;
 }
 
-function cache_images($html, $site_url, $debug) {
+function cache_images($html, $site_url, $debug)
+{
     libxml_use_internal_errors(true);
 
     $charset_hack = '<head>
@@ -1177,7 +1179,8 @@ function cache_images($html, $site_url, $debug) {
     //return $doc->saveXML($node);
 }
 
-function expire_error_log($debug) {
+function expire_error_log($debug)
+{
     if ($debug) _debug("Removing old error log entries...");
 
     if (DB_TYPE == "pgsql") {
@@ -1190,7 +1193,8 @@ function expire_error_log($debug) {
 
 }
 
-function expire_lock_files($debug) {
+function expire_lock_files($debug)
+{
     //if ($debug) _debug("Removing old lock files...");
 
     $num_deleted = 0;
@@ -1211,7 +1215,8 @@ function expire_lock_files($debug) {
     if ($debug) _debug("Removed $num_deleted old lock files.");
 }
 
-function expire_cached_files($debug) {
+function expire_cached_files($debug)
+{
     foreach (array("simplepie", "images", "export", "upload") as $dir) {
         $cache_dir = CACHE_DIR . "/$dir";
 
@@ -1244,7 +1249,8 @@ function expire_cached_files($debug) {
 * @param    string    query
 * @return    array    params
 */
-function convertUrlQuery($query) {
+function convertUrlQuery($query)
+{
     $queryParts = explode('&', $query);
 
     $params = array();
@@ -1257,7 +1263,8 @@ function convertUrlQuery($query) {
     return $params;
 }
 
-function get_article_filters($filters, $title, $content, $link, $timestamp, $author, $tags) {
+function get_article_filters($filters, $title, $content, $link, $timestamp, $author, $tags)
+{
     $matches = array();
 
     foreach ($filters as $filter) {
@@ -1335,7 +1342,8 @@ function get_article_filters($filters, $title, $content, $link, $timestamp, $aut
     return $matches;
 }
 
-function find_article_filter($filters, $filter_name) {
+function find_article_filter($filters, $filter_name)
+{
     foreach ($filters as $f) {
         if ($f["type"] == $filter_name) {
             return $f;
@@ -1344,7 +1352,8 @@ function find_article_filter($filters, $filter_name) {
     return false;
 }
 
-function find_article_filters($filters, $filter_name) {
+function find_article_filters($filters, $filter_name)
+{
     $results = array();
 
     foreach ($filters as $f) {
@@ -1355,7 +1364,8 @@ function find_article_filters($filters, $filter_name) {
     return $results;
 }
 
-function calculate_article_score($filters) {
+function calculate_article_score($filters)
+{
     $score = 0;
 
     foreach ($filters as $f) {
@@ -1366,7 +1376,8 @@ function calculate_article_score($filters) {
     return $score;
 }
 
-function labels_contains_caption($labels, $caption) {
+function labels_contains_caption($labels, $caption)
+{
     foreach ($labels as $label) {
         if ($label[1] == $caption) {
             return true;
@@ -1376,7 +1387,8 @@ function labels_contains_caption($labels, $caption) {
     return false;
 }
 
-function assign_article_to_label_filters($id, $filters, $owner_uid, $article_labels) {
+function assign_article_to_label_filters($id, $filters, $owner_uid, $article_labels)
+{
     foreach ($filters as $f) {
         if ($f["type"] == "label") {
             if (!labels_contains_caption($article_labels, $f["param"])) {
@@ -1386,12 +1398,14 @@ function assign_article_to_label_filters($id, $filters, $owner_uid, $article_lab
     }
 }
 
-function make_guid_from_title($title) {
+function make_guid_from_title($title)
+{
     return preg_replace("/[ \"\',.:;]/", "-",
         mb_strtolower(strip_tags($title), 'utf-8'));
 }
 
-/* function verify_feed_xml($feed_data) {
+/* function verify_feed_xml($feed_data)
+{
     libxml_use_internal_errors(true);
     $doc = new DOMDocument();
     $doc->loadXML($feed_data);
@@ -1400,7 +1414,8 @@ function make_guid_from_title($title) {
     return $error;
 } */
 
-function housekeeping_common($debug) {
+function housekeeping_common($debug)
+{
     expire_cached_files($debug);
     expire_lock_files($debug);
     expire_error_log($debug);
