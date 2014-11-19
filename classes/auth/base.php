@@ -42,9 +42,8 @@ class Auth_Base
 
                 return $this->find_user_by_login($login);
 
-            } else {
-                return $user_id;
             }
+            return $user_id;
         }
 
         return $this->find_user_by_login($login);
@@ -61,9 +60,8 @@ class Auth_Base
 
         if ($this->dbh->num_rows($result) > 0) {
             return $this->dbh->fetch_result($result, 0, "id");
-        } else {
-            return false;
         }
 
+        return false;
     }
 }
