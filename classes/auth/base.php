@@ -1,26 +1,33 @@
 <?php
-class Auth_Base {
+class Auth_Base
+{
     private $dbh;
 
-    function __construct() {
+    function __construct()
+    {
         $this->dbh = Db::get();
     }
 
-    function check_password($owner_uid, $password) {
+    function check_password($owner_uid, $password)
+    {
         return false;
     }
 
-    function authenticate($login, $password) {
+    function authenticate($login, $password)
+    {
         return false;
     }
 
     // Auto-creates specified user if allowed by system configuration
     // Can be used instead of find_user_by_login() by external auth modules
-    function auto_create_user($login, $password = false) {
+    function auto_create_user($login, $password = false)
+    {
         if ($login && defined('AUTH_AUTO_CREATE') && AUTH_AUTO_CREATE) {
             $user_id = $this->find_user_by_login($login);
 
-            if (!$password) $password = make_password();
+            if (!$password) {
+                $password = make_password();
+            }
 
             if (!$user_id) {
                 $login = $this->dbh->escape_string($login);
@@ -43,11 +50,14 @@ class Auth_Base {
         return $this->find_user_by_login($login);
     }
 
-    function find_user_by_login($login) {
+    function find_user_by_login($login)
+    {
         $login = $this->dbh->escape_string($login);
 
-        $result = $this->dbh->query("SELECT id FROM ttrss_users WHERE
-            login = '$login'");
+        $result = $this->dbh->query(
+            "SELECT id FROM ttrss_users WHERE
+            login = '$login'"
+        );
 
         if ($this->dbh->num_rows($result) > 0) {
             return $this->dbh->fetch_result($result, 0, "id");
