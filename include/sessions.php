@@ -91,16 +91,16 @@ function validate_session()
                 __("Session failed to validate (user not found)");
 
             return false;
-        } else {
-            $pwd_hash = Db::get()->fetch_result($result, 0, "pwd_hash");
+        }
 
-            if ($pwd_hash != $_SESSION["pwd_hash"]) {
+        $pwd_hash = Db::get()->fetch_result($result, 0, "pwd_hash");
 
-                $_SESSION["login_error_msg"] =
-                    __("Session failed to validate (password changed)");
+        if ($pwd_hash != $_SESSION["pwd_hash"]) {
 
-                return false;
-            }
+            $_SESSION["login_error_msg"] =
+                __("Session failed to validate (password changed)");
+
+            return false;
         }
     }
 
@@ -129,10 +129,9 @@ function ttrss_read($id)
         );
 
         return "";
-    } else {
-        return base64_decode(Db::get()->fetch_result($res, 0, "data"));
     }
 
+    return base64_decode(Db::get()->fetch_result($res, 0, "data"));
 }
 
 function ttrss_write($id, $data)
