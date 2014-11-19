@@ -1,7 +1,8 @@
 #!/usr/bin/env php
 <?php
-set_include_path(dirname(__FILE__) ."/include" . PATH_SEPARATOR .
-    get_include_path());
+set_include_path(
+    dirname(__FILE__) ."/include" . PATH_SEPARATOR . get_include_path()
+);
 
 define('DISABLE_SESSIONS', true);
 
@@ -15,12 +16,14 @@ require_once "sanity_check.php";
 require_once "db.php";
 require_once "db-prefs.php";
 
-if (!defined('PHP_EXECUTABLE'))
+if (!defined('PHP_EXECUTABLE')) {
     define('PHP_EXECUTABLE', '/usr/bin/php');
+}
 
 init_plugins();
 
-$longopts = array("feeds",
+$longopts = array(
+    "feeds",
     "feedbrowser",
     "daemon",
     "daemon-loop",
@@ -34,7 +37,8 @@ $longopts = array("feeds",
     "convert-filters",
     "force-update",
     "list-plugins",
-    "help");
+    "help"
+);
 
 foreach (PluginHost::getInstance()->get_commands() as $command => $data) {
     array_push($longopts, $command . $data["suffix"]);
@@ -50,7 +54,7 @@ if (!is_array($options)) {
 }
 
 if (count($options) == 0 && !defined('STDIN')) {
-    ?> <html>
+    ?><html>
     <head>
     <title>Tiny Tiny RSS data update script.</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -61,14 +65,19 @@ if (count($options) == 0 && !defined('STDIN')) {
     <div class="floatingLogo"><img src="images/logo_small.png"></div>
     <h1><?php echo __("Tiny Tiny RSS data update script.") ?></h1>
 
-    <?php print_error("Please run this script from the command line. Use option \"-help\" to display command help if this error is displayed erroneously."); ?>
+    <?php
+    print_error(
+        "Please run this script from the command line. Use option \"-help\" to ".
+        "display command help if this error is displayed erroneously."
+    );
+    ?>
 
     </body></html>
 <?php
     exit;
 }
 
-if (count($options) == 0 || isset($options["help"]) ) {
+if (count($options) == 0 || isset($options["help"])) {
     print "Tiny Tiny RSS data update script.\n\n";
     print "Options:\n";
     print "  --feeds              - update feeds\n";
@@ -149,8 +158,10 @@ if (!$lock_handle) {
 if (isset($options["force-update"])) {
     _debug("marking all feeds as needing update...");
 
-    db_query( "UPDATE ttrss_feeds SET last_update_started = '1970-01-01',
-        last_updated = '1970-01-01'");
+    db_query(
+        "UPDATE ttrss_feeds SET last_update_started = '1970-01-01',
+        last_updated = '1970-01-01'"
+    );
 }
 
 if (isset($options["feeds"])) {
@@ -183,14 +194,15 @@ if (isset($options["daemon-loop"])) {
 
     update_daemon_common(isset($options["pidlock"]) ? 50 : DAEMON_FEED_LIMIT);
 
-    if (!isset($options["pidlock"]) || $options["task"] == 0)
+    if (!isset($options["pidlock"]) || $options["task"] == 0) {
         housekeeping_common(true);
+    }
 
     PluginHost::getInstance()->run_hooks(PluginHost::HOOK_UPDATE_TASK, "hook_update_task", $op);
 }
 
 if (isset($options["cleanup-tags"])) {
-    $rc = cleanup_tags( 14, 50000);
+    $rc = cleanup_tags(14, 50000);
     _debug("$rc tags deleted.\n");
 }
 
@@ -198,19 +210,24 @@ if (isset($options["indexes"])) {
     _debug("PLEASE BACKUP YOUR DATABASE BEFORE PROCEEDING!");
     _debug("Type 'yes' to continue.");
 
-    if (read_stdin() != 'yes')
+    if (read_stdin() != 'yes') {
         exit;
+    }
 
     _debug("clearing existing indexes...");
 
     if (DB_TYPE == "pgsql") {
-        $result = db_query( "SELECT relname FROM
-            pg_catalog.pg_class WHERE relname LIKE 'ttrss_%'
-                AND relname NOT LIKE '%_pkey'
-            AND relkind = 'i'");
+        $result = db_query(
+            "SELECT relname FROM pg_catalog.pg_class
+            WHERE relname LIKE 'ttrss_%'
+            AND relname NOT LIKE '%_pkey'
+            AND relkind = 'i'"
+        );
     } else {
-        $result = db_query( "SELECT index_name,table_name FROM
-            information_schema.statistics WHERE index_name LIKE 'ttrss_%'");
+        $result = db_query(
+            "SELECT index_name,table_name FROM
+            information_schema.statistics WHERE index_name LIKE 'ttrss_%'"
+        );
     }
 
     while ($line = db_fetch_assoc($result)) {
@@ -222,7 +239,7 @@ if (isset($options["indexes"])) {
                 $line['table_name']." DROP INDEX ".$line['index_name'];
             _debug($statement);
         }
-        db_query( $statement, false);
+        db_query($statement, false);
     }
 
     _debug("reading indexes from schema for: " . DB_TYPE);
@@ -239,7 +256,7 @@ if (isset($options["indexes"])) {
                 $statement = "CREATE INDEX $index ON $table";
 
                 _debug($statement);
-                db_query( $statement);
+                db_query($statement);
             }
         }
         fclose($fp);
@@ -253,14 +270,15 @@ if (isset($options["convert-filters"])) {
     _debug("WARNING: this will remove all existing type2 filters.");
     _debug("Type 'yes' to continue.");
 
-    if (read_stdin() != 'yes')
+    if (read_stdin() != 'yes') {
         exit;
+    }
 
     _debug("converting filters...");
 
-    db_query( "DELETE FROM ttrss_filters2");
+    db_query("DELETE FROM ttrss_filters2");
 
-    $result = db_query( "SELECT * FROM ttrss_filters ORDER BY id");
+    $result = db_query("SELECT * FROM ttrss_filters ORDER BY id");
 
     while ($line = db_fetch_assoc($result)) {
         $owner_uid = $line["owner_uid"];
@@ -277,16 +295,24 @@ if (isset($options["convert-filters"])) {
 
             $filter["enabled"] = $line["enabled"] ? "on" : "off";
             $filter["rule"] = array(
-                json_encode(array(
-                    "reg_exp" => $line["reg_exp"],
-                    "feed_id" => $feed_id,
-                    "filter_type" => $line["filter_type"])));
+                json_encode(
+                    array(
+                        "reg_exp" => $line["reg_exp"],
+                        "feed_id" => $feed_id,
+                        "filter_type" => $line["filter_type"]
+                    )
+                )
+            );
 
             $filter["action"] = array(
-                json_encode(array(
-                    "action_id" => $line["action_id"],
-                    "action_param_label" => $line["action_param"],
-                    "action_param" => $line["action_param"])));
+                json_encode(
+                    array(
+                        "action_id" => $line["action_id"],
+                        "action_param_label" => $line["action_param"],
+                        "action_param" => $line["action_param"]
+                    )
+                )
+            );
 
             // Oh god it's full of hacks
 
@@ -309,8 +335,9 @@ if (isset($options["update-schema"])) {
         _debug("WARNING: please backup your database before continuing.");
         _debug("Type 'yes' to continue.");
 
-        if (read_stdin() != 'yes')
+        if (read_stdin() != 'yes') {
             exit;
+        }
 
         for ($i = $updater->getSchemaVersion() + 1; $i <= SCHEMA_VERSION; $i++) {
             _debug("performing update up to version $i...");
@@ -319,8 +346,9 @@ if (isset($options["update-schema"])) {
 
             _debug($result ? "OK!" : "FAILED!");
 
-            if (!$result) return;
-
+            if (!$result) {
+                return;
+            }
         }
     } else {
         _debug("update not required.");
@@ -339,17 +367,25 @@ if (isset($options["list-plugins"])) {
 
         $status = $about[3] ? "system" : "user";
 
-        if (in_array($name, $enabled)) $name .= "*";
+        if (in_array($name, $enabled)) {
+            $name .= "*";
+        }
 
-        printf("%-50s %-10s v%.2f (by %s)\n%s\n\n",
-            $name, $status, $about[0], $about[2], $about[1]);
+        printf(
+            "%-50s %-10s v%.2f (by %s)\n%s\n\n",
+            $name,
+            $status,
+            $about[0],
+            $about[2],
+            $about[1]
+        );
     }
 
     echo "Plugins marked by * are currently enabled for all users.\n";
-
 }
 
 PluginHost::getInstance()->run_commands($options);
 
-if (file_exists(LOCK_DIRECTORY . "/$lock_filename"))
+if (file_exists(LOCK_DIRECTORY . "/$lock_filename")) {
     unlink(LOCK_DIRECTORY . "/$lock_filename");
+}
