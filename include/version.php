@@ -11,9 +11,9 @@ function get_version()
         $suffix = substr(trim(file_get_contents("$root_dir/.git/refs/heads/master")), 0, 7);
 
         return VERSION_STATIC . ".$suffix";
-    } else {
-        return VERSION_STATIC;
     }
+
+    return VERSION_STATIC;
 }
 
 define('VERSION', get_version());
