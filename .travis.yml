@@ -15,6 +15,7 @@ script:
   - phpcs --report-full --standard=PSR2 include/digest.php
   - phpcs --report-full --standard=PSR2 include/feedbrowser.php
   - phpcs --report-full --standard=PSR2 include/functions2.php
+  - phpcs --report-full --standard=PSR2 include/labels.php
   - phpcs --report-full --standard=PSR2 -n include/colors.php
   - phpcs --report-full --standard=PSR2 -n include/db.php
   - phpcs --report-full --standard=PSR2 -n include/errorhandler.php
