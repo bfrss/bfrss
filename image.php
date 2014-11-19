@@ -1,6 +1,7 @@
 <?php
-set_include_path(dirname(__FILE__) ."/include" . PATH_SEPARATOR .
-    get_include_path());
+set_include_path(
+    dirname(__FILE__) ."/include" . PATH_SEPARATOR . get_include_path()
+);
 
 require_once "config.php";
 
@@ -30,8 +31,9 @@ if ($hash) {
         /* See if we can use X-Sendfile */
         $xsendfile = false;
         if (function_exists('apache_get_modules') &&
-            array_search('mod_xsendfile', apache_get_modules()))
+            array_search('mod_xsendfile', apache_get_modules())) {
             $xsendfile = true;
+        }
 
         if ($xsendfile) {
             header("X-Sendfile: $filename");
