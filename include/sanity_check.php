@@ -15,18 +15,23 @@
  * If you come crying when stuff inevitably breaks, you will be mocked and told
  * to get out. */
 
-function make_self_url_path() {
-    $url_path = ($_SERVER['HTTPS'] != "on" ? 'http://' :  'https://') . $_SERVER["HTTP_HOST"] . parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
+function make_self_url_path()
+{
+    $url_path = ($_SERVER['HTTPS'] != "on" ? 'http://' :  'https://') .
+        $_SERVER["HTTP_HOST"] . parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 
     return $url_path;
 }
 
-function initial_sanity_check() {
-
+function initial_sanity_check()
+{
     $errors = array();
 
     if (!file_exists("config.php")) {
-        array_push($errors, "Configuration file not found. Looks like you forgot to copy config.php-dist to config.php and edit it.");
+        array_push(
+            $errors,
+            "Configuration file not found. Looks like you forgot to copy config.php-dist to config.php and edit it."
+        );
     } else {
 
         require_once "sanity_config.php";
@@ -35,7 +40,7 @@ function initial_sanity_check() {
             array_push($errors, "Please copy config.php-dist to config.php or run the installer in install/");
         }
 
-        if (strpos(PLUGINS, "auth_") === FALSE) {
+        if (strpos(PLUGINS, "auth_") === false) {
             array_push($errors, "Please enable at least one authentication module via PLUGINS constant in config.php");
         }
 
@@ -48,7 +53,11 @@ function initial_sanity_check() {
         }
 
         if (CONFIG_VERSION != EXPECTED_CONFIG_VERSION) {
-            array_push($errors, "Configuration file (config.php) has incorrect version. Update it with new options from config.php-dist and set CONFIG_VERSION to the correct value.");
+            array_push(
+                $errors,
+                "Configuration file (config.php) has incorrect version. ".
+                "Update it with new options from config.php-dist and set CONFIG_VERSION to the correct value."
+            );
         }
 
         if (!is_writable(CACHE_DIR . "/images")) {
@@ -76,14 +85,20 @@ function initial_sanity_check() {
         }
 
         if (GENERATED_CONFIG_CHECK != EXPECTED_CONFIG_VERSION) {
-            array_push($errors,
-                "Configuration option checker sanity_config.php is outdated, please recreate it using ./utils/regen_config_checks.sh");
+            array_push(
+                $errors,
+                "Configuration option checker sanity_config.php is outdated, ".
+                "please recreate it using ./utils/regen_config_checks.sh"
+            );
         }
 
         foreach ($requred_defines as $d) {
             if (!defined($d)) {
-                array_push($errors,
-                    "Required configuration file parameter $d is not defined in config.php. You might need to copy it from config.php-dist.");
+                array_push(
+                    $errors,
+                    "Required configuration file parameter $d is not defined in config.php. ".
+                    "You might need to copy it from config.php-dist."
+                );
             }
         }
 
@@ -91,15 +106,20 @@ function initial_sanity_check() {
             $result = db_query("SELECT id FROM ttrss_users WHERE id = 1");
 
             if (db_num_rows($result) != 1) {
-                array_push($errors, "SINGLE_USER_MODE is enabled in config.php but default admin account is not found.");
+                array_push(
+                    $errors,
+                    "SINGLE_USER_MODE is enabled in config.php but default admin account is not found."
+                );
             }
         }
 
         if (SELF_URL_PATH == "http://example.org/tt-rss/") {
             $urlpath = preg_replace("/\w+\.php$/", "", make_self_url_path());
 
-            array_push($errors,
-                    "Please set SELF_URL_PATH to the correct value for your server (possible value: <b>$urlpath</b>)");
+            array_push(
+                $errors,
+                "Please set SELF_URL_PATH to the correct value for your server (possible value: <b>$urlpath</b>)"
+            );
         }
 
         if (!is_writable(ICONS_DIR)) {
@@ -107,11 +127,18 @@ function initial_sanity_check() {
         }
 
         if (!is_writable(LOCK_DIRECTORY)) {
-            array_push($errors, "LOCK_DIRECTORY defined in config.php is not writable (chmod -R 777 ".LOCK_DIRECTORY.").\n");
+            array_push(
+                $errors,
+                "LOCK_DIRECTORY defined in config.php is not writable (chmod -R 777 ".LOCK_DIRECTORY.").\n"
+            );
         }
 
         if (!function_exists("curl_init") && !ini_get("allow_url_fopen")) {
-            array_push($errors, "PHP configuration option allow_url_fopen is disabled, and CURL functions are not present. Either enable allow_url_fopen or install PHP extension for CURL.");
+            array_push(
+                $errors,
+                "PHP configuration option allow_url_fopen is disabled, and CURL functions are not present. ".
+                "Either enable allow_url_fopen or install PHP extension for CURL."
+            );
         }
 
         if (!function_exists("json_encode")) {
@@ -151,7 +178,8 @@ function initial_sanity_check() {
         }
     }
 
-    if (count($errors) > 0 && $_SERVER['REQUEST_URI']) { ?>
+    if (count($errors) > 0 && $_SERVER['REQUEST_URI']) {
+        ?>
         <html>
         <head>
             <title>Startup failed</title>
@@ -162,19 +190,26 @@ function initial_sanity_check() {
             <div class="floatingLogo"><img src="images/logo_small.png"></div>
             <div class="content">
         <h1>Startup failed</h1>
-        <p>Tiny Tiny RSS was unable to start properly. This usually means a misconfiguration or an incomplete upgrade. Please fix
-        errors indicated by the following messages:</p>
-        <?php foreach ($errors as $error) { echo format_error($error); } ?>
+        <p>Tiny Tiny RSS was unable to start properly.
+        This usually means a misconfiguration or an incomplete upgrade.
+        Please fix errors indicated by the following messages:</p>
+        <?php
+        foreach ($errors as $error) {
+            echo format_error($error);
+        }
+        ?>
         <p>You might want to check tt-rss <a href="http://tt-rss.org/wiki">wiki</a> or the
-            <a href="http://tt-rss.org/forum">forums</a> for more information. Please search the forums before creating new topic
-            for your question.</p>
+        <a href="http://tt-rss.org/forum">forums</a> for more information.
+        Please search the forums before creating new topic
+        for your question.</p>
         </div>
         </body>
         </html>
-    <?php
+        <?php
         die;
-    } else if (count($errors) > 0) {
-        echo "Tiny Tiny RSS was unable to start properly. This usually means a misconfiguration or an incomplete upgrade.\n";
+    } elseif (count($errors) > 0) {
+        echo "Tiny Tiny RSS was unable to start properly. ".
+            "This usually means a misconfiguration or an incomplete upgrade.\n";
         echo "Please fix errors indicated by the following messages:\n\n";
 
         foreach ($errors as $error) {
