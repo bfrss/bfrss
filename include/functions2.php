@@ -550,6 +550,8 @@ function queryFeedHeadlines(
     } elseif ($feed > 0) {
 
         if ($cat_view) {
+            $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
+
             if ($include_children) {
                 # sub-cats
                 $subcats = getChildCategories($feed, $owner_uid);
@@ -561,12 +563,10 @@ function queryFeedHeadlines(
             } else {
                 $query_strategy_part = "cat_id = '$feed'";
             }
-
-            $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
-
         } else {
             $query_strategy_part = "feed_id = '$feed'";
         }
+
     } elseif ($feed == 0 && !$cat_view) { // archive virtual feed
         $query_strategy_part = "feed_id IS NULL";
         $allow_archived = true;
