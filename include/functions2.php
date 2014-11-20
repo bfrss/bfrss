@@ -288,14 +288,14 @@ function search_to_sql($search)
                         "($not (LOWER(ttrss_entries.title) LIKE '%".
                         db_escape_string(mb_strtolower($commandpair[1]))."%'))"
                     );
-                    break;
+                    continue 2; // foreach
                 case "author":
                     array_push(
                         $query_keywords,
                         "($not (LOWER(author) LIKE '%".
                         db_escape_string(mb_strtolower($commandpair[1]))."%'))"
                     );
-                    break;
+                    continue 2; // foreach
                 case "note":
                     if ($commandpair[1] == "true") {
                         array_push($query_keywords, "($not (note IS NOT NULL AND note != ''))");
@@ -308,69 +308,51 @@ function search_to_sql($search)
                             db_escape_string(mb_strtolower($commandpair[1]))."%'))"
                         );
                     }
-                    break;
+                    continue 2; // foreach
                 case "star":
                     if ($commandpair[1] == "true") {
                         array_push($query_keywords, "($not (marked = true))");
                     } else {
                         array_push($query_keywords, "($not (marked = false))");
                     }
-                    break;
+                    continue 2; // foreach
                 case "pub":
                     if ($commandpair[1] == "true") {
                         array_push($query_keywords, "($not (published = true))");
                     } else {
                         array_push($query_keywords, "($not (published = false))");
                     }
-                    break;
-                default:
-                    if (strpos($k, "@") === 0) {
-                        $user_tz_string = get_pref('USER_TIMEZONE', $_SESSION['uid']);
-                        $orig_ts = strtotime(substr($k, 1));
-                        $k = date("Y-m-d", convert_timestamp($orig_ts, $user_tz_string, 'UTC'));
+                    continue 2; // foreach
+            }
+        }
 
-                        //$k = date("Y-m-d", strtotime(substr($k, 1)));
+        if (strpos($k, "@") !== 0 || $commandpair[0] == "title" ||
+            $commandpair[0] == "author" || $commandpair[0] == "note" ||
+            $commandpair[0] == "star" || $commandpair[0] == "pub") {
 
-                        array_push($query_keywords, "(".SUBSTRING_FOR_DATE."(updated,1,LENGTH('$k')) $not = '$k')");
-                    } else {
-                        array_push(
-                            $query_keywords,
-                            "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
-                            OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))"
-                        );
+            // if $commandpair[0] is one of the listed => !commandpair[1]
 
-                        if (!$not) {
-                            array_push($search_words, $k);
-                        }
-                    }
+            array_push(
+                $query_keywords,
+                "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
+                OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))"
+            );
+
+            if ($commandpair[0] == "title" || $commandpair[0] == "author" ||
+                !$not) {
+
+                array_push($search_words, $k);
             }
         } else {
-            if ($commandpair[0] == "title" || $commandpair[0] == "author" ||
-                $commandpair[0] == "note" || $commandpair[0] == "star" ||
-                $commandpair[0] == "pub" || strpos($k, "@") !== 0) {
+            // strpos($k, "@") === 0
 
-                array_push(
-                    $query_keywords,
-                    "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
-                    OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))"
-                );
+            $user_tz_string = get_pref('USER_TIMEZONE', $_SESSION['uid']);
+            $orig_ts = strtotime(substr($k, 1));
+            $k = date("Y-m-d", convert_timestamp($orig_ts, $user_tz_string, 'UTC'));
 
-                if ($commandpair[0] == "title" || $commandpair[0] == "author" ||
-                    !$not) {
+            //$k = date("Y-m-d", strtotime(substr($k, 1)));
 
-                    array_push($search_words, $k);
-                }
-            } else {
-                // strpos($k, "@") === 0
-
-                $user_tz_string = get_pref('USER_TIMEZONE', $_SESSION['uid']);
-                $orig_ts = strtotime(substr($k, 1));
-                $k = date("Y-m-d", convert_timestamp($orig_ts, $user_tz_string, 'UTC'));
-
-                //$k = date("Y-m-d", strtotime(substr($k, 1)));
-
-                array_push($query_keywords, "(".SUBSTRING_FOR_DATE."(updated,1,LENGTH('$k')) $not = '$k')");
-            }
+            array_push($query_keywords, "(".SUBSTRING_FOR_DATE."(updated,1,LENGTH('$k')) $not = '$k')");
         }
     }
 
