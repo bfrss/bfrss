@@ -321,18 +321,18 @@ function feed_purge_interval($feed_id)
         WHERE id = '$feed_id'"
     );
 
-    if (db_num_rows($result) == 1) {
-        $purge_interval = db_fetch_result($result, 0, "purge_interval");
-        $owner_uid = db_fetch_result($result, 0, "owner_uid");
-
-        if ($purge_interval == 0) {
-            $purge_interval = get_pref('PURGE_OLD_DAYS', $owner_uid);
-        }
-
-        return $purge_interval;
+    if (db_num_rows($result) != 1) {
+        return -1;
     }
 
-    return -1;
+    $purge_interval = db_fetch_result($result, 0, "purge_interval");
+    $owner_uid = db_fetch_result($result, 0, "owner_uid");
+
+    if ($purge_interval == 0) {
+        $purge_interval = get_pref('PURGE_OLD_DAYS', $owner_uid);
+    }
+
+    return $purge_interval;
 }
 
 function purge_orphans($do_output = false)
@@ -354,18 +354,18 @@ function get_feed_update_interval($feed_id)
         ttrss_feeds WHERE id = '$feed_id'"
     );
 
-    if (db_num_rows($result) == 1) {
-        $update_interval = db_fetch_result($result, 0, "update_interval");
-        $owner_uid = db_fetch_result($result, 0, "owner_uid");
-
-        if ($update_interval != 0) {
-            return $update_interval;
-        }
-
-        return get_pref('DEFAULT_UPDATE_INTERVAL', $owner_uid, false);
+    if (db_num_rows($result) != 1) {
+        return -1;
     }
 
-    return -1;
+    $update_interval = db_fetch_result($result, 0, "update_interval");
+    $owner_uid = db_fetch_result($result, 0, "owner_uid");
+
+    if ($update_interval != 0) {
+        return $update_interval;
+    }
+
+    return get_pref('DEFAULT_UPDATE_INTERVAL', $owner_uid, false);
 }
 
 function fetch_file_contents(
@@ -577,46 +577,48 @@ function check_feed_favicon($site_url, $feed)
 
     $icon_file = ICONS_DIR . "/$feed.ico";
 
-    if (!file_exists($icon_file)) {
-        $favicon_url = get_favicon_url($site_url);
+    if (file_exists($icon_file)) {
+        return;
+    }
 
-        if ($favicon_url) {
-            // Limiting to "image" type misses those served with text/plain
-            $contents = fetch_file_contents($favicon_url); // , "image");
+    $favicon_url = get_favicon_url($site_url);
 
-            if ($contents) {
-                // Crude image type matching.
-                // Patterns gleaned from the file(1) source code.
-                if (preg_match('/^\x00\x00\x01\x00/', $contents)) {
-                    // 0       string  \000\000\001\000        MS Windows icon resource
-                    //error_log("check_feed_favicon: favicon_url=$favicon_url isa MS Windows icon resource");
-                } elseif (preg_match('/^GIF8/', $contents)) {
-                    // 0       string          GIF8            GIF image data
-                    //error_log("check_feed_favicon: favicon_url=$favicon_url isa GIF image");
-                } elseif (preg_match('/^\x89PNG\x0d\x0a\x1a\x0a/', $contents)) {
-                    // 0       string          \x89PNG\x0d\x0a\x1a\x0a         PNG image data
-                    //error_log("check_feed_favicon: favicon_url=$favicon_url isa PNG image");
-                } elseif (preg_match('/^\xff\xd8/', $contents)) {
-                    // 0       beshort         0xffd8          JPEG image data
-                    //error_log("check_feed_favicon: favicon_url=$favicon_url isa JPG image");
-                } else {
-                    //error_log("check_feed_favicon: favicon_url=$favicon_url isa UNKNOWN type");
-                    $contents = "";
-                }
-            }
+    if ($favicon_url) {
+        // Limiting to "image" type misses those served with text/plain
+        $contents = fetch_file_contents($favicon_url); // , "image");
 
-            if ($contents) {
-                $fp = @fopen($icon_file, "w");
-
-                if ($fp) {
-                    fwrite($fp, $contents);
-                    fclose($fp);
-                    chmod($icon_file, 0644);
-                }
+        if ($contents) {
+            // Crude image type matching.
+            // Patterns gleaned from the file(1) source code.
+            if (preg_match('/^\x00\x00\x01\x00/', $contents)) {
+                // 0       string  \000\000\001\000        MS Windows icon resource
+                //error_log("check_feed_favicon: favicon_url=$favicon_url isa MS Windows icon resource");
+            } elseif (preg_match('/^GIF8/', $contents)) {
+                // 0       string          GIF8            GIF image data
+                //error_log("check_feed_favicon: favicon_url=$favicon_url isa GIF image");
+            } elseif (preg_match('/^\x89PNG\x0d\x0a\x1a\x0a/', $contents)) {
+                // 0       string          \x89PNG\x0d\x0a\x1a\x0a         PNG image data
+                //error_log("check_feed_favicon: favicon_url=$favicon_url isa PNG image");
+            } elseif (preg_match('/^\xff\xd8/', $contents)) {
+                // 0       beshort         0xffd8          JPEG image data
+                //error_log("check_feed_favicon: favicon_url=$favicon_url isa JPG image");
+            } else {
+                //error_log("check_feed_favicon: favicon_url=$favicon_url isa UNKNOWN type");
+                $contents = "";
             }
         }
-        return $icon_file;
+
+        if ($contents) {
+            $fp = @fopen($icon_file, "w");
+
+            if ($fp) {
+                fwrite($fp, $contents);
+                fclose($fp);
+                chmod($icon_file, 0644);
+            }
+        }
     }
+    return $icon_file;
 }
 
 function print_select($id, $default, $values, $attributes = "")
@@ -707,27 +709,26 @@ function initialize_user_prefs($uid, $profile = false)
     }
 
     while ($line = db_fetch_assoc($result)) {
-        if (array_search($line["pref_name"], $active_prefs) === false) {
-            //print "adding " . $line["pref_name"] . "<br>";
+        if (array_search($line["pref_name"], $active_prefs) !== false) {
+            continue;
+        }
+        //print "adding " . $line["pref_name"] . "<br>";
 
-            $line["def_value"] = db_escape_string($line["def_value"]);
-            $line["pref_name"] = db_escape_string($line["pref_name"]);
+        $line["def_value"] = db_escape_string($line["def_value"]);
+        $line["pref_name"] = db_escape_string($line["pref_name"]);
 
-            if (get_schema_version() < 63) {
-                db_query(
-                    "INSERT INTO ttrss_user_prefs
-                    (owner_uid,pref_name,value) VALUES
-                    ('$uid', '".$line["pref_name"]."','".$line["def_value"]."')"
-                );
-
-            } else {
-                db_query(
-                    "INSERT INTO ttrss_user_prefs
-                    (owner_uid,pref_name,value, profile) VALUES
-                    ('$uid', '".$line["pref_name"]."','".$line["def_value"]."', $profile)"
-                );
-            }
-
+        if (get_schema_version() < 63) {
+            db_query(
+                "INSERT INTO ttrss_user_prefs
+                (owner_uid,pref_name,value) VALUES
+                ('$uid', '".$line["pref_name"]."','".$line["def_value"]."')"
+            );
+        } else {
+            db_query(
+                "INSERT INTO ttrss_user_prefs
+                (owner_uid,pref_name,value, profile) VALUES
+                ('$uid', '".$line["pref_name"]."','".$line["def_value"]."', $profile)"
+            );
         }
     }
     db_query("COMMIT");
@@ -896,58 +897,58 @@ function login_sequence()
         authenticate_user("admin", null);
         startup_gettext();
         load_user_plugins($_SESSION["uid"]);
-    } else {
-        if (!validate_session()) {
-            $_SESSION["uid"] = false;
+        return;
+    }
+
+    // Multi user mode
+    if (!validate_session()) {
+        $_SESSION["uid"] = false;
+    }
+
+    if (!$_SESSION["uid"]) {
+
+        if (AUTH_AUTO_LOGIN && authenticate_user(null, null)) {
+            $_SESSION["ref_schema_version"] = get_schema_version(true);
+        } else {
+                authenticate_user(null, null, true);
         }
 
         if (!$_SESSION["uid"]) {
+            @session_destroy();
+            setcookie(session_name(), '', time()-42000, '/');
 
-            if (AUTH_AUTO_LOGIN && authenticate_user(null, null)) {
-                $_SESSION["ref_schema_version"] = get_schema_version(true);
-            } else {
-                 authenticate_user(null, null, true);
-            }
-
-            if (!$_SESSION["uid"]) {
-                @session_destroy();
-                setcookie(session_name(), '', time()-42000, '/');
-
-                render_login_form();
-                exit;
-            }
-
-        } else {
-            /* bump login timestamp */
-            db_query(
-                "UPDATE ttrss_users SET last_login = NOW() WHERE id = " .
-                $_SESSION["uid"]
-            );
-            $_SESSION["last_login_update"] = time();
+            render_login_form();
+            exit;
         }
 
-        if ($_SESSION["uid"]) {
-            startup_gettext();
-            load_user_plugins($_SESSION["uid"]);
+    } else {
+        /* bump login timestamp */
+        db_query(
+            "UPDATE ttrss_users SET last_login = NOW() WHERE id = " .
+            $_SESSION["uid"]
+        );
+        $_SESSION["last_login_update"] = time();
+    }
 
-            /* cleanup ccache */
+    if ($_SESSION["uid"]) {
+        startup_gettext();
+        load_user_plugins($_SESSION["uid"]);
 
-            db_query(
-                "DELETE FROM ttrss_counters_cache WHERE owner_uid = ".
-                $_SESSION["uid"] . " AND
-                    (SELECT COUNT(id) FROM ttrss_feeds WHERE
-                        ttrss_feeds.id = feed_id) = 0"
-            );
+        /* cleanup ccache */
 
-            db_query(
-                "DELETE FROM ttrss_cat_counters_cache WHERE owner_uid = ".
-                $_SESSION["uid"] . " AND
-                    (SELECT COUNT(id) FROM ttrss_feed_categories WHERE
-                        ttrss_feed_categories.id = feed_id) = 0"
-            );
+        db_query(
+            "DELETE FROM ttrss_counters_cache WHERE owner_uid = ".
+            $_SESSION["uid"] . " AND
+                (SELECT COUNT(id) FROM ttrss_feeds WHERE
+                    ttrss_feeds.id = feed_id) = 0"
+        );
 
-        }
-
+        db_query(
+            "DELETE FROM ttrss_cat_counters_cache WHERE owner_uid = ".
+            $_SESSION["uid"] . " AND
+                (SELECT COUNT(id) FROM ttrss_feed_categories WHERE
+                    ttrss_feed_categories.id = feed_id) = 0"
+        );
     }
 }
 
@@ -1117,24 +1118,28 @@ function sanity_check()
 
 function file_is_locked($filename)
 {
-    if (file_exists(LOCK_DIRECTORY . "/$filename")) {
-        if (function_exists('flock')) {
-            $fp = @fopen(LOCK_DIRECTORY . "/$filename", "r");
-            if ($fp) {
-                if (flock($fp, LOCK_EX | LOCK_NB)) {
-                    flock($fp, LOCK_UN);
-                    fclose($fp);
-                    return false;
-                }
-                fclose($fp);
-                return true;
-            }
-            return false;
-        }
-        return true; // consider the file always locked and skip the test
+    if (!file_exists(LOCK_DIRECTORY . "/$filename")) {
+        return false;
     }
 
-    return false;
+    if (!function_exists('flock')) {
+        // consider the file always locked and skip the test
+        return true;
+    }
+
+    $fp = @fopen(LOCK_DIRECTORY . "/$filename", "r");
+    if (!$fp) {
+        return false;
+    }
+
+    if (flock($fp, LOCK_EX | LOCK_NB)) {
+        flock($fp, LOCK_UN);
+        fclose($fp);
+        return false;
+    }
+
+    fclose($fp);
+    return true;
 }
 
 
@@ -1142,39 +1147,38 @@ function make_lockfile($filename)
 {
     $fp = fopen(LOCK_DIRECTORY . "/$filename", "w");
 
-    if ($fp && flock($fp, LOCK_EX | LOCK_NB)) {
-        $stat_h = fstat($fp);
-        $stat_f = stat(LOCK_DIRECTORY . "/$filename");
-
-        if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
-            if ($stat_h["ino"] != $stat_f["ino"] ||
-                    $stat_h["dev"] != $stat_f["dev"]) {
-
-                return false;
-            }
-        }
-
-        if (function_exists('posix_getpid')) {
-            fwrite($fp, posix_getpid() . "\n");
-        }
-        return $fp;
+    if (!$fp || !flock($fp, LOCK_EX | LOCK_NB)) {
+        return false;
     }
 
-    return false;
+    $stat_h = fstat($fp);
+    $stat_f = stat(LOCK_DIRECTORY . "/$filename");
+
+    if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN' &&
+        ($stat_h["ino"] != $stat_f["ino"] ||
+        $stat_h["dev"] != $stat_f["dev"])) {
+
+        return false;
+    }
+
+    if (function_exists('posix_getpid')) {
+        fwrite($fp, posix_getpid() . "\n");
+    }
+    return $fp;
 }
 
 function make_stampfile($filename)
 {
     $fp = fopen(LOCK_DIRECTORY . "/$filename", "w");
 
-    if (flock($fp, LOCK_EX | LOCK_NB)) {
-        fwrite($fp, time() . "\n");
-        flock($fp, LOCK_UN);
-        fclose($fp);
-        return true;
+    if (!flock($fp, LOCK_EX | LOCK_NB)) {
+        return false;
     }
 
-    return false;
+    fwrite($fp, time() . "\n");
+    flock($fp, LOCK_UN);
+    fclose($fp);
+    return true;
 }
 
 function sql_random_function()
