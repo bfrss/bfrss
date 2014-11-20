@@ -1463,7 +1463,10 @@ function format_article($id, $mark_as_read = true, $zoom_mode = false, $owner_ui
             <img src='images/tag.png'
             class='tagsPic' alt='Tags' title='Tags'>&nbsp;";
 
-        if (!$zoom_mode) {
+        if ($zoom_mode) {
+            $tags_str = strip_tags($tags_str);
+            $rv['content'] .= "<span id=\"ATSTR-$id\">$tags_str</span>";
+        } else {
             $rv['content'] .= "<span id=\"ATSTR-$id\">$tags_str</span>
                 <a title=\"".__('Edit tags for this article')."\"
                 href=\"#\" onclick=\"editArticleTags($id, $feed_id)\">(+)</a>";
@@ -1475,11 +1478,8 @@ function format_article($id, $mark_as_read = true, $zoom_mode = false, $owner_ui
             foreach (PluginHost::getInstance()->get_hooks(PluginHost::HOOK_ARTICLE_BUTTON) as $p) {
                 $rv['content'] .= $p->hook_article_button($line);
             }
-
-        } else {
-            $tags_str = strip_tags($tags_str);
-            $rv['content'] .= "<span id=\"ATSTR-$id\">$tags_str</span>";
         }
+
         $rv['content'] .= "</div>";
         $rv['content'] .= "<div clear='both'>";
 
