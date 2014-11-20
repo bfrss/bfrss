@@ -1371,11 +1371,9 @@ function format_article($id, $mark_as_read = true, $zoom_mode = false, $owner_ui
                 target='_blank' href=\"$comments_url\">$num_comments ".
                 _ngettext("comment", "comments", $num_comments)."</a>";
 
-        } else {
-            if ($line["comments"] && $line["link"] != $line["comments"]) {
-                $entry_comments = "<a class=\"postComments\" target='_blank' href=\"".
-                    htmlspecialchars($line["comments"])."\">".__("comments")."</a>";
-            }
+        } elseif ($line["comments"] && $line["link"] != $line["comments"]) {
+            $entry_comments = "<a class=\"postComments\" target='_blank' href=\"".
+                htmlspecialchars($line["comments"])."\">".__("comments")."</a>";
         }
 
         if ($zoom_mode) {
