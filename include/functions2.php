@@ -1868,6 +1868,10 @@ function getArticleFeed($id)
  */
 function fix_url($url)
 {
+    if (url == '') {
+        return '';
+    }
+
     if (strpos($url, '://') === false) {
         $url = 'http://' . $url;
     } elseif (substr($url, 0, 5) == 'feed:') {
@@ -1880,11 +1884,7 @@ function fix_url($url)
         $url .= '/';
     }
 
-    if ($url != "http:///") {
-        return $url;
-    }
-
-    return '';
+    return $url;
 }
 
 function validate_feed_url($url)
