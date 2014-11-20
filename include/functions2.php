@@ -280,41 +280,23 @@ function search_to_sql($search)
 
         $commandpair = explode(":", mb_strtolower($k), 2);
 
-        switch ($commandpair[0]) {
-            case "title":
-                if ($commandpair[1]) {
+        if ($commandpair[1]) {
+            switch ($commandpair[0]) {
+                case "title":
                     array_push(
                         $query_keywords,
                         "($not (LOWER(ttrss_entries.title) LIKE '%".
                         db_escape_string(mb_strtolower($commandpair[1]))."%'))"
                     );
-                } else {
-                    array_push(
-                        $query_keywords,
-                        "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
-                        OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))"
-                    );
-                    array_push($search_words, $k);
-                }
-                break;
-            case "author":
-                if ($commandpair[1]) {
+                    break;
+                case "author":
                     array_push(
                         $query_keywords,
                         "($not (LOWER(author) LIKE '%".
                         db_escape_string(mb_strtolower($commandpair[1]))."%'))"
                     );
-                } else {
-                    array_push(
-                        $query_keywords,
-                        "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
-                        OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))"
-                    );
-                    array_push($search_words, $k);
-                }
-                break;
-            case "note":
-                if ($commandpair[1]) {
+                    break;
+                case "note":
                     if ($commandpair[1] == "true") {
                         array_push($query_keywords, "($not (note IS NOT NULL AND note != ''))");
                     } elseif ($commandpair[1] == "false") {
@@ -326,43 +308,61 @@ function search_to_sql($search)
                             db_escape_string(mb_strtolower($commandpair[1]))."%'))"
                         );
                     }
-                } else {
-                    array_push(
-                        $query_keywords,
-                        "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
-                        OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))"
-                    );
-                    if (!$not) {
-                        array_push($search_words, $k);
-                    }
-                }
-                break;
-            case "star":
-                if ($commandpair[1]) {
+                    break;
+                case "star":
                     if ($commandpair[1] == "true") {
                         array_push($query_keywords, "($not (marked = true))");
                     } else {
                         array_push($query_keywords, "($not (marked = false))");
                     }
-                } else {
-                    array_push(
-                        $query_keywords,
-                        "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
-                        OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))"
-                    );
-                    if (!$not) {
-                        array_push($search_words, $k);
-                    }
-                }
-                break;
-            case "pub":
-                if ($commandpair[1]) {
+                    break;
+                case "pub":
                     if ($commandpair[1] == "true") {
                         array_push($query_keywords, "($not (published = true))");
                     } else {
                         array_push($query_keywords, "($not (published = false))");
                     }
-                } else {
+                    break;
+                default:
+                    if (strpos($k, "@") === 0) {
+                        $user_tz_string = get_pref('USER_TIMEZONE', $_SESSION['uid']);
+                        $orig_ts = strtotime(substr($k, 1));
+                        $k = date("Y-m-d", convert_timestamp($orig_ts, $user_tz_string, 'UTC'));
+
+                        //$k = date("Y-m-d", strtotime(substr($k, 1)));
+
+                        array_push($query_keywords, "(".SUBSTRING_FOR_DATE."(updated,1,LENGTH('$k')) $not = '$k')");
+                    } else {
+                        array_push(
+                            $query_keywords,
+                            "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
+                            OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))"
+                        );
+
+                        if (!$not) {
+                            array_push($search_words, $k);
+                        }
+                    }
+            }
+        } else {
+            switch ($commandpair[0]) {
+                case "title":
+                    array_push(
+                        $query_keywords,
+                        "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
+                        OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))"
+                    );
+                    array_push($search_words, $k);
+                    break;
+                case "author":
+                    array_push(
+                        $query_keywords,
+                        "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
+                        OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))"
+                    );
+                    array_push($search_words, $k);
+                    break;
+                case "note":
                     array_push(
                         $query_keywords,
                         "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
@@ -371,28 +371,48 @@ function search_to_sql($search)
                     if (!$not) {
                         array_push($search_words, $k);
                     }
-                }
-                break;
-            default:
-                if (strpos($k, "@") === 0) {
-                    $user_tz_string = get_pref('USER_TIMEZONE', $_SESSION['uid']);
-                    $orig_ts = strtotime(substr($k, 1));
-                    $k = date("Y-m-d", convert_timestamp($orig_ts, $user_tz_string, 'UTC'));
-
-                    //$k = date("Y-m-d", strtotime(substr($k, 1)));
-
-                    array_push($query_keywords, "(".SUBSTRING_FOR_DATE."(updated,1,LENGTH('$k')) $not = '$k')");
-                } else {
+                    break;
+                case "star":
                     array_push(
                         $query_keywords,
                         "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
                         OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))"
                     );
-
                     if (!$not) {
                         array_push($search_words, $k);
                     }
-                }
+                    break;
+                case "pub":
+                    array_push(
+                        $query_keywords,
+                        "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
+                        OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))"
+                    );
+                    if (!$not) {
+                        array_push($search_words, $k);
+                    }
+                    break;
+                default:
+                    if (strpos($k, "@") === 0) {
+                        $user_tz_string = get_pref('USER_TIMEZONE', $_SESSION['uid']);
+                        $orig_ts = strtotime(substr($k, 1));
+                        $k = date("Y-m-d", convert_timestamp($orig_ts, $user_tz_string, 'UTC'));
+
+                        //$k = date("Y-m-d", strtotime(substr($k, 1)));
+
+                        array_push($query_keywords, "(".SUBSTRING_FOR_DATE."(updated,1,LENGTH('$k')) $not = '$k')");
+                    } else {
+                        array_push(
+                            $query_keywords,
+                            "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
+                            OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))"
+                        );
+
+                        if (!$not) {
+                            array_push($search_words, $k);
+                        }
+                    }
+            }
         }
     }
 
