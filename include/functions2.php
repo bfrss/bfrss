@@ -345,73 +345,31 @@ function search_to_sql($search)
                     }
             }
         } else {
-            switch ($commandpair[0]) {
-                case "title":
-                    array_push(
-                        $query_keywords,
-                        "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
-                        OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))"
-                    );
+            if ($commandpair[0] == "title" || $commandpair[0] == "author" ||
+                $commandpair[0] == "note" || $commandpair[0] == "star" ||
+                $commandpair[0] == "pub" || strpos($k, "@") !== 0) {
+
+                array_push(
+                    $query_keywords,
+                    "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
+                    OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))"
+                );
+
+                if ($commandpair[0] == "title" || $commandpair[0] == "author" ||
+                    !$not) {
+
                     array_push($search_words, $k);
-                    break;
-                case "author":
-                    array_push(
-                        $query_keywords,
-                        "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
-                        OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))"
-                    );
-                    array_push($search_words, $k);
-                    break;
-                case "note":
-                    array_push(
-                        $query_keywords,
-                        "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
-                        OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))"
-                    );
-                    if (!$not) {
-                        array_push($search_words, $k);
-                    }
-                    break;
-                case "star":
-                    array_push(
-                        $query_keywords,
-                        "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
-                        OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))"
-                    );
-                    if (!$not) {
-                        array_push($search_words, $k);
-                    }
-                    break;
-                case "pub":
-                    array_push(
-                        $query_keywords,
-                        "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
-                        OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))"
-                    );
-                    if (!$not) {
-                        array_push($search_words, $k);
-                    }
-                    break;
-                default:
-                    if (strpos($k, "@") === 0) {
-                        $user_tz_string = get_pref('USER_TIMEZONE', $_SESSION['uid']);
-                        $orig_ts = strtotime(substr($k, 1));
-                        $k = date("Y-m-d", convert_timestamp($orig_ts, $user_tz_string, 'UTC'));
+                }
+            } else {
+                // strpos($k, "@") === 0
 
-                        //$k = date("Y-m-d", strtotime(substr($k, 1)));
+                $user_tz_string = get_pref('USER_TIMEZONE', $_SESSION['uid']);
+                $orig_ts = strtotime(substr($k, 1));
+                $k = date("Y-m-d", convert_timestamp($orig_ts, $user_tz_string, 'UTC'));
 
-                        array_push($query_keywords, "(".SUBSTRING_FOR_DATE."(updated,1,LENGTH('$k')) $not = '$k')");
-                    } else {
-                        array_push(
-                            $query_keywords,
-                            "(UPPER(ttrss_entries.title) $not LIKE UPPER('%$k%')
-                            OR UPPER(ttrss_entries.content) $not LIKE UPPER('%$k%'))"
-                        );
+                //$k = date("Y-m-d", strtotime(substr($k, 1)));
 
-                        if (!$not) {
-                            array_push($search_words, $k);
-                        }
-                    }
+                array_push($query_keywords, "(".SUBSTRING_FOR_DATE."(updated,1,LENGTH('$k')) $not = '$k')");
             }
         }
     }
