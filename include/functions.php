@@ -1581,8 +1581,9 @@ function getFeedArticles(
 
         $result = db_query(
             "SELECT SUM((SELECT COUNT(int_id)
-            FROM ttrss_user_entries,ttrss_entries WHERE int_id = post_int_id
-                AND ref_id = id AND $unread_qpart)) AS count FROM ttrss_tags
+                FROM ttrss_user_entries,ttrss_entries WHERE int_id = post_int_id
+                AND ref_id = id AND $unread_qpart)) AS count
+            FROM ttrss_tags
             WHERE owner_uid = $owner_uid AND tag_name = '$feed'"
         );
         return db_fetch_result($result, 0, "count");
@@ -1632,9 +1633,9 @@ function getFeedArticles(
             $from_where = "";
         }
 
-        $query = "SELECT count(int_id) AS unread
-            FROM $from_qpart WHERE
-            $unread_qpart AND $from_where ($match_part) AND ttrss_user_entries.owner_uid = $owner_uid";
+        $query = "SELECT count(int_id) AS unread FROM $from_qpart
+            WHERE $unread_qpart AND $from_where ($match_part)
+            AND ttrss_user_entries.owner_uid = $owner_uid";
 
         //echo "[$feed/$query]\n";
 
@@ -1657,7 +1658,6 @@ function getFeedArticles(
 
 function getGlobalUnread($user_id = false)
 {
-
     if (!$user_id) {
         $user_id = $_SESSION["uid"];
     }
