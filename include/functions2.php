@@ -1059,23 +1059,28 @@ function strip_harmful_tags($doc, $allowed_elements, $disallowed_attributes)
 
 function check_for_update()
 {
-    if (CHECK_FOR_NEW_VERSION && $_SESSION['access_level'] >= 10) {
-        $version_url = "http://tt-rss.org/version.php?ver=" . VERSION .
-            "&iid=" . sha1(SELF_URL_PATH);
-
-        $version_data = @fetch_file_contents($version_url);
-
-        if ($version_data) {
-            $version_data = json_decode($version_data, true);
-
-            if ($version_data && $version_data['version'] &&
-                version_compare(VERSION_STATIC, $version_data['version']) == -1) {
-
-                return $version_data;
-            }
-        }
+    if (!CHECK_FOR_NEW_VERSION || !$_SESSION['access_level'] >= 10) {
+        return false;
     }
-    return false;
+
+    $version_url = "http://tt-rss.org/version.php?ver=" . VERSION .
+        "&iid=" . sha1(SELF_URL_PATH);
+
+    $version_data = @fetch_file_contents($version_url);
+
+    if (!$version_data) {
+        return false;
+    }
+
+    $version_data = json_decode($version_data, true);
+
+    if (!$version_data || !$version_data['version'] ||
+        version_compare(VERSION_STATIC, $version_data['version']) != -1) {
+
+        return false;
+    }
+
+    return $version_data;
 }
 
 function catchupArticlesById($ids, $cmode, $owner_uid = false)
