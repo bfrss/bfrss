@@ -1729,7 +1729,6 @@ function feed_has_icon($id)
 function init_plugins()
 {
     PluginHost::getInstance()->load(PLUGINS, PluginHost::KIND_ALL);
-
     return true;
 }
 
@@ -1756,7 +1755,6 @@ function format_tags_string($tags, $id)
 
 function format_article_labels($labels, $id)
 {
-
     if (!is_array($labels)) {
         return '';
     }
@@ -1774,7 +1772,6 @@ function format_article_labels($labels, $id)
     }
 
     return $labels_str;
-
 }
 
 function format_article_note($id, $note, $allow_edit = true)
