@@ -420,7 +420,10 @@ function queryFeedHeadlines(
     $ext_tables_part = "";
     $search_words = array();
 
+    $search_query_part = "";
     if ($search) {
+        // adjust $search_query_part
+
         foreach (PluginHost::getInstance()->get_hooks(PluginHost::HOOK_SEARCH) as $plugin) {
             list($search_query_part, $search_words) = $plugin->hook_search($search);
             break;
@@ -431,11 +434,11 @@ function queryFeedHeadlines(
             list($search_query_part, $search_words) = search_to_sql($search);
         }
         $search_query_part .= " AND ";
-    } else {
-        $search_query_part = "";
     }
 
+    $filter_query_part = "";
     if ($filter) {
+        // adjust $filter_query_part
 
         if (DB_TYPE == "pgsql") {
             $query_strategy_part .= " AND updated > NOW() - INTERVAL '14 days' ";
@@ -448,7 +451,6 @@ function queryFeedHeadlines(
         $filter_query_part = filter_to_sql($filter, $owner_uid);
 
         // Try to check if SQL regexp implementation chokes on a valid regexp
-
 
         $result = db_query(
             "SELECT true AS true_val
@@ -470,20 +472,18 @@ function queryFeedHeadlines(
         } else {
             $filter_query_part = "false AND";
         }
-
-    } else {
-        $filter_query_part = "";
     }
 
+    $since_id_part = "";
     if ($since_id) {
+        // adjust $since_id_part
         $since_id_part = "ttrss_entries.id > $since_id AND ";
-    } else {
-        $since_id_part = "";
     }
 
     $view_query_part = "";
-
     if ($view_mode == "adaptive") {
+        // adjust $view_query_part
+
         if ($search) {
             $view_query_part = " ";
         } elseif ($feed != -1) {
