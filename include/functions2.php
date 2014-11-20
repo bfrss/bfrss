@@ -927,22 +927,21 @@ function sanitize(
                 $entry->setAttribute('src', $src);
             }
 
-            if ($entry->nodeName == 'img') {
-                if (($owner && get_pref("STRIP_IMAGES", $owner)) ||
-                        $force_remove_images || $_SESSION["bw_limit"]) {
+            if ($entry->nodeName == 'img' &&
+                (($owner && get_pref("STRIP_IMAGES", $owner)) ||
+                $force_remove_images || $_SESSION["bw_limit"])) {
 
-                    $p = $doc->createElement('p');
+                $p = $doc->createElement('p');
 
-                    $a = $doc->createElement('a');
-                    $a->setAttribute('href', $entry->getAttribute('src'));
+                $a = $doc->createElement('a');
+                $a->setAttribute('href', $entry->getAttribute('src'));
 
-                    $a->appendChild(new DOMText($entry->getAttribute('src')));
-                    $a->setAttribute('target', '_blank');
+                $a->appendChild(new DOMText($entry->getAttribute('src')));
+                $a->setAttribute('target', '_blank');
 
-                    $p->appendChild($a);
+                $p->appendChild($a);
 
-                    $entry->parentNode->replaceChild($p, $entry);
-                }
+                $entry->parentNode->replaceChild($p, $entry);
             }
         }
 
@@ -1068,10 +1067,11 @@ function check_for_update()
 
         if ($version_data) {
             $version_data = json_decode($version_data, true);
-            if ($version_data && $version_data['version']) {
-                if (version_compare(VERSION_STATIC, $version_data['version']) == -1) {
-                    return $version_data;
-                }
+
+            if ($version_data && $version_data['version'] &&
+                version_compare(VERSION_STATIC, $version_data['version']) == -1) {
+
+                return $version_data;
             }
         }
     }
