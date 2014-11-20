@@ -1706,7 +1706,6 @@ function getGlobalCounters($global_unread = -1)
 
 function getVirtCounters()
 {
-
     $ret_arr = array();
 
     for ($i = 0; $i >= -4; $i--) {
@@ -1721,9 +1720,11 @@ function getVirtCounters()
             $auxctr = 0;
         }
 
-        $cv = array("id" => $i,
+        $cv = array(
+            "id" => $i,
             "counter" => (int) $count,
-            "auxcounter" => $auxctr);
+            "auxcounter" => $auxctr
+        );
 
         //if (get_pref('EXTENDED_FEEDLIST'))
             //$cv["xmsg"] = getFeedArticles($i)." ".__("total");
@@ -1735,8 +1736,10 @@ function getVirtCounters()
 
     if (is_array($feeds)) {
         foreach ($feeds as $feed) {
-            $cv = array("id" => PluginHost::pfeed_to_feed_id($feed['id']),
-                "counter" => $feed['sender']->get_unread($feed['id']));
+            $cv = array(
+                "id" => PluginHost::pfeed_to_feed_id($feed['id']),
+                "counter" => $feed['sender']->get_unread($feed['id'])
+            );
 
             if (method_exists($feed['sender'], 'get_total')) {
                 $cv["auxcounter"] = $feed['sender']->get_total($feed['id']);
@@ -1813,10 +1816,12 @@ function getFeedCounters($active_feed = false)
             $last_updated = '';
         }
 
-        $cv = array("id" => $id,
+        $cv = array(
+            "id" => $id,
             "updated" => $last_updated,
             "counter" => (int) $count,
-            "has_img" => (int) $has_img);
+            "has_img" => (int) $has_img
+        );
 
         if ($last_error) {
             $cv["error"] = $last_error;
@@ -1831,7 +1836,6 @@ function getFeedCounters($active_feed = false)
         }
 
         array_push($ret_arr, $cv);
-
     }
 
     return $ret_arr;
@@ -1847,15 +1851,15 @@ function get_pgsql_version()
 /**
  * @return array (code => Status code, message => error message if available)
  *
- *                 0 - OK, Feed already exists
- *                 1 - OK, Feed added
- *                 2 - Invalid URL
- *                 3 - URL content is HTML, no feeds available
- *                 4 - URL content is HTML which contains multiple feeds.
- *                     Here you should call extractfeedurls in rpc-backend
- *                     to get all possible feeds.
- *                 5 - Couldn't download the URL content.
- *                 6 - Content is an invalid XML.
+ * 0 - OK, Feed already exists
+ * 1 - OK, Feed added
+ * 2 - Invalid URL
+ * 3 - URL content is HTML, no feeds available
+ * 4 - URL content is HTML which contains multiple feeds.
+ *     Here you should call extractfeedurls in rpc-backend
+ *     to get all possible feeds.
+ * 5 - Couldn't download the URL content.
+ * 6 - Content is an invalid XML.
  */
 function subscribe_to_feed($url, $cat_id = 0, $auth_login = '', $auth_pass = '')
 {
@@ -1917,14 +1921,16 @@ function subscribe_to_feed($url, $cat_id = 0, $auth_login = '', $auth_pass = '')
     if (db_num_rows($result) == 0) {
         $result = db_query(
             "INSERT INTO ttrss_feeds
-                (owner_uid,feed_url,title,cat_id, auth_login,auth_pass,update_method,auth_pass_encrypted)
-            VALUES ('".$_SESSION["uid"]."', '$url',
-            '[Unknown]', $cat_qpart, '$auth_login', '$auth_pass', 0, $auth_pass_encrypted)"
+                (owner_uid, feed_url, title, cat_id, auth_login,
+                auth_pass, update_method, auth_pass_encrypted)
+            VALUES ('".$_SESSION["uid"]."', '$url', '[Unknown]',
+                $cat_qpart, '$auth_login', '$auth_pass', 0,
+                $auth_pass_encrypted)"
         );
 
         $result = db_query(
-            "SELECT id FROM ttrss_feeds WHERE feed_url = '$url'
-                AND owner_uid = " . $_SESSION["uid"]
+            "SELECT id FROM ttrss_feeds
+            WHERE feed_url = '$url' AND owner_uid = " . $_SESSION["uid"]
         );
 
         $feed_id = db_fetch_result($result, 0, "id");
