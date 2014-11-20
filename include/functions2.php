@@ -1103,20 +1103,20 @@ function catchupArticlesById($ids, $cmode, $owner_uid = false)
 
     if ($cmode == 0) {
         db_query(
-            "UPDATE ttrss_user_entries SET
-            unread = false,last_read = NOW()
+            "UPDATE ttrss_user_entries
+            SET unread = false, last_read = NOW()
             WHERE ($ids_qpart) AND owner_uid = $owner_uid"
         );
     } elseif ($cmode == 1) {
         db_query(
-            "UPDATE ttrss_user_entries SET
-            unread = true
+            "UPDATE ttrss_user_entries
+            SET unread = true
             WHERE ($ids_qpart) AND owner_uid = $owner_uid"
         );
     } else {
         db_query(
-            "UPDATE ttrss_user_entries SET
-            unread = NOT unread,last_read = NOW()
+            "UPDATE ttrss_user_entries
+            SET unread = NOT unread, last_read = NOW()
             WHERE ($ids_qpart) AND owner_uid = $owner_uid"
         );
     }
