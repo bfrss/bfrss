@@ -1557,22 +1557,22 @@ function getFeedArticles(
     $n_feed = (int) $feed;
     $need_entries = false;
 
-    if (!$owner_uid) {
-        $owner_uid = $_SESSION["uid"];
+    if ($n_feed == -6) {
+        return 0;
     }
 
-    if ($unread_only) {
-        $unread_qpart = "unread = true";
-    } else {
-        $unread_qpart = "true";
+    if (!$owner_uid) {
+        $owner_uid = $_SESSION["uid"];
     }
 
     if ($is_cat) {
         return getCategoryUnread($n_feed, $owner_uid);
     }
 
-    if ($n_feed == -6) {
-        return 0;
+    if ($unread_only) {
+        $unread_qpart = "unread = true";
+    } else {
+        $unread_qpart = "true";
     }
 
     if ($feed != "0" && $n_feed == 0) {
