@@ -498,21 +498,17 @@ function queryFeedHeadlines(
                 $view_query_part = " unread = true AND ";
             }
         }
-    }
 
-    if ($view_mode == "marked") {
+    } elseif ($view_mode == "marked") {
         $view_query_part = " marked = true AND ";
-    }
 
-    if ($view_mode == "has_note") {
+    } elseif ($view_mode == "has_note") {
         $view_query_part = " (note IS NOT NULL AND note != '') AND ";
-    }
 
-    if ($view_mode == "published") {
+    } elseif ($view_mode == "published") {
         $view_query_part = " published = true AND ";
-    }
 
-    if ($view_mode == "unread" && $feed != -6) {
+    } elseif ($view_mode == "unread" && $feed != -6) {
         $view_query_part = " unread = true AND ";
     }
 
