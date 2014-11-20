@@ -2239,14 +2239,14 @@ function cleanup_tags($days = 14, $limit = 1000)
             array_push($ids, $line['id']);
         }
 
-        if (count($ids) > 0) {
-            $ids = join(",", $ids);
-
-            $tmp_result = db_query("DELETE FROM ttrss_tags WHERE id IN ($ids)");
-            $tags_deleted += db_affected_rows($tmp_result);
-        } else {
+        if (count($ids) <= 0) {
             break;
         }
+
+        $ids = join(",", $ids);
+
+        $tmp_result = db_query("DELETE FROM ttrss_tags WHERE id IN ($ids)");
+        $tags_deleted += db_affected_rows($tmp_result);
 
         $limit -= $limit_part;
     }
