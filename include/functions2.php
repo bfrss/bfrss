@@ -682,24 +682,20 @@ function queryFeedHeadlines(
 
     if ($search) {
         $feed_title = T_sprintf("Search results: %s", $search);
-    } else {
-        if ($cat_view) {
-            $feed_title = getCategoryTitle($feed);
-        } else {
-            if (is_numeric($feed) && $feed > 0) {
-                $result = db_query(
-                    "SELECT title,site_url,last_error,last_updated
-                    FROM ttrss_feeds WHERE id = '$feed' AND owner_uid = $owner_uid"
-                );
+    } elseif ($cat_view) {
+        $feed_title = getCategoryTitle($feed);
+    } elseif (is_numeric($feed) && $feed > 0) {
+        $result = db_query(
+            "SELECT title,site_url,last_error,last_updated
+            FROM ttrss_feeds WHERE id = '$feed' AND owner_uid = $owner_uid"
+        );
 
-                $feed_title = db_fetch_result($result, 0, "title");
-                $feed_site_url = db_fetch_result($result, 0, "site_url");
-                $last_error = db_fetch_result($result, 0, "last_error");
-                $last_updated = db_fetch_result($result, 0, "last_updated");
-            } else {
-                $feed_title = getFeedTitle($feed);
-            }
-        }
+        $feed_title = db_fetch_result($result, 0, "title");
+        $feed_site_url = db_fetch_result($result, 0, "site_url");
+        $last_error = db_fetch_result($result, 0, "last_error");
+        $last_updated = db_fetch_result($result, 0, "last_updated");
+    } else {
+        $feed_title = getFeedTitle($feed);
     }
 
 
