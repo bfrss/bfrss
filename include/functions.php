@@ -1233,7 +1233,6 @@ function catchup_feed($feed, $cat_view, $owner_uid = false, $max_id = false, $mo
         if ($cat_view) {
 
             if ($feed >= 0) {
-
                 if ($feed > 0) {
                     $children = getChildCategories($feed, $owner_uid);
                     array_push($children, $feed);
@@ -1242,6 +1241,7 @@ function catchup_feed($feed, $cat_view, $owner_uid = false, $max_id = false, $mo
 
                     $cat_qpart = "cat_id IN ($children)";
                 } else {
+                    // feed == 0
                     $cat_qpart = "cat_id IS NULL";
                 }
 
@@ -1255,7 +1255,6 @@ function catchup_feed($feed, $cat_view, $owner_uid = false, $max_id = false, $mo
                 );
 
             } elseif ($feed == -2) {
-
                 db_query(
                     "UPDATE ttrss_user_entries
                     SET unread = false,last_read = NOW() WHERE (SELECT COUNT(*)
@@ -1266,7 +1265,6 @@ function catchup_feed($feed, $cat_view, $owner_uid = false, $max_id = false, $mo
             }
 
         } elseif ($feed > 0) {
-
             db_query(
                 "UPDATE ttrss_user_entries
                 SET unread = false, last_read = NOW() WHERE ref_id IN
@@ -1276,7 +1274,6 @@ function catchup_feed($feed, $cat_view, $owner_uid = false, $max_id = false, $mo
             );
 
         } elseif ($feed < 0 && $feed > LABEL_BASE_INDEX) { // special, like starred
-
             if ($feed == -1) {
                 db_query(
                     "UPDATE ttrss_user_entries
