@@ -1063,6 +1063,7 @@ function check_for_update()
         return false;
     }
 
+    // TODO: change URL, this is bfrss and not ttrss :)
     $version_url = "http://tt-rss.org/version.php?ver=" . VERSION .
         "&iid=" . sha1(SELF_URL_PATH);
 
