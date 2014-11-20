@@ -1379,29 +1379,29 @@ function format_article($id, $mark_as_read = true, $zoom_mode = false, $owner_ui
         if ($zoom_mode) {
             header("Content-Type: text/html");
             $rv['content'] .= "<html><head>
-                    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>
-                    <title>Tiny Tiny RSS - ".$line["title"]."</title>".
-                    stylesheet_tag("css/tt-rss.css").
-                    stylesheet_tag("css/zoom.css").
-                    stylesheet_tag("css/dijit.css")."
+                <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>
+                <title>Tiny Tiny RSS - ".$line["title"]."</title>".
+                stylesheet_tag("css/tt-rss.css").
+                stylesheet_tag("css/zoom.css").
+                stylesheet_tag("css/dijit.css")."
 
-                    <link rel=\"shortcut icon\" type=\"image/png\" href=\"images/favicon.png\">
-                    <link rel=\"icon\" type=\"image/png\" sizes=\"72x72\" href=\"images/favicon-72px.png\">
+                <link rel=\"shortcut icon\" type=\"image/png\" href=\"images/favicon.png\">
+                <link rel=\"icon\" type=\"image/png\" sizes=\"72x72\" href=\"images/favicon-72px.png\">
 
-                    <script type=\"text/javascript\">
-                    function openSelectedAttachment(elem) {
-                        try {
-                            var url = elem[elem.selectedIndex].value;
+                <script type=\"text/javascript\">
+                function openSelectedAttachment(elem) {
+                    try {
+                        var url = elem[elem.selectedIndex].value;
 
-                            if (url) {
-                                window.open(url);
-                                elem.selectedIndex = 0;
-                            }
-
-                        } catch (e) {
-                            exception_error(\"openSelectedAttachment\", e);
+                        if (url) {
+                            window.open(url);
+                            elem.selectedIndex = 0;
                         }
+
+                    } catch (e) {
+                        exception_error(\"openSelectedAttachment\", e);
                     }
+                }
                 </script>
                 </head><body id=\"ttrssZoom\">";
         }
