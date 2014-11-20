@@ -2414,11 +2414,11 @@ function getFeedCategory($feed)
 {
     $result = db_query("SELECT cat_id FROM ttrss_feeds WHERE id = '$feed'");
 
-    if (db_num_rows($result) > 0) {
-        return db_fetch_result($result, 0, "cat_id");
+    if (db_num_rows($result) <= 0) {
+        return false;
     }
 
-    return false;
+    return db_fetch_result($result, 0, "cat_id");
 }
 
 function implements_interface($class, $interface)
