@@ -1282,9 +1282,8 @@ function catchup_feed($feed, $cat_view, $owner_uid = false, $max_id = false, $mo
                             (SELECT id FROM ttrss_entries, ttrss_user_entries WHERE ref_id = id
                                 AND owner_uid = $owner_uid AND unread = true AND marked = true AND $date_qpart) as tmp)"
                 );
-            }
 
-            if ($feed == -2) {
+            } elseif ($feed == -2) {
                 db_query(
                     "UPDATE ttrss_user_entries
                     SET unread = false, last_read = NOW() WHERE ref_id IN
@@ -1293,10 +1292,8 @@ function catchup_feed($feed, $cat_view, $owner_uid = false, $max_id = false, $mo
                                 AND owner_uid = $owner_uid AND unread = true
                                 AND published = true AND $date_qpart) as tmp)"
                 );
-            }
 
-            if ($feed == -3) {
-
+            } elseif ($feed == -3) {
                 $intl = get_pref("FRESH_ARTICLE_MAX_AGE");
 
                 if (DB_TYPE == "pgsql") {
@@ -1314,9 +1311,8 @@ function catchup_feed($feed, $cat_view, $owner_uid = false, $max_id = false, $mo
                                 AND owner_uid = $owner_uid AND score >= 0 AND unread = true
                                 AND $date_qpart AND $match_part) as tmp)"
                 );
-            }
 
-            if ($feed == -4) {
+            } elseif ($feed == -4) {
                 db_query(
                     "UPDATE ttrss_user_entries
                     SET unread = false, last_read = NOW() WHERE ref_id IN
@@ -1354,7 +1350,6 @@ function catchup_feed($feed, $cat_view, $owner_uid = false, $max_id = false, $mo
                         AND post_int_id = int_id AND tag_name = '$feed'
                         AND ttrss_user_entries.owner_uid = $owner_uid AND unread = true AND $date_qpart) as tmp)"
         );
-
     }
 }
 
