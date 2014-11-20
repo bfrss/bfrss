@@ -2160,11 +2160,11 @@ function getLastArticleId()
     $result = db_query("SELECT MAX(ref_id) AS id FROM ttrss_user_entries
         WHERE owner_uid = " . $_SESSION["uid"]);
 
-    if (db_num_rows($result) == 1) {
-        return db_fetch_result($result, 0, "id");
+    if (db_num_rows($result) != 1) {
+        return -1;
     }
 
-    return -1;
+    return db_fetch_result($result, 0, "id");
 }
 
 function build_url($parts)
