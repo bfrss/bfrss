@@ -207,8 +207,9 @@ function make_runtime_info()
 {
     $data = array();
 
-    $result = db_query("SELECT MAX(id) AS mid, COUNT(*) AS nf FROM
-        ttrss_feeds WHERE owner_uid = " . $_SESSION["uid"]);
+    $result = db_query("SELECT MAX(id) AS mid, COUNT(*) AS nf
+        FROM ttrss_feeds
+        WHERE owner_uid = " . $_SESSION["uid"]);
 
     $max_feed_id = db_fetch_result($result, 0, "mid");
     $num_feeds = db_fetch_result($result, 0, "nf");
