@@ -1256,41 +1256,36 @@ function format_inline_player($url, $ctype)
 
     $url = htmlspecialchars($url);
 
-    if (strpos($ctype, "audio/") === 0) {
+    if (strpos($ctype, "audio/") !== 0) {
+        return "";
+        /*$filename = substr($url, strrpos($url, "/")+1);
 
-        if ($_SESSION["hasAudio"] && (strpos($ctype, "ogg") !== false ||
-            $_SESSION["hasMp3"])) {
-
-            $entry .= "<audio preload=\"none\" controls>
-                <source type=\"$ctype\" src=\"$url\"></source>
-                </audio>";
-
-        } else {
-
-            $entry .= "<object type=\"application/x-shockwave-flash\"
-                data=\"lib/button/musicplayer.swf?song_url=$url\"
-                width=\"17\" height=\"17\" style='float : left; margin-right : 5px;'>
-                <param name=\"movie\"
-                    value=\"lib/button/musicplayer.swf?song_url=$url\" />
-                </object>";
-        }
-
-        if ($entry) {
-            $entry .= "&nbsp; <a target=\"_blank\"
-                href=\"$url\">" . basename($url) . "</a>";
-        }
-
-        return $entry;
-
+        $entry .= " <a target=\"_blank\" href=\"" . htmlspecialchars($url) . "\">" .
+        $filename . " (" . $ctype . ")" . "</a>"; */
     }
 
-    return "";
+    if ($_SESSION["hasAudio"] && (strpos($ctype, "ogg") !== false ||
+        $_SESSION["hasMp3"])) {
 
-    /*$filename = substr($url, strrpos($url, "/")+1);
+        $entry .= "<audio preload=\"none\" controls>
+            <source type=\"$ctype\" src=\"$url\"></source>
+            </audio>";
 
-    $entry .= " <a target=\"_blank\" href=\"" . htmlspecialchars($url) . "\">" .
-        $filename . " (" . $ctype . ")" . "</a>"; */
+    } else {
+        $entry .= "<object type=\"application/x-shockwave-flash\"
+            data=\"lib/button/musicplayer.swf?song_url=$url\"
+            width=\"17\" height=\"17\" style='float : left; margin-right : 5px;'>
+            <param name=\"movie\"
+                value=\"lib/button/musicplayer.swf?song_url=$url\" />
+            </object>";
+    }
 
+    if ($entry) {
+        $entry .= "&nbsp; <a target=\"_blank\"
+            href=\"$url\">" . basename($url) . "</a>";
+    }
+
+    return $entry;
 }
 
 function format_article($id, $mark_as_read = true, $zoom_mode = false, $owner_uid = false)
