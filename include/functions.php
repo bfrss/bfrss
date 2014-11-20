@@ -266,16 +266,14 @@ function purge_feed($feed_id, $purge_interval, $debug = false)
         if (preg_match("/^7\./", $pg_version) || preg_match("/^8\.0/", $pg_version)) {
 
             $result = db_query(
-                "DELETE FROM ttrss_user_entries WHERE
-                ttrss_entries.id = ref_id AND
+                "DELETE FROM ttrss_user_entries
+                WHERE ttrss_entries.id = ref_id AND
                 marked = false AND
                 feed_id = '$feed_id' AND
                 $query_limit
                 ttrss_entries.date_updated < NOW() - INTERVAL '$purge_interval days'"
             );
-
         } else {
-
             $result = db_query(
                 "DELETE FROM ttrss_user_entries
                 USING ttrss_entries
@@ -286,13 +284,13 @@ function purge_feed($feed_id, $purge_interval, $debug = false)
                 ttrss_entries.date_updated < NOW() - INTERVAL '$purge_interval days'"
             );
         }
-
     } else {
-
-    /*$result = db_query("DELETE FROM ttrss_user_entries WHERE
+        /*$result = db_query(
+            "DELETE FROM ttrss_user_entries WHERE
             marked = false AND feed_id = '$feed_id' AND
             (SELECT date_updated FROM ttrss_entries WHERE
-                id = ref_id) < DATE_SUB(NOW(), INTERVAL $purge_interval DAY)"); */
+                id = ref_id) < DATE_SUB(NOW(), INTERVAL $purge_interval DAY)"
+        ); */
 
         $result = db_query(
             "DELETE FROM ttrss_user_entries
@@ -318,7 +316,6 @@ function purge_feed($feed_id, $purge_interval, $debug = false)
 
 function feed_purge_interval($feed_id)
 {
-
     $result = db_query(
         "SELECT purge_interval, owner_uid FROM ttrss_feeds
         WHERE id = '$feed_id'"
@@ -340,7 +337,6 @@ function feed_purge_interval($feed_id)
 
 function purge_orphans($do_output = false)
 {
-
     // purge orphaned posts in main content table
     $result = db_query("DELETE FROM ttrss_entries WHERE
         (SELECT COUNT(int_id) FROM ttrss_user_entries WHERE ref_id = id) = 0");
@@ -382,7 +378,6 @@ function fetch_file_contents(
     $timestamp = 0,
     $useragent = false
 ) {
-
     global $fetch_last_error;
     global $fetch_last_error_code;
     global $fetch_last_error_content;
@@ -544,7 +539,6 @@ function fetch_file_contents(
  */
 function get_favicon_url($url)
 {
-
     $favicon_url = false;
 
     if ($html = @fetch_file_contents($url)) {
@@ -684,7 +678,6 @@ function print_radio($id, $default, $true_is, $values, $attributes = "")
 
 function initialize_user_prefs($uid, $profile = false)
 {
-
     $uid = db_escape_string($uid);
 
     if (!$profile) {
@@ -703,8 +696,8 @@ function initialize_user_prefs($uid, $profile = false)
     $result = db_query("SELECT pref_name,def_value FROM ttrss_prefs");
 
     $u_result = db_query(
-        "SELECT pref_name
-        FROM ttrss_user_prefs WHERE owner_uid = '$uid' $profile_qpart"
+        "SELECT pref_name FROM ttrss_user_prefs
+        WHERE owner_uid = '$uid' $profile_qpart"
     );
 
     $active_prefs = array();
@@ -737,9 +730,7 @@ function initialize_user_prefs($uid, $profile = false)
 
         }
     }
-
     db_query("COMMIT");
-
 }
 
 function get_ssl_certificate_id()
@@ -765,78 +756,77 @@ function get_ssl_certificate_id()
 
 function authenticate_user($login, $password, $check_only = false)
 {
+    if (SINGLE_USER_MODE) {
+        $_SESSION["uid"] = 1;
+        $_SESSION["name"] = "admin";
+        $_SESSION["access_level"] = 10;
 
-    if (!SINGLE_USER_MODE) {
-        $user_id = false;
+        $_SESSION["hide_hello"] = true;
+        $_SESSION["hide_logout"] = true;
 
-        foreach (PluginHost::getInstance()->get_hooks(PluginHost::HOOK_AUTH_USER) as $plugin) {
+        $_SESSION["auth_module"] = false;
 
-            $user_id = (int) $plugin->authenticate($login, $password);
-
-            if ($user_id) {
-                $_SESSION["auth_module"] = strtolower(get_class($plugin));
-                break;
-            }
-        }
-
-        if ($user_id && !$check_only) {
-            @session_start();
-
-            $_SESSION["uid"] = $user_id;
-            $_SESSION["version"] = VERSION_STATIC;
-
-            $result = db_query(
-                "SELECT login,access_level,pwd_hash FROM ttrss_users
-                WHERE id = '$user_id'"
-            );
-
-            $_SESSION["name"] = db_fetch_result($result, 0, "login");
-            $_SESSION["access_level"] = db_fetch_result($result, 0, "access_level");
+        if (!$_SESSION["csrf_token"]) {
             $_SESSION["csrf_token"] = uniqid(rand(), true);
-
-            db_query(
-                "UPDATE ttrss_users SET last_login = NOW() WHERE id = " .
-                $_SESSION["uid"]
-            );
-
-            $_SESSION["ip_address"] = $_SERVER["REMOTE_ADDR"];
-            $_SESSION["user_agent"] = sha1($_SERVER['HTTP_USER_AGENT']);
-            $_SESSION["pwd_hash"] = db_fetch_result($result, 0, "pwd_hash");
-
-            $_SESSION["last_version_check"] = time();
-
-            initialize_user_prefs($_SESSION["uid"]);
-
-            return true;
         }
 
-        return false;
+        $_SESSION["ip_address"] = $_SERVER["REMOTE_ADDR"];
 
+        initialize_user_prefs($_SESSION["uid"]);
+
+        return true;
     }
 
-    $_SESSION["uid"] = 1;
-    $_SESSION["name"] = "admin";
-    $_SESSION["access_level"] = 10;
+    // Multi user mode
 
-    $_SESSION["hide_hello"] = true;
-    $_SESSION["hide_logout"] = true;
+    $user_id = false;
 
-    $_SESSION["auth_module"] = false;
+    foreach (PluginHost::getInstance()->get_hooks(PluginHost::HOOK_AUTH_USER) as $plugin) {
 
-    if (!$_SESSION["csrf_token"]) {
+        $user_id = (int) $plugin->authenticate($login, $password);
+
+        if ($user_id) {
+            $_SESSION["auth_module"] = strtolower(get_class($plugin));
+            break;
+        }
+    }
+
+    if ($user_id && !$check_only) {
+        @session_start();
+
+        $_SESSION["uid"] = $user_id;
+        $_SESSION["version"] = VERSION_STATIC;
+
+        $result = db_query(
+            "SELECT login,access_level,pwd_hash FROM ttrss_users
+            WHERE id = '$user_id'"
+        );
+
+        $_SESSION["name"] = db_fetch_result($result, 0, "login");
+        $_SESSION["access_level"] = db_fetch_result($result, 0, "access_level");
         $_SESSION["csrf_token"] = uniqid(rand(), true);
+
+        db_query(
+            "UPDATE ttrss_users SET last_login = NOW() WHERE id = " .
+            $_SESSION["uid"]
+        );
+
+        $_SESSION["ip_address"] = $_SERVER["REMOTE_ADDR"];
+        $_SESSION["user_agent"] = sha1($_SERVER['HTTP_USER_AGENT']);
+        $_SESSION["pwd_hash"] = db_fetch_result($result, 0, "pwd_hash");
+
+        $_SESSION["last_version_check"] = time();
+
+        initialize_user_prefs($_SESSION["uid"]);
+
+        return true;
     }
 
-    $_SESSION["ip_address"] = $_SERVER["REMOTE_ADDR"];
-
-    initialize_user_prefs($_SESSION["uid"]);
-
-    return true;
+    return false;
 }
 
 function make_password($length = 8)
 {
-
     $password = "";
     $possible = "0123456789abcdfghjkmnpqrstvwxyzABCDFGHJKMNPQRSTVWXYZ";
 
@@ -1017,7 +1007,6 @@ function make_local_datetime(
     $user_tz_string = get_pref('USER_TIMEZONE', $owner_uid);
 
     if ($user_tz_string != 'Automatic') {
-
         try {
             if (!$user_tz) {
                 $user_tz = new DateTimeZone($user_tz_string);
