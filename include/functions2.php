@@ -1146,8 +1146,6 @@ function get_article_tags($id, $owner_uid = 0, $tag_cache = false)
         ttrss_tags WHERE post_int_id = (SELECT int_id FROM ttrss_user_entries WHERE
         ref_id = '$a_id' AND owner_uid = '$owner_uid' LIMIT 1) ORDER BY tag_name";
 
-    $tags = array();
-
     /* check cache first */
 
     if ($tag_cache === false) {
@@ -1160,27 +1158,28 @@ function get_article_tags($id, $owner_uid = 0, $tag_cache = false)
     }
 
     if ($tag_cache) {
-        $tags = explode(",", $tag_cache);
-    } else {
-
-        /* do it the hard way */
-
-        $tmp_result = db_query($query);
-
-        while ($tmp_line = db_fetch_assoc($tmp_result)) {
-            array_push($tags, $tmp_line["tag_name"]);
-        }
-
-        /* update the cache */
-
-        $tags_str = db_escape_string(join(",", $tags));
-
-        db_query(
-            "UPDATE ttrss_user_entries
-            SET tag_cache = '$tags_str' WHERE ref_id = '$id'
-            AND owner_uid = $owner_uid"
-        );
+        return explode(",", $tag_cache);
     }
+
+    $tags = array();
+
+    /* do it the hard way */
+
+    $tmp_result = db_query($query);
+
+    while ($tmp_line = db_fetch_assoc($tmp_result)) {
+        array_push($tags, $tmp_line["tag_name"]);
+    }
+
+    /* update the cache */
+
+    $tags_str = db_escape_string(join(",", $tags));
+
+    db_query(
+        "UPDATE ttrss_user_entries
+        SET tag_cache = '$tags_str' WHERE ref_id = '$id'
+        AND owner_uid = $owner_uid"
+    );
 
     return $tags;
 }
