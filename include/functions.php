@@ -1375,8 +1375,8 @@ function getCategoryTitle($cat_id)
     }
 
     $result = db_query(
-        "SELECT title FROM ttrss_feed_categories WHERE
-        id = '$cat_id'"
+        "SELECT title FROM ttrss_feed_categories
+        WHERE id = '$cat_id'"
     );
 
     if (db_num_rows($result) == 1) {
@@ -1398,13 +1398,15 @@ function getCategoryCounters()
 
     array_push($ret_arr, $cv);
 
-    $result = db_query("SELECT id AS cat_id, value AS unread,
-        (SELECT COUNT(id) FROM ttrss_feed_categories AS c2
+    $result = db_query(
+        "SELECT id AS cat_id, value AS unread,
+            (SELECT COUNT(id) FROM ttrss_feed_categories AS c2
             WHERE c2.parent_cat = ttrss_feed_categories.id) AS num_children
         FROM ttrss_feed_categories, ttrss_cat_counters_cache
         WHERE ttrss_cat_counters_cache.feed_id = id AND
         ttrss_cat_counters_cache.owner_uid = ttrss_feed_categories.owner_uid AND
-        ttrss_feed_categories.owner_uid = " . $_SESSION["uid"]);
+        ttrss_feed_categories.owner_uid = " . $_SESSION["uid"]
+    );
 
     while ($line = db_fetch_assoc($result)) {
         $line["cat_id"] = (int) $line["cat_id"];
@@ -1423,8 +1425,11 @@ function getCategoryCounters()
 
     /* Special case: NULL category doesn't actually exist in the DB */
 
-    $cv = array("id" => 0, "kind" => "cat",
-        "counter" => (int) ccache_find(0, $_SESSION["uid"], true));
+    $cv = array(
+        "id" => 0,
+        "kind" => "cat",
+        "counter" => (int) ccache_find(0, $_SESSION["uid"], true)
+    );
 
     array_push($ret_arr, $cv);
 
@@ -1439,8 +1444,8 @@ function getCategoryChildrenUnread($cat, $owner_uid = false)
     }
 
     $result = db_query(
-        "SELECT id FROM ttrss_feed_categories WHERE parent_cat = '$cat'
-        AND owner_uid = $owner_uid"
+        "SELECT id FROM ttrss_feed_categories
+        WHERE parent_cat = '$cat' AND owner_uid = $owner_uid"
     );
 
     $unread = 0;
@@ -1535,11 +1540,11 @@ function getLabelUnread($label_id, $owner_uid = false)
         WHERE owner_uid = '$owner_uid' AND unread = true AND label_id = '$label_id' AND article_id = ref_id"
     );
 
-    if (db_num_rows($result) != 0) {
-        return db_fetch_result($result, 0, "unread");
+    if (db_num_rows($result) == 0) {
+        return 0;
     }
 
-    return 0;
+    return db_fetch_result($result, 0, "unread");
 }
 
 function getFeedArticles(
