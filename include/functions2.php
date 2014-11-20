@@ -550,22 +550,16 @@ function queryFeedHeadlines(
     } elseif ($feed > 0) {
 
         if ($cat_view) {
+            if ($include_children) {
+                # sub-cats
+                $subcats = getChildCategories($feed, $owner_uid);
 
-            if ($feed > 0) {
-                if ($include_children) {
-                    # sub-cats
-                    $subcats = getChildCategories($feed, $owner_uid);
-
-                    array_push($subcats, $feed);
-                    $query_strategy_part = "cat_id IN (".
-                        implode(",", $subcats).")";
-
-                } else {
-                    $query_strategy_part = "cat_id = '$feed'";
-                }
+                array_push($subcats, $feed);
+                $query_strategy_part = "cat_id IN (".
+                    implode(",", $subcats).")";
 
             } else {
-                $query_strategy_part = "cat_id IS NULL";
+                $query_strategy_part = "cat_id = '$feed'";
             }
 
             $vfeed_query_part = "ttrss_feeds.title AS feed_title,";
