@@ -2172,19 +2172,21 @@ function getFeedCatTitle($id)
         return __("Labels");
     }
 
-    if ($id > 0) {
-        $result = db_query(
-            "SELECT ttrss_feed_categories.title
-            FROM ttrss_feeds, ttrss_feed_categories
-            WHERE ttrss_feeds.id = '$id' AND cat_id = ttrss_feed_categories.id"
-        );
-        if (db_num_rows($result) == 1) {
-            return db_fetch_result($result, 0, "title");
-        }
-        return __("Uncategorized");
+    if ($id <= 0) {
+        return "getFeedCatTitle($id) failed";
     }
 
-    return "getFeedCatTitle($id) failed";
+    $result = db_query(
+        "SELECT ttrss_feed_categories.title
+        FROM ttrss_feeds, ttrss_feed_categories
+        WHERE ttrss_feeds.id = '$id' AND cat_id = ttrss_feed_categories.id"
+    );
+
+    if (db_num_rows($result) == 1) {
+        return db_fetch_result($result, 0, "title");
+    }
+
+    return __("Uncategorized");
 }
 
 function getFeedIcon($id)
