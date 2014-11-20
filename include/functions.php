@@ -1908,6 +1908,10 @@ function subscribe_to_feed($url, $cat_id = 0, $auth_login = '', $auth_pass = '')
         WHERE feed_url = '$url' AND owner_uid = ".$_SESSION["uid"]
     );
 
+    if (db_num_rows($result) != 0) {
+        return array("code" => 0);
+    }
+
     if (strlen(FEED_CRYPT_KEY) > 0) {
         require_once "crypt.php";
         $auth_pass = substr(encrypt_string($auth_pass), 0, 250);
@@ -1918,31 +1922,27 @@ function subscribe_to_feed($url, $cat_id = 0, $auth_login = '', $auth_pass = '')
 
     $auth_pass = db_escape_string($auth_pass);
 
-    if (db_num_rows($result) == 0) {
-        $result = db_query(
-            "INSERT INTO ttrss_feeds
-                (owner_uid, feed_url, title, cat_id, auth_login,
-                auth_pass, update_method, auth_pass_encrypted)
-            VALUES ('".$_SESSION["uid"]."', '$url', '[Unknown]',
-                $cat_qpart, '$auth_login', '$auth_pass', 0,
-                $auth_pass_encrypted)"
-        );
+    $result = db_query(
+        "INSERT INTO ttrss_feeds
+            (owner_uid, feed_url, title, cat_id, auth_login,
+            auth_pass, update_method, auth_pass_encrypted)
+        VALUES ('".$_SESSION["uid"]."', '$url', '[Unknown]',
+            $cat_qpart, '$auth_login', '$auth_pass', 0,
+            $auth_pass_encrypted)"
+    );
 
-        $result = db_query(
-            "SELECT id FROM ttrss_feeds
-            WHERE feed_url = '$url' AND owner_uid = " . $_SESSION["uid"]
-        );
+    $result = db_query(
+        "SELECT id FROM ttrss_feeds
+        WHERE feed_url = '$url' AND owner_uid = " . $_SESSION["uid"]
+    );
 
-        $feed_id = db_fetch_result($result, 0, "id");
+    $feed_id = db_fetch_result($result, 0, "id");
 
-        if ($feed_id) {
-            update_rss_feed($feed_id, true);
-        }
-
-        return array("code" => 1);
+    if ($feed_id) {
+        update_rss_feed($feed_id, true);
     }
 
-    return array("code" => 0);
+    return array("code" => 1);
 }
 
 function print_feed_select(
