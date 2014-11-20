@@ -1828,19 +1828,19 @@ function add_feed_category($feed_cat, $parent_cat_id = false)
         WHERE $parent_qpart AND title = '$feed_cat' AND owner_uid = ".$_SESSION["uid"]
     );
 
-    if (db_num_rows($result) == 0) {
-
-        $result = db_query(
-            "INSERT INTO ttrss_feed_categories (owner_uid,title,parent_cat)
-            VALUES ('".$_SESSION["uid"]."', '$feed_cat', $parent_insert)"
-        );
-
-        db_query("COMMIT");
-
-        return true;
+    if (db_num_rows($result) != 0) {
+        // TODO check what sideeffects the missing db_query("COMMIT") has
+        return false;
     }
 
-    return false;
+    $result = db_query(
+        "INSERT INTO ttrss_feed_categories (owner_uid,title,parent_cat)
+        VALUES ('".$_SESSION["uid"]."', '$feed_cat', $parent_insert)"
+    );
+
+    db_query("COMMIT");
+
+    return true;
 }
 
 function getArticleFeed($id)
