@@ -1713,9 +1713,11 @@ function getVirtCounters()
 
         $count = getFeedUnread($i);
 
-        if ($i == 0 || $i == -1 || $i == -2) {
+        if ($i >= -2) {
+            // i in [0,-1,-2]
             $auxctr = getFeedArticles($i, false);
         } else {
+            // i in [-3,-4]
             $auxctr = 0;
         }
 
