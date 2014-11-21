@@ -1533,10 +1533,10 @@ function labels_contains_caption($labels, $caption)
 function assign_article_to_label_filters($id, $filters, $owner_uid, $article_labels)
 {
     foreach ($filters as $f) {
-        if ($f["type"] == "label") {
-            if (!labels_contains_caption($article_labels, $f["param"])) {
-                label_add_article($id, $f["param"], $owner_uid);
-            }
+        if ($f["type"] == "label" &&
+            !labels_contains_caption($article_labels, $f["param"])) {
+
+            label_add_article($id, $f["param"], $owner_uid);
         }
     }
 }
