@@ -17,6 +17,7 @@ script:
   - phpcs --report-full --standard=PSR2 include/functions2.php
   - phpcs --report-full --standard=PSR2 include/labels.php
   - phpcs --report-full --standard=PSR2 include/version.php
+  - phpcs --report-full --standard=PSR2 install/*.php
   - phpcs --report-full --standard=PSR2 -n api/index.php
   - phpcs --report-full --standard=PSR2 -n include/colors.php
   - phpcs --report-full --standard=PSR2 -n include/db.php
