@@ -1350,7 +1350,6 @@ function catchup_feed($feed, $cat_view, $owner_uid = false, $max_id = false, $mo
         );
     }
     ccache_update($feed, $owner_uid, $cat_view);
-    }
 }
 
 function getAllCounters()
