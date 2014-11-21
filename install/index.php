@@ -102,14 +102,24 @@ function sanity_check($db_type)
 
 function print_error($msg)
 {
-    global $twig;
-    echo $twig->render('error.html', array('error_message' => $msg));
+    print "<div class='error'><span><img src='../images/alert.png'></span>
+-        <span>$msg</span></div>";
 }
 
 function print_notice($msg)
 {
     print "<div class=\"notice\">
         <span><img src=\"../images/information.png\"></span><span>$msg</span></div>";
+}
+
+function render_error($twig, $msg)
+{
+    return $twig->render('error.html', array('message' => $msg));
+}
+
+function render_notice($twig, $msg)
+{
+    return $twig->render('notice.html', array('message' => $msg));
 }
 
 function db_connect($host, $user, $pass, $db, $type, $port = false)
@@ -259,7 +269,11 @@ if (file_exists("../config.php")) {
     require "../config.php";
 
     if (!defined('_INSTALLER_IGNORE_CONFIG_CHECK')) {
-        print_error("Error: config.php already exists in tt-rss directory; aborting.");
+        $error = render_error(
+            $twig,
+            "Error: config.php already exists in tt-rss directory; aborting."
+        );
+        print($error);
         exit;
     }
 }
