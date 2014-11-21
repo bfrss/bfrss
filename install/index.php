@@ -11,6 +11,13 @@
 <body>
 
 <?php
+set_include_path(
+    dirname(__FILE__) . PATH_SEPARATOR . get_include_path()
+);
+require_once '../vendor/autoload.php';
+
+$loader = new Twig_Loader_Filesystem('../templates/html/installer');
+$twig = new Twig_Environment($loader, array('cache' => '../cache/templates'));
 
 // could be needed because of existing config.php
 function define_default($param, $value)
@@ -95,8 +102,8 @@ function sanity_check($db_type)
 
 function print_error($msg)
 {
-    print "<div class='error'><span><img src='../images/alert.png'></span>
-        <span>$msg</span></div>";
+    global $twig;
+    echo $twig->render('error.html', array('error_message' => $msg));
 }
 
 function print_notice($msg)
