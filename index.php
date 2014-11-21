@@ -1,18 +1,36 @@
 <?php
 if (file_exists("install") && !file_exists("config.php")) {
+    // Redirect to installation page.
     header("Location: install/");
 }
 
+// Initialize template engine
+require_once 'vendor/autoload.php';
+$loader = new Twig_Loader_Filesystem('templates/html/main');
+$twig = new Twig_Environment($loader, array('cache' => 'cache/templates'));
+
 if (!file_exists("config.php")) {
-    print "<b>Fatal Error</b>: You forgot to copy
-    <b>config.php-dist</b> to <b>config.php</b> and edit it.\n";
+    // Neither install/ nor config.php exists.
+    $template = $twig->loadTemplate('fatal_error.html');
+    $page = $template->render(
+        array(
+            'error_message' => 'You forgot to copy <b>config.php-dist</b> '.
+                'to <b>config.php</b> and edit it.'
+        )
+    );
+    print $page;
     exit;
 }
 
-// we need a separate check here because functions.php might get parsed
-// incorrectly before 5.3 because of :: syntax.
-if (version_compare(PHP_VERSION, '5.3.0', '<')) {
-    print "<b>Fatal Error</b>: PHP version 5.3.0 or newer required.\n";
+if (version_compare(PHP_VERSION, '5.3.7', '<')) {
+    // The version of PHP is not sufficient for bfrss.
+    $template = $twig->loadTemplate('fatal_error.html');
+    $page = $template->render(
+        array(
+            'error_message' => 'PHP version 5.3.7 or newer required.'
+        )
+    );
+    print $page;
     exit;
 }
 
