@@ -1,0 +1,25 @@
+{% from 'messages.html' import error as error_macro %}
+{% from 'messages.html' import notice as notice_macro %}
+{% extends "installer-base.html" %}
+
+{% block content %}
+{{ parent() }}
+
+<h2>Checking configuration</h2>
+
+{% if config_notices|length > 0 %}
+  {{- notice_macro("Configuration check succeeded with minor problems:") }}
+  <ul>
+  {% for notice in config_notices %}
+    <li>{{ notice }}</li>
+  {% endfor %}
+  </ul>
+{%- else %}
+  {{- notice_macro("Configuration check succeeded.") }}
+{%- endif %}
+
+
+<h2>Checking database</h2>
+{{ error_macro("Unable to connect to database using specified parameters.") }}
+
+{% endblock %}

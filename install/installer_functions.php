@@ -93,16 +93,6 @@ function print_notice($msg)
         <span><img src=\"../images/information.png\"></span><span>$msg</span></div>";
 }
 
-function render_error($twig, $msg)
-{
-    return $twig->render('error.html', array('message' => $msg));
-}
-
-function render_notice($twig, $msg)
-{
-    return $twig->render('notice.html', array('message' => $msg));
-}
-
 function db_connect($host, $user, $pass, $db, $type, $port = false)
 {
     if ($type == "pgsql") {

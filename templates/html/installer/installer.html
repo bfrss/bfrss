@@ -1,27 +1,24 @@
+{% from 'messages.html' import error as error_macro %}
+{% from 'messages.html' import notice as notice_macro %}
 <html>
 <head>
-	<title>Big Fat RSS - Installer</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Big Fat RSS - Installer</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <!-- TODO
-    Fix the path to css. We want to provide it via the template
+    Fix the path to css, images, … We want to provide it via the template
     engine as a absolute url (e.g. /css/utility.css).
      -->
-	<link rel="stylesheet" type="text/css" href="../css/utility.css">
-	<link rel="stylesheet" type="text/css" href="../css/dijit.css">
-	<style type="text/css">
-	textarea { font-size : 12px; }
-	</style>
+    <link rel="stylesheet" type="text/css" href="../css/utility.css">
+    <link rel="stylesheet" type="text/css" href="../css/dijit.css">
 </head>
 <body>
-<!-- TODO
-Fix path to images. See TODO about css above.
--->
 <div class="floatingLogo"><img src="../images/logo_small.png"></div>
 <h1>Tiny Tiny RSS Installer</h1>
 
-<div class='content'>
+<div class="content">
 {% block content %}
-{{ content }}
+  {{- error_macro(error) -}}
 {% endblock %}
+</div><!-- class="content" -->
 </body>
 </html>
