@@ -2516,31 +2516,31 @@ function get_minified_js($files)
     $rv = '';
 
     foreach ($files as $js) {
-        if (!isset($_GET['debug'])) {
-            $cached_file = CACHE_DIR . "/js/".basename($js).".js";
+        if (isset($_GET['debug'])) {
+            $rv .= file_get_contents("js/$js.js"); // no cache in debug mode
+            continue;
+        }
 
-            if (file_exists($cached_file) && is_readable($cached_file) &&
-                filemtime($cached_file) >= filemtime("js/$js.js")) {
+        $cached_file = CACHE_DIR . "/js/".basename($js).".js";
 
-                list($header, $contents) = explode("\n", file_get_contents($cached_file), 2);
+        if (file_exists($cached_file) && is_readable($cached_file) &&
+            filemtime($cached_file) >= filemtime("js/$js.js")) {
 
-                if ($header && $contents) {
-                    list($htag, $hversion) = explode(":", $header);
+            list($header, $contents) = explode("\n", file_get_contents($cached_file), 2);
 
-                    if ($htag == "tt-rss" && $hversion == VERSION) {
-                        $rv .= $contents;
-                        continue;
-                    }
+            if ($header && $contents) {
+                list($htag, $hversion) = explode(":", $header);
+
+                if ($htag == "tt-rss" && $hversion == VERSION) {
+                    $rv .= $contents;
+                    continue;
                 }
             }
-
-            $minified = JShrink\Minifier::minify(file_get_contents("js/$js.js"));
-            file_put_contents($cached_file, "tt-rss:" . VERSION . "\n" . $minified);
-            $rv .= $minified;
-
-        } else {
-            $rv .= file_get_contents("js/$js.js"); // no cache in debug mode
         }
+
+        $minified = JShrink\Minifier::minify(file_get_contents("js/$js.js"));
+        file_put_contents($cached_file, "tt-rss:" . VERSION . "\n" . $minified);
+        $rv .= $minified;
     }
 
     return $rv;
