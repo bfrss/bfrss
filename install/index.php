@@ -17,7 +17,8 @@ if (file_exists("../config.php")) {
             $twig,
             "Error: config.php already exists in tt-rss directory; aborting."
         );
-        print($error);
+        $page = $twig->render('installer.html', array('content' => $error));
+        echo $page;
         exit;
     }
 }
