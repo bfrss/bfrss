@@ -1279,28 +1279,30 @@ function cache_images($html, $site_url, $debug)
     $entries = $xpath->query('(//img[@src])');
 
     foreach ($entries as $entry) {
-        if ($entry->hasAttribute('src')) {
-            $src = rewrite_relative_url($site_url, $entry->getAttribute('src'));
-
-            $local_filename = CACHE_DIR . "/images/" . sha1($src) . ".png";
-
-            if ($debug) {
-                _debug("cache_images: downloading: $src to $local_filename");
-            }
-
-            if (!file_exists($local_filename)) {
-                $file_content = fetch_file_contents($src);
-
-                if ($file_content && strlen($file_content) > _MIN_CACHE_IMAGE_SIZE) {
-                    file_put_contents($local_filename, $file_content);
-                }
-            }
-
-            /* if (file_exists($local_filename)) {
-                $entry->setAttribute('src', SELF_URL_PATH . '/image.php?url=' .
-                    base64_encode($src));
-            } */
+        if (!$entry->hasAttribute('src')) {
+            continue;
         }
+
+        $src = rewrite_relative_url($site_url, $entry->getAttribute('src'));
+
+        $local_filename = CACHE_DIR . "/images/" . sha1($src) . ".png";
+
+        if ($debug) {
+            _debug("cache_images: downloading: $src to $local_filename");
+        }
+
+        if (!file_exists($local_filename)) {
+            $file_content = fetch_file_contents($src);
+
+            if ($file_content && strlen($file_content) > _MIN_CACHE_IMAGE_SIZE) {
+                file_put_contents($local_filename, $file_content);
+            }
+        }
+
+        /* if (file_exists($local_filename)) {
+            $entry->setAttribute('src', SELF_URL_PATH . '/image.php?url=' .
+                base64_encode($src));
+        } */
     }
 
     //$node = $doc->getElementsByTagName('body')->item(0);
