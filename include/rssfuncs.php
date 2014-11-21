@@ -1287,22 +1287,20 @@ function cache_images($html, $site_url, $debug)
 
         $local_filename = CACHE_DIR . "/images/" . sha1($src) . ".png";
 
+        if (file_exists($local_filename)) {
+            //$entry->setAttribute('src', SELF_URL_PATH . '/image.php?url=' .
+            //    base64_encode($src));
+            continue;
+        }
+
         if ($debug) {
             _debug("cache_images: downloading: $src to $local_filename");
         }
 
-        if (!file_exists($local_filename)) {
-            $file_content = fetch_file_contents($src);
-
-            if ($file_content && strlen($file_content) > _MIN_CACHE_IMAGE_SIZE) {
-                file_put_contents($local_filename, $file_content);
-            }
+        $file_content = fetch_file_contents($src);
+        if ($file_content && strlen($file_content) > _MIN_CACHE_IMAGE_SIZE) {
+            file_put_contents($local_filename, $file_content);
         }
-
-        /* if (file_exists($local_filename)) {
-            $entry->setAttribute('src', SELF_URL_PATH . '/image.php?url=' .
-                base64_encode($src));
-        } */
     }
 
     //$node = $doc->getElementsByTagName('body')->item(0);
