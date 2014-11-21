@@ -1210,10 +1210,10 @@ function update_rss_feed($feed, $ignore_daemon = false, $no_cache = false, $rss 
                     $caption = preg_quote($label["caption"]);
 
                     if ($caption &&
-                        preg_match("/\b$caption\b/i", "$tags_str " . strip_tags($entry_content) . " $entry_title")) {
-                        if (!labels_contains_caption($article_labels, $caption)) {
-                            label_add_article($entry_ref_id, $caption, $owner_uid);
-                        }
+                        preg_match("/\b$caption\b/i", "$tags_str " . strip_tags($entry_content) . " $entry_title") &&
+                        !labels_contains_caption($article_labels, $caption)) {
+
+                        label_add_article($entry_ref_id, $caption, $owner_uid);
                     }
                 }
             }
