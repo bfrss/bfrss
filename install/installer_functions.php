@@ -167,21 +167,21 @@ function make_config(
 
     foreach ($data as $line) {
         if (preg_match("/define\('DB_TYPE'/", $line)) {
-            $rv .= "\tdefine('DB_TYPE', '$DB_TYPE');\n";
+            $rv .= "define('DB_TYPE', '$DB_TYPE');\n";
         } elseif (preg_match("/define\('DB_HOST'/", $line)) {
-            $rv .= "\tdefine('DB_HOST', '$DB_HOST');\n";
+            $rv .= "define('DB_HOST', '$DB_HOST');\n";
         } elseif (preg_match("/define\('DB_USER'/", $line)) {
-            $rv .= "\tdefine('DB_USER', '$DB_USER');\n";
+            $rv .= "define('DB_USER', '$DB_USER');\n";
         } elseif (preg_match("/define\('DB_NAME'/", $line)) {
-            $rv .= "\tdefine('DB_NAME', '$DB_NAME');\n";
+            $rv .= "define('DB_NAME', '$DB_NAME');\n";
         } elseif (preg_match("/define\('DB_PASS'/", $line)) {
-            $rv .= "\tdefine('DB_PASS', '$DB_PASS');\n";
+            $rv .= "define('DB_PASS', '$DB_PASS');\n";
         } elseif (preg_match("/define\('DB_PORT'/", $line)) {
-            $rv .= "\tdefine('DB_PORT', '$DB_PORT');\n";
+            $rv .= "define('DB_PORT', '$DB_PORT');\n";
         } elseif (preg_match("/define\('SELF_URL_PATH'/", $line)) {
-            $rv .= "\tdefine('SELF_URL_PATH', '$SELF_URL_PATH');\n";
+            $rv .= "define('SELF_URL_PATH', '$SELF_URL_PATH');\n";
         } elseif (preg_match("/define\('FEED_CRYPT_KEY'/", $line)) {
-            $rv .= "\tdefine('FEED_CRYPT_KEY', '$crypt_key');\n";
+            $rv .= "define('FEED_CRYPT_KEY', '$crypt_key');\n";
         } elseif (!$finished) {
             $rv .= "$line\n";
         }
