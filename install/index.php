@@ -1,269 +1,13 @@
-<html>
-<head>
-	<title>Tiny Tiny RSS - Installer</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<link rel="stylesheet" type="text/css" href="../css/utility.css">
-	<link rel="stylesheet" type="text/css" href="../css/dijit.css">
-	<style type="text/css">
-	textarea { font-size : 12px; }
-	</style>
-</head>
-<body>
-
 <?php
 set_include_path(
     dirname(__FILE__) . PATH_SEPARATOR . get_include_path()
 );
+
+require_once 'installer_functions.php';
 require_once '../vendor/autoload.php';
 
 $loader = new Twig_Loader_Filesystem('../templates/html/installer');
 $twig = new Twig_Environment($loader, array('cache' => '../cache/templates'));
-
-// could be needed because of existing config.php
-function define_default($param, $value)
-{
-    //
-}
-
-function make_password($length = 8)
-{
-    $password = "";
-    $possible = "0123456789abcdfghjkmnpqrstvwxyzABCDFGHJKMNPQRSTVWXYZ*%+^";
-
-    $i = 0;
-
-    while ($i < $length) {
-        $char = substr($possible, mt_rand(0, strlen($possible)-1), 1);
-
-        if (!strstr($password, $char)) {
-            $password .= $char;
-            $i++;
-        }
-    }
-    return $password;
-}
-
-
-function sanity_check($db_type)
-{
-    $errors = array();
-
-    if (version_compare(PHP_VERSION, '5.3.0', '<')) {
-        array_push($errors, "PHP version 5.3.0 or newer required.");
-    }
-
-    if (!function_exists("curl_init") && !ini_get("allow_url_fopen")) {
-        array_push(
-            $errors,
-            "PHP configuration option allow_url_fopen is disabled, and CURL ".
-            "functions are not present. Either enable allow_url_fopen or ".
-            "install PHP extension for CURL."
-        );
-    }
-
-    if (!function_exists("json_encode")) {
-        array_push($errors, "PHP support for JSON is required, but was not found.");
-    }
-
-    if ($db_type == "mysql" && !function_exists("mysql_connect") && !function_exists("mysqli_connect")) {
-        array_push($errors, "PHP support for MySQL is required for configured $db_type in config.php.");
-    }
-
-    if ($db_type == "pgsql" && !function_exists("pg_connect")) {
-        array_push($errors, "PHP support for PostgreSQL is required for configured $db_type in config.php");
-    }
-
-    if (!function_exists("mb_strlen")) {
-        array_push($errors, "PHP support for mbstring functions is required but was not found.");
-    }
-
-    if (!function_exists("hash")) {
-        array_push($errors, "PHP support for hash() function is required but was not found.");
-    }
-
-    if (!function_exists("ctype_lower")) {
-        array_push($errors, "PHP support for ctype functions are required by HTMLPurifier.");
-    }
-
-    if (!function_exists("iconv")) {
-        array_push($errors, "PHP support for iconv is required to handle multiple charsets.");
-    }
-
-    /* if (ini_get("safe_mode")) {
-        array_push($errors, "PHP safe mode setting is not supported.");
-    } */
-
-    if (!class_exists("DOMDocument")) {
-        array_push($errors, "PHP support for DOMDocument is required, but was not found.");
-    }
-
-    return $errors;
-}
-
-function print_error($msg)
-{
-    print "<div class='error'><span><img src='../images/alert.png'></span>
--        <span>$msg</span></div>";
-}
-
-function print_notice($msg)
-{
-    print "<div class=\"notice\">
-        <span><img src=\"../images/information.png\"></span><span>$msg</span></div>";
-}
-
-function render_error($twig, $msg)
-{
-    return $twig->render('error.html', array('message' => $msg));
-}
-
-function render_notice($twig, $msg)
-{
-    return $twig->render('notice.html', array('message' => $msg));
-}
-
-function db_connect($host, $user, $pass, $db, $type, $port = false)
-{
-    if ($type == "pgsql") {
-
-        $string = "dbname=$db user=$user";
-
-        if ($pass) {
-            $string .= " password=$pass";
-        }
-
-        if ($host) {
-            $string .= " host=$host";
-        }
-
-        if ($port) {
-            $string = "$string port=" . $port;
-        }
-
-        $link = pg_connect($string);
-
-        return $link;
-    }
-
-    if ($type == "mysql") {
-        if (function_exists("mysqli_connect")) {
-            if ($port) {
-                return mysqli_connect($host, $user, $pass, $db, $port);
-            }
-            return mysqli_connect($host, $user, $pass, $db);
-        }
-
-        $link = mysql_connect($host, $user, $pass);
-        if ($link) {
-            $result = mysql_select_db($db, $link);
-            if ($result) {
-                return $link;
-            }
-        }
-    }
-}
-
-function make_config(
-    $DB_TYPE,
-    $DB_HOST,
-    $DB_USER,
-    $DB_NAME,
-    $DB_PASS,
-    $DB_PORT,
-    $SELF_URL_PATH
-) {
-    $data = explode("\n", file_get_contents("../config.php-dist"));
-
-    $rv = "";
-
-    $finished = false;
-
-    if (function_exists("mcrypt_decrypt")) {
-        $crypt_key = make_password(24);
-    } else {
-        $crypt_key = "";
-    }
-
-    foreach ($data as $line) {
-        if (preg_match("/define\('DB_TYPE'/", $line)) {
-            $rv .= "\tdefine('DB_TYPE', '$DB_TYPE');\n";
-        } elseif (preg_match("/define\('DB_HOST'/", $line)) {
-            $rv .= "\tdefine('DB_HOST', '$DB_HOST');\n";
-        } elseif (preg_match("/define\('DB_USER'/", $line)) {
-            $rv .= "\tdefine('DB_USER', '$DB_USER');\n";
-        } elseif (preg_match("/define\('DB_NAME'/", $line)) {
-            $rv .= "\tdefine('DB_NAME', '$DB_NAME');\n";
-        } elseif (preg_match("/define\('DB_PASS'/", $line)) {
-            $rv .= "\tdefine('DB_PASS', '$DB_PASS');\n";
-        } elseif (preg_match("/define\('DB_PORT'/", $line)) {
-            $rv .= "\tdefine('DB_PORT', '$DB_PORT');\n";
-        } elseif (preg_match("/define\('SELF_URL_PATH'/", $line)) {
-            $rv .= "\tdefine('SELF_URL_PATH', '$SELF_URL_PATH');\n";
-        } elseif (preg_match("/define\('FEED_CRYPT_KEY'/", $line)) {
-            $rv .= "\tdefine('FEED_CRYPT_KEY', '$crypt_key');\n";
-        } elseif (!$finished) {
-            $rv .= "$line\n";
-        }
-
-        if (preg_match("/\?\>/", $line)) {
-            $finished = true;
-        }
-    }
-
-    return $rv;
-}
-
-function db_query($link, $query, $type, $die_on_error = true)
-{
-    if ($type == "pgsql") {
-        $result = pg_query($link, $query);
-        if (!$result) {
-            $query = htmlspecialchars($query); // just in case
-            if ($die_on_error) {
-                die("Query <i>$query</i> failed [$result]: " . ($link ? pg_last_error($link) : "No connection"));
-            }
-        }
-        return $result;
-    }
-
-    if ($type == "mysql") {
-        if (function_exists("mysqli_connect")) {
-            $result = mysqli_query($link, $query);
-        } else {
-            $result = mysql_query($query, $link);
-        }
-        if (!$result) {
-            $query = htmlspecialchars($query);
-            if ($die_on_error) {
-                die(
-                    "Query <i>$query</i> failed: " .
-                    ($link ?
-                        (function_exists("mysqli_connect") ? mysqli_error($link) : mysql_error($link)) :
-                        "No connection")
-                );
-            }
-        }
-        return $result;
-    }
-}
-
-function make_self_url_path()
-{
-    $url_path = ((!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] != "on") ? 'http://' :  'https://') .
-        $_SERVER["HTTP_HOST"] . parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
-
-    return $url_path;
-}
-
-?>
-
-<div class="floatingLogo"><img src="../images/logo_small.png"></div>
-
-<h1>Tiny Tiny RSS Installer</h1>
-
-<div class='content'>
-
-<?php
 
 if (file_exists("../config.php")) {
     require "../config.php";
@@ -292,6 +36,21 @@ if (!$SELF_URL_PATH) {
     $SELF_URL_PATH = preg_replace("/\/install\/$/", "/", make_self_url_path());
 }
 ?>
+
+<html>
+<head>
+	<title>Tiny Tiny RSS - Installer</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<link rel="stylesheet" type="text/css" href="../css/utility.css">
+	<link rel="stylesheet" type="text/css" href="../css/dijit.css">
+	<style type="text/css">
+	textarea { font-size : 12px; }
+	</style>
+</head>
+<body>
+<div class="floatingLogo"><img src="../images/logo_small.png"></div>
+<h1>Tiny Tiny RSS Installer</h1>
+<div class='content'>
 
 <form action="" method="post">
 <input type="hidden" name="op" value="testconfig">
