@@ -138,13 +138,9 @@ $op_classname = array(
 
 $classname = $op_classname[strtolower($op)];
 
-if (class_exists($classname) || $override) {
+if ($override || class_exists($classname)) {
 
-    if ($override) {
-        $handler = $override;
-    } else {
-        $handler = new $classname($_REQUEST);
-    }
+    $handler = $override ? $override : new $classname($_REQUEST);
 
     if ($handler && implements_interface($handler, 'IHandler')) {
         if (validate_csrf($csrf_token) || $handler->csrf_ignore($method)) {
