@@ -9,7 +9,7 @@
   <title>Tiny Tiny RSS</title>
 
   <script type="text/javascript">
-    var __ttrss_version = "{{ VERSION }}"
+    var __ttrss_version = "{{ version }}"
   </script>
 
   {%- for cssfile in cssfiles %}
@@ -71,7 +71,7 @@
 
   <div id="feeds-holder" dojoType="dijit.layout.ContentPane" region="leading" style="width:20%;" splitter="true">
     <div id="feedlistLoading">
-      <img src='images/indicator_tiny.gif'/>
+      <img src="images/indicator_tiny.gif"/>
       Loading, please wait...
     </div><!-- id="feedlistLoading" -->
     <div id="feedTree">
@@ -131,7 +131,7 @@
 
           <div class="actionChooser">
 
-            {%- for hook_action_item in hook_action_items %}
+            {%- for hook_toolbar_button in hook_toolbar_buttons %}
             {{ hook_toolbar_button|raw }}
             {%- endfor %}
 

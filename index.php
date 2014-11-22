@@ -67,6 +67,16 @@ login_sequence();
 
 header('Content-Type: text/html; charset=utf-8');
 
+$template = $twig->loadTemplate('main/index.html');
+$template_vars = array(
+        'version' => VERSION,
+        'cssfiles' => array(),
+        'jsfiles' => array(),
+        'hook_toolbar_buttons' => array(),
+        'hook_action_items' => array()
+);
+
+
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
