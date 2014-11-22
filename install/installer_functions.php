@@ -154,12 +154,8 @@ function make_config(
             $rv .= "define('SELF_URL_PATH', '$SELF_URL_PATH');\n";
         } elseif (preg_match("/define\('FEED_CRYPT_KEY'/", $line)) {
             $rv .= "define('FEED_CRYPT_KEY', '$crypt_key');\n";
-        } elseif (!$finished) {
+        } else {
             $rv .= "$line\n";
-        }
-
-        if (preg_match("/\?\>/", $line)) {
-            $finished = true;
         }
     }
 
