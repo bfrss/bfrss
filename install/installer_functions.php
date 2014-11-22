@@ -1,11 +1,5 @@
 <?php
 
-// could be needed because of existing config.php
-function define_default($param, $value)
-{
-    //
-}
-
 function make_password($length = 8)
 {
     $password = "";
@@ -79,18 +73,6 @@ function sanity_check($db_type)
     }
 
     return $errors;
-}
-
-function print_error($msg)
-{
-    print "<div class='error'><span><img src='../images/alert.png'></span>
--        <span>$msg</span></div>";
-}
-
-function print_notice($msg)
-{
-    print "<div class=\"notice\">
-        <span><img src=\"../images/information.png\"></span><span>$msg</span></div>";
 }
 
 function db_connect($host, $user, $pass, $db, $type, $port = false)
@@ -191,6 +173,7 @@ function db_query($link, $query, $type, $die_on_error = true)
         if (!$result) {
             $query = htmlspecialchars($query); // just in case
             if ($die_on_error) {
+                // TODO Show a complete error page.
                 die("Query <i>$query</i> failed [$result]: " . ($link ? pg_last_error($link) : "No connection"));
             }
         }
@@ -206,6 +189,7 @@ function db_query($link, $query, $type, $die_on_error = true)
         if (!$result) {
             $query = htmlspecialchars($query);
             if ($die_on_error) {
+                // TODO Show a complete error page.
                 die(
                     "Query <i>$query</i> failed: " .
                     ($link ?
