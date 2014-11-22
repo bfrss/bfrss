@@ -1,3 +1,7 @@
+{% from 'macros/messages.html' import error as error_macro %}
+{% from 'macros/messages.html' import notice as notice_macro %}
+{% from 'macros/tags.html' import stylesheet_tag as stylesheet_tag_macro %}
+{% from 'macros/tags.html' import javascript_tag as javascript_tag_macro %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
@@ -8,46 +12,26 @@
     var __ttrss_version = "{{ VERSION }}"
   </script>
 
-  {{ stylesheet_tag("lib/dijit/themes/claro/claro.css") }}
-  {{ stylesheet_tag("css/layout.css") }}
-
-  {{ stylesheet_tag(theme) }}
+  {%- for cssfile in cssfiles %}
+  {{ stylesheet_tag_macro(cssfile['filename'], cssfile['timestamp']) }}
+  {%- endfor %}
 
   <?php print_user_stylesheet() ?>
 
   <style type="text/css">
-    <?php
-        foreach (PluginHost::getInstance()->get_plugins() as $n => $p) {
-            if (method_exists($p, "get_css")) {
-                echo $p->get_css();
-            }
-        }
-    ?>
+    {{ css|raw }}
   </style>
 
   <link rel="shortcut icon" type="image/png" href="images/favicon.png"/>
   <link rel="icon" type="image/png" sizes="72x72" href="images/favicon-72px.png" />
 
   {%- for jsfile in jsfiles %}
-  {{ javascript_tag(jsfile) }}
+  {{ javascript_tag_macro(jsfile['filename'], jsfile['timestamp']) }}
   {%- endfor %}
 
   <script type="text/javascript">
     require({cache:{}});
-    <?php
-        require_once 'lib/jshrink/Minifier.php';
-
-        print get_minified_js(array("tt-rss",
-            "functions", "feedlist", "viewfeed", "FeedTree", "PluginHost"));
-
-        foreach (PluginHost::getInstance()->get_plugins() as $n => $p) {
-            if (method_exists($p, "get_js")) {
-                echo JShrink\Minifier::minify($p->get_js());
-            }
-        }
-
-        init_js_translations();
-    ?>
+    {{ js|raw }}
   </script>
 
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>

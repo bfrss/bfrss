@@ -2553,6 +2553,16 @@ function stylesheet_tag($filename)
     return "<link rel=\"stylesheet\" type=\"text/css\" href=\"$filename?$timestamp\"/>\n";
 }
 
+function stylesheet_tag_array($filename)
+{
+    $timestamp = filemtime($filename);
+
+    return array(
+        'filename' => $filename,
+        'timestamp' => $timestamp
+    );
+}
+
 function javascript_tag($filename)
 {
     $query = "";
@@ -2569,6 +2579,27 @@ function javascript_tag($filename)
     }
 
     return "<script type=\"text/javascript\" charset=\"utf-8\" src=\"$filename?$timestamp\"></script>\n";
+}
+
+function javascript_tag_array($filename)
+{
+    $query = "";
+
+    if (!(strpos($filename, "?") === false)) {
+        $query = substr($filename, strpos($filename, "?")+1);
+        $filename = substr($filename, 0, strpos($filename, "?"));
+    }
+
+    $timestamp = filemtime($filename);
+
+    if ($query) {
+        $timestamp .= "&$query";
+    }
+
+    return array(
+        'filename' => $filename,
+        'timestamp' => $timestamp
+    );
 }
 
 function calculate_dep_timestamp()
