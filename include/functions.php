@@ -1981,7 +1981,7 @@ function print_feed_select(
         if (!$root_id) {
             print "</select>";
         }
-        return
+        return;
     }
 
     if ($root_id) {
