@@ -6,12 +6,12 @@ if (file_exists("install") && !file_exists("config.php")) {
 
 // Initialize template engine
 require_once 'vendor/autoload.php';
-$loader = new Twig_Loader_Filesystem('templates/html/main');
+$loader = new Twig_Loader_Filesystem('templates/html');
 $twig = new Twig_Environment($loader, array('cache' => 'cache/templates'));
 
 if (!file_exists("config.php")) {
     // Neither install/ nor config.php exists.
-    $template = $twig->loadTemplate('fatal_error.html');
+    $template = $twig->loadTemplate('main/fatal_error.html');
     $page = $template->render(
         array(
             'error_message' => 'You forgot to copy <b>config.php-dist</b> '.
@@ -24,7 +24,7 @@ if (!file_exists("config.php")) {
 
 if (version_compare(PHP_VERSION, '5.3.7', '<')) {
     // The version of PHP is not sufficient for bfrss.
-    $template = $twig->loadTemplate('fatal_error.html');
+    $template = $twig->loadTemplate('main/fatal_error.html');
     $page = $template->render(
         array(
             'error_message' => 'PHP version 5.3.7 or newer required.'
