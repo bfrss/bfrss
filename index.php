@@ -70,11 +70,68 @@ header('Content-Type: text/html; charset=utf-8');
 $template = $twig->loadTemplate('main/index.html');
 $template_vars = array(
         'version' => VERSION,
-        'cssfiles' => array(),
-        'jsfiles' => array(),
+        'css_files' => array(),
+        'css_user' => '',
+        'css_plugins' => '',
+        'js_files' => array(),
+        'js' => '',
         'hook_toolbar_buttons' => array(),
         'hook_action_items' => array()
 );
+
+// Add css files
+array_push($template_vars['css_files'], stylesheet_tag_array("lib/dijit/themes/claro/claro.css"));
+array_push($template_vars['css_files'], stylesheet_tag_array("css/layout.css"));
+
+if ($_SESSION["uid"]) {
+    $theme = get_pref("USER_CSS_THEME", $_SESSION["uid"], false);
+    if ($theme && file_exists("themes/$theme")) {
+        array_push($template_vars['css_files'], stylesheet_tag_array("themes/$theme"));
+    } else {
+        array_push($template_vars['css_files'], stylesheet_tag_array("themes/default.css"));
+    }
+}
+
+// Add user-customized css
+$usercss_br = get_pref('USER_STYLESHEET');
+if ($usercss_br) {
+    $template_vars['css_user'] = str_replace("<br/>", "\n", $usercss_br);
+}
+
+// Add css from plugins
+foreach (PluginHost::getInstance()->get_plugins() as $n => $p) {
+    if (method_exists($p, "get_css")) {
+        $template_vars['css_plugins'] .= $p->get_css();
+    }
+}
+
+
+// Add js files
+foreach (array(
+    "lib/prototype.js",
+    "lib/scriptaculous/scriptaculous.js?load=effects,controls",
+    "lib/dojo/dojo.js",
+    "lib/dojo/tt-rss-layer.js",
+    "errors.php?mode=js"
+    ) as $jsfile) {
+
+    array_push($template_vars['js_files'], javascript_tag_array($jsfile));
+}
+
+// Add raw js
+require_once 'lib/jshrink/Minifier.php';
+
+$template_vars['js'] .= get_minified_js(array("tt-rss",
+    "functions", "feedlist", "viewfeed", "FeedTree", "PluginHost"));
+
+foreach (PluginHost::getInstance()->get_plugins() as $n => $p) {
+    if (method_exists($p, "get_js")) {
+        $template_vars['js'] .= JShrink\Minifier::minify($p->get_js());
+    }
+}
+
+$template_vars['js'] .= init_js_translations_return();
+
 
 
 ?>

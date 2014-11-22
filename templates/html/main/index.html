@@ -12,21 +12,25 @@
     var __ttrss_version = "{{ version }}"
   </script>
 
-  {%- for cssfile in cssfiles %}
-  {{ stylesheet_tag_macro(cssfile['filename'], cssfile['timestamp']) }}
+  {%- for css_file in css_files %}
+  {{ stylesheet_tag_macro(css_file['filename'], css_file['timestamp']) }}
   {%- endfor %}
 
-  <?php print_user_stylesheet() ?>
+  {%- if css_user %}
+  <style type="text/css"><!-- user stylesheet -->
+    {{ css_user }}
+  </style>
+  {%- endif %}
 
   <style type="text/css">
-    {{ css|raw }}
+    {{ css_plugins|raw }}
   </style>
 
   <link rel="shortcut icon" type="image/png" href="images/favicon.png"/>
   <link rel="icon" type="image/png" sizes="72x72" href="images/favicon-72px.png" />
 
-  {%- for jsfile in jsfiles %}
-  {{ javascript_tag_macro(jsfile['filename'], jsfile['timestamp']) }}
+  {%- for js_file in js_files %}
+  {{ javascript_tag_macro(js_file['filename'], js_file['timestamp']) }}
   {%- endfor %}
 
   <script type="text/javascript">

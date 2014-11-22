@@ -2661,6 +2661,38 @@ function init_js_translations()
         }
     }
 }
+function init_js_translations_return()
+{
+    $result = 'var T_messages = new Object();
+
+    function __(msg) {
+        if (T_messages[msg]) {
+            return T_messages[msg];
+        } else {
+            return msg;
+        }
+    }
+
+    function ngettext(msg1, msg2, n) {
+        return __((parseInt(n) > 1) ? msg2 : msg1);
+    }';
+
+    $l10n = _get_reader();
+
+    for ($i = 0; $i < $l10n->total; $i++) {
+        $orig = $l10n->get_original_string($i);
+        if (strpos($orig, "\000") !== false) {
+            // Plural forms
+            $key = explode(chr(0), $orig);
+            $result .= T_js_decl($key[0], _ngettext($key[0], $key[1], 1)); // Singular
+            $result .= T_js_decl($key[1], _ngettext($key[0], $key[1], 2)); // Plural
+        } else {
+            $translation = __($orig);
+            $result .= T_js_decl($orig, $translation);
+        }
+    }
+    return $result;
+}
 
 function label_to_feed_id($label)
 {
