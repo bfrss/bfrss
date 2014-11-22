@@ -34,8 +34,9 @@ if (version_compare(PHP_VERSION, '5.3.7', '<')) {
     exit;
 }
 
-set_include_path(dirname(__FILE__) ."/include" . PATH_SEPARATOR .
-    get_include_path());
+set_include_path(
+    dirname(__FILE__) ."/include" . PATH_SEPARATOR . get_include_path()
+);
 
 require_once "autoload.php";
 require_once "sessions.php";
@@ -48,16 +49,18 @@ require_once "lib/Mobile_Detect.php";
 
 $mobile = new Mobile_Detect();
 
-if (!init_plugins()) return;
+if (!init_plugins()) {
+    return;
+}
 
 if (!$_REQUEST['mobile']) {
     if ($mobile->isTablet() && PluginHost::getInstance()->get_plugin("digest")) {
         header('Location: backend.php?op=digest');
         exit;
-    } else if ($mobile->isMobile() && PluginHost::getInstance()->get_plugin("mobile")) {
+    } elseif ($mobile->isMobile() && PluginHost::getInstance()->get_plugin("mobile")) {
         header('Location: backend.php?op=mobile');
         exit;
-    } else if ($mobile->isMobile() && PluginHost::getInstance()->get_plugin("digest")) {
+    } elseif ($mobile->isMobile() && PluginHost::getInstance()->get_plugin("digest")) {
         header('Location: backend.php?op=digest');
         exit;
     }
