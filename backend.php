@@ -120,12 +120,30 @@ $op = str_replace("-", "_", $op);
 
 $override = PluginHost::getInstance()->lookup_handler($op, $method);
 
-if (class_exists($op) || $override) {
+$op_classname = array(
+    'article' => 'Article',
+    'backend' => 'Backend',
+    'dlg' => 'Dlg',
+    'feeds' => 'Feeds',
+    'opml' => 'Opml',
+    'pluginhandler' => 'PluginHandler',
+    'pref_feeds' => 'Pref_Feeds',
+    'pref_filters' => 'Pref_Filters',
+    'pref_labels' => 'Pref_Labels',
+    'pref_prefs' => 'Pref_Prefs',
+    'pref_system' => 'Pref_System',
+    'pref_users' => 'Pref_Users',
+    'rpc' => 'RPC',
+);
+
+$classname = $op_classname[strtolower($op)];
+
+if (class_exists($classname) || $override) {
 
     if ($override) {
         $handler = $override;
     } else {
-        $handler = new $op($_REQUEST);
+        $handler = new $classname($_REQUEST);
     }
 
     if ($handler && implements_interface($handler, 'IHandler')) {
