@@ -4,8 +4,9 @@ if (file_exists("install") && !file_exists("config.php")) {
     header("Location: install/");
 }
 
-// Initialize template engine
 require_once 'vendor/autoload.php';
+
+// Initialize template engine
 $loader = new Twig_Loader_Filesystem('templates/html');
 $twig = new Twig_Environment($loader, array('cache' => 'cache/templates'));
 
@@ -38,7 +39,6 @@ set_include_path(
     dirname(__FILE__) ."/include" . PATH_SEPARATOR . get_include_path()
 );
 
-require_once "autoload.php";
 require_once "sessions.php";
 require_once "functions.php";
 require_once "sanity_check.php";

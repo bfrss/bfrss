@@ -40,7 +40,7 @@ if (array_search($op, $public_calls) !== false) {
 
 @$csrf_token = $_REQUEST['csrf_token'];
 
-require_once "autoload.php";
+require_once "vendor/autoload.php";
 require_once "sessions.php";
 require_once "functions.php";
 require_once "config.php";

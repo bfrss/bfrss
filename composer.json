@@ -2,5 +2,8 @@
     "require": {
         "ircmaxell/password-compat": "~1.0.4",
         "twig/twig": "~1.16"
+    },
+    "autoload": {
+        "classmap": ["classes/"]
     }
 }
