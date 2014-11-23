@@ -1095,79 +1095,30 @@ class Feeds extends Handler_Protected
 
     function quickAddFeed()
     {
-        print "<input dojoType=\"dijit.form.TextBox\" style=\"display : none\" name=\"op\" value=\"rpc\">";
-        print "<input dojoType=\"dijit.form.TextBox\" style=\"display : none\" name=\"method\" value=\"addfeed\">";
+        // Initialize template engine
+        $loader = new Twig_Loader_Filesystem('templates/html');
+        $twig = new Twig_Environment($loader, array('cache' => 'cache/templates'));
 
-        print "<div id='fadd_multiple_notify' style='display : none'>";
-        print_notice("Provided URL is a HTML page referencing multiple feeds, please select required feed from the dropdown menu below.");
-        print "<p></div>";
+        // Load template
+        $template = $twig->loadTemplate('classes/feeds/quickAddFeed.html');
+        $template_vars = array();
 
-        print "<div class=\"dlgSec\">".__("Feed or site URL")."</div>";
-        print "<div class=\"dlgSecCont\">";
-
-        print "<div style='float : right'>
-            <img style='display : none'
-                id='feed_add_spinner' src='images/indicator_white.gif'></div>";
-
-        print "<input style=\"font-size : 16px; width : 20em;\"
-            placeHolder=\"".__("Feed or site URL")."\"
-            dojoType=\"dijit.form.ValidationTextBox\" required=\"1\" name=\"feed\" id=\"feedDlg_feedUrl\">";
-
-        print "<hr/>";
-
+        // Fill template variables
         if (get_pref('ENABLE_FEED_CATS')) {
-            print __('Place in category:') . " ";
-            print_feed_cat_select("cat", false, 'dojoType="dijit.form.Select"');
+            $template_vars['cats'] = true;
+            $template_vars['feed_cat_select'] = return_feed_cat_select(
+                "cat",
+                false,
+                'dojoType="dijit.form.Select"'
+            );
         }
 
-        print "</div>";
-
-        print '<div id="feedDlg_feedsContainer" style="display : none">
-
-                <div class="dlgSec">' . __('Available feeds') . '</div>
-                <div class="dlgSecCont">'.
-                '<select id="feedDlg_feedContainerSelect"
-                    dojoType="dijit.form.Select" size="3">
-                    <script type="dojo/method" event="onChange" args="value">
-                        dijit.byId("feedDlg_feedUrl").attr("value", value);
-                    </script>
-                </select>'.
-                '</div></div>';
-
-        print "<div id='feedDlg_loginContainer' style='display : none'>
-
-                <div class=\"dlgSec\">".__("Authentication")."</div>
-                <div class=\"dlgSecCont\">".
-
-                " <input dojoType=\"dijit.form.TextBox\" name='login'\"
-                    placeHolder=\"".__("Login")."\"
-                    style=\"width : 10em;\"> ".
-                " <input
-                    placeHolder=\"".__("Password")."\"
-                    dojoType=\"dijit.form.TextBox\" type='password'
-                    style=\"width : 10em;\" name='pass'\">
-            </div></div>";
-
-
-        print "<div style=\"clear : both\">
-            <input type=\"checkbox\" name=\"need_auth\" dojoType=\"dijit.form.CheckBox\" id=\"feedDlg_loginCheck\"
-                    onclick='checkboxToggleElement(this, \"feedDlg_loginContainer\")'>
-                <label for=\"feedDlg_loginCheck\">".
-                __('This feed requires authentication.')."</div>";
-
-        print "</form>";
-
-        print "<div class=\"dlgButtons\">
-            <button dojoType=\"dijit.form.Button\" onclick=\"return dijit.byId('feedAddDlg').execute()\">".__('Subscribe')."</button>";
-
-        if (!(defined('_DISABLE_FEED_BROWSER') && _DISABLE_FEED_BROWSER)) {
-            print "<button dojoType=\"dijit.form.Button\" onclick=\"return feedBrowser()\">".__('More feeds')."</button>";
+        if (!defined('_DISABLE_FEED_BROWSER') || !_DISABLE_FEED_BROWSER) {
+            $template_vars['feedbrowser'] = true;
         }
 
-        print "<button dojoType=\"dijit.form.Button\" onclick=\"return dijit.byId('feedAddDlg').hide()\">".__('Cancel')."</button>
-            </div>";
-
-        //return;
+        // Render the template
+        echo $template->render($template_vars);
     }
 
     function feedBrowser()

@@ -2089,8 +2089,8 @@ function print_feed_cat_select(
 ) {
 
     if (!$root_id) {
-            print "<select id=\"$id\" name=\"$id\" default=\"$default_id\" ".
-                "onchange=\"catSelectOnChange(this)\" $attributes>";
+        print "<select id=\"$id\" name=\"$id\" default=\"$default_id\" ".
+            "onchange=\"catSelectOnChange(this)\" $attributes>";
     }
 
     if ($root_id) {
@@ -2154,6 +2154,78 @@ function print_feed_cat_select(
         }
         print "</select>";
     }
+}
+
+function return_feed_cat_select(
+    $id,
+    $default_id,
+    $attributes,
+    $include_all_cats = true,
+    $root_id = false,
+    $nest_level = 0
+) {
+    $rv = "";
+
+    if ($root_id) {
+        $parent_qpart = "parent_cat = '$root_id'";
+    } else {
+        $parent_qpart = "parent_cat IS NULL";
+        $rv .= "<select id=\"".$id."\" name=\"".$id."\" ".
+            "default=\"".$default_id."\" ".
+            "onchange=\"catSelectOnChange(this)\" ".$attributes.">";
+    }
+
+    $result = db_query(
+        "SELECT id,title,
+            (SELECT COUNT(id) FROM ttrss_feed_categories AS c2 WHERE
+            c2.parent_cat = ttrss_feed_categories.id) AS num_children
+        FROM ttrss_feed_categories
+        WHERE owner_uid = ".$_SESSION["uid"]." AND ".$parent_qpart." ORDER BY title"
+    );
+
+    while ($line = db_fetch_assoc($result)) {
+        for ($i = 0; $i < $nest_level; $i++) {
+            $line["title"] = " - " . $line["title"];
+        }
+
+        if ($line["title"]) {
+            $rv .=  "<option";
+            if ($line["id"] == $default_id) {
+                $rv .=  " selected=\"1\"";
+            }
+            $rv .= " value='". (int)$line["id"] ."'>";
+            $rv .= htmlspecialchars($line["title"]);
+            $rv .= "</option>";
+        }
+
+        if ($line["num_children"] > 0) {
+            $rv .=  return_feed_cat_select(
+                $id,
+                $default_id,
+                $attributes,
+                $include_all_cats,
+                $line["id"],
+                $nest_level+1
+            );
+        }
+    }
+
+    if (!$root_id) {
+        if ($include_all_cats) {
+            if (db_num_rows($result) > 0) {
+                $rv .=  "<option disabled=\"1\">--------</option>";
+            }
+
+            $rv .= "<option";
+            if ($default_id == 0) {
+                $rv .= " selected=\"1\"";
+            }
+            $rv .= " value=\"0\">".__('Uncategorized')."</option>";
+        }
+        $rv .=  "</select>";
+    }
+
+    return $rv;
 }
 
 function checkbox_to_sql_bool($val)
