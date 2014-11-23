@@ -1223,62 +1223,43 @@ class Feeds extends Handler_Protected
 
     function search()
     {
+        // Initialize template engine
+        $loader = new Twig_Loader_Filesystem('templates/html/classes/feeds');
+        $twig = new Twig_Environment($loader, array('cache' => 'cache/templates'));
+
+        // Load template
+        $template = $twig->loadTemplate('search.html');
+        $template_vars = array();
+
+        // Fill template variables
         $this->params = explode(":", $this->dbh->escape_string($_REQUEST["param"]), 2);
 
         $active_feed_id = sprintf("%d", $this->params[0]);
         $is_cat = $this->params[1] != "false";
 
-        print "<div class=\"dlgSec\">".__('Look for')."</div>";
-
-        print "<div class=\"dlgSecCont\">";
-
-        print "<input dojoType=\"dijit.form.ValidationTextBox\"
-            style=\"font-size : 16px; width : 20em;\"
-            required=\"1\" name=\"query\" type=\"search\" value=''>";
-
-        print "<hr/>".__('Limit search to:')." ";
-
-        print "<select name=\"search_mode\" dojoType=\"dijit.form.Select\">
-            <option value=\"all_feeds\">".__('All feeds')."</option>";
-
-        $feed_title = getFeedTitle($active_feed_id);
-
-        if (!$is_cat) {
-            $feed_cat_title = getFeedCatTitle($active_feed_id);
-        } else {
-            $feed_cat_title = getCategoryTitle($active_feed_id);
-        }
-
         if ($active_feed_id && !$is_cat) {
-            print "<option selected=\"1\" value=\"this_feed\">$feed_title</option>";
+            $template_vars['feed_title'] = getFeedTitle($active_feed_id);
         } else {
-            print "<option disabled=\"1\" value=\"false\">".__('This feed')."</option>";
-        }
-
-        if ($is_cat) {
-              $cat_preselected = "selected=\"1\"";
+            $template_vars['this_feed'] = true;
         }
 
         if (get_pref('ENABLE_FEED_CATS') && ($active_feed_id > 0 || $is_cat)) {
-            print "<option $cat_preselected value=\"this_cat\">$feed_cat_title</option>";
-        } else {
-            //print "<option disabled>".__('This category')."</option>";
+            $template_vars['this_cat'] = true;
+
+            if ($is_cat) {
+                $template_vars['is_cat'] = true;
+                $template_vars['feed_cat_title'] = getCategoryTitle($active_feed_id);
+            } else {
+                $template_vars['is_cat'] = false;
+                $template_vars['feed_cat_title'] = getFeedCatTitle($active_feed_id);
+            }
         }
-
-        print "</select>";
-
-        print "</div>";
-
-        print "<div class=\"dlgButtons\">";
 
         if (count(PluginHost::getInstance()->get_hooks(PluginHost::HOOK_SEARCH)) == 0) {
-            print "<div style=\"float : left\">
-                <a class=\"visibleLink\" target=\"_blank\" href=\"http://tt-rss.org/wiki/SearchSyntax\">".__("Search syntax")."</a>
-                </div>";
+            $template_vars['syntax'] = true;
         }
 
-        print "<button dojoType=\"dijit.form.Button\" onclick=\"dijit.byId('searchDlg').execute()\">".__('Search')."</button>
-        <button dojoType=\"dijit.form.Button\" onclick=\"dijit.byId('searchDlg').hide()\">".__('Cancel')."</button>
-        </div>";
+        // Render the template
+        echo $template->render($template_vars);
     }
 }
