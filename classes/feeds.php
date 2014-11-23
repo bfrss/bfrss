@@ -1176,49 +1176,22 @@ class Feeds extends Handler_Protected
             return;
         }
 
-        $browser_search = $this->dbh->escape_string($_REQUEST["search"]);
+        // Initialize template engine
+        $loader = new Twig_Loader_Filesystem('templates/html/classes/feeds');
+        $twig = new Twig_Environment($loader, array('cache' => 'cache/templates'));
 
-        print "<input dojoType=\"dijit.form.TextBox\" style=\"display : none\" name=\"op\" value=\"rpc\">";
-        print "<input dojoType=\"dijit.form.TextBox\" style=\"display : none\" name=\"method\" value=\"updateFeedBrowser\">";
+        // Load template
+        $template = $twig->loadTemplate('feedBrowser.html');
+        $template_vars = array();
 
-        print "<div dojoType=\"dijit.Toolbar\">
-            <div style='float : right'>
-            <img style='display : none'
-                id='feed_browser_spinner' src='images/indicator_white.gif'>
-            <input name=\"search\" dojoType=\"dijit.form.TextBox\" size=\"20\" type=\"search\"
-                onchange=\"dijit.byId('feedBrowserDlg').update()\" value=\"$browser_search\">
-            <button dojoType=\"dijit.form.Button\" onclick=\"dijit.byId('feedBrowserDlg').update()\">".__('Search')."</button>
-        </div>";
-
-        print " <select name=\"mode\" dojoType=\"dijit.form.Select\" onchange=\"dijit.byId('feedBrowserDlg').update()\">
-            <option value='1'>" . __('Popular feeds') . "</option>
-            <option value='2'>" . __('Feed archive') . "</option>
-            </select> ";
-
-        print __("limit:");
-
-        print " <select dojoType=\"dijit.form.Select\" name=\"limit\" onchange=\"dijit.byId('feedBrowserDlg').update()\">";
-
-        foreach (array(25, 50, 100, 200) as $l) {
-            //$issel = ($l == $limit) ? "selected=\"1\"" : "";
-            print "<option value=\"$l\">$l</option>";
-        }
-
-        print "</select> ";
-
-        print "</div>";
+        // Fill template variables
+        $template_vars['browser_search'] = $this->dbh->escape_string($_REQUEST["search"]);
 
         require_once "feedbrowser.php";
+        $template_vars['feed_list'] = make_feed_browser("", 25);
 
-        print "<ul class='browseFeedList' id='browseFeedList'>";
-        print make_feed_browser("", 25);
-        print "</ul>";
-
-        print "<div align='center'>
-            <button dojoType=\"dijit.form.Button\" onclick=\"dijit.byId('feedBrowserDlg').execute()\">".__('Subscribe')."</button>
-            <button dojoType=\"dijit.form.Button\" style='display : none' id='feed_archive_remove' onclick=\"dijit.byId('feedBrowserDlg').removeFromArchive()\">".__('Remove')."</button>
-            <button dojoType=\"dijit.form.Button\" onclick=\"dijit.byId('feedBrowserDlg').hide()\" >".__('Cancel')."</button></div>";
-
+        // Render the template
+        echo $template->render($template_vars);
     }
 
     function search()
