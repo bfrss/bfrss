@@ -53,7 +53,7 @@ class Feeds extends Handler_Protected {
 				<img class=\"noborder\" src=\"images/pub_set.png\"></a>";
 
 
-#		$reply .= "<span>";
+		#$reply .= "<span>";
 		$reply .= "<span id='feed_title' class='$error_class'>";
 
 		if ($feed_site_url) {
@@ -77,7 +77,7 @@ class Feeds extends Handler_Protected {
 
 		$reply .= "</span>";
 
-#		$reply .= "</span>";
+		#$reply .= "</span>";
 
 		// left part
 
@@ -212,11 +212,11 @@ class Feeds extends Handler_Protected {
 
 		if ($_REQUEST["debug"]) $timing_info = print_checkpoint("H0", $timing_info);
 
-//		error_log("format_headlines_list: [" . $feed . "] method [" . $method . "]");
+		//error_log("format_headlines_list: [" . $feed . "] method [" . $method . "]");
 		if($search_mode == '' && $method != '' ){
 		    $search_mode = $method;
 		}
-//		error_log("search_mode: " . $search_mode);
+		//error_log("search_mode: " . $search_mode);
 
 		if (!$cat_view && is_numeric($feed) && $feed < PLUGIN_FEED_BASE_INDEX && $feed > LABEL_BASE_INDEX) {
 			$handler = PluginHost::getInstance()->get_feed_handler(
@@ -366,16 +366,16 @@ class Feeds extends Handler_Protected {
 						alt=\"Publish article\" onclick='togglePub($id)'>";
 				}
 
-#				$content_link = "<a target=\"_blank\" href=\"".$line["link"]."\">" .
-#					$line["title"] . "</a>";
+				#$content_link = "<a target=\"_blank\" href=\"".$line["link"]."\">" .
+					#$line["title"] . "</a>";
 
-#				$content_link = "<a
-#					href=\"" . htmlspecialchars($line["link"]) . "\"
-#					onclick=\"view($id,$feed_id);\">" .
-#					$line["title"] . "</a>";
+				#$content_link = "<a
+					#href=\"" . htmlspecialchars($line["link"]) . "\"
+					#onclick=\"view($id,$feed_id);\">" .
+					#$line["title"] . "</a>";
 
-#				$content_link = "<a href=\"javascript:viewContentUrl('".$line["link"]."');\">" .
-#					$line["title"] . "</a>";
+				#$content_link = "<a href=\"javascript:viewContentUrl('".$line["link"]."');\">" .
+					#$line["title"] . "</a>";
 
 				$updated_fmt = make_local_datetime($line["updated"], false);
 				$date_entered_fmt = T_sprintf("Imported at %s",
@@ -385,7 +385,7 @@ class Feeds extends Handler_Protected {
 
 				$score_pic = "images/" . get_score_pic($score);
 
-/*				$score_title = __("(Click to change)");
+				/*$score_title = __("(Click to change)");
 				$score_pic = "<img class='hlScorePic' src=\"images/$score_pic\"
 					onclick=\"adjustArticleScore($id, $score)\" title=\"$score $score_title\">"; */
 
@@ -670,14 +670,14 @@ class Feeds extends Handler_Protected {
 
 					$reply['content'] .= "<span id=\"CWRAP-$id\">";
 
-//					if (!$expand_cdm) {
+					//if (!$expand_cdm) {
 						$reply['content'] .= "<span id=\"CENCW-$id\" style=\"display : none\">";
 						$reply['content'] .= htmlspecialchars($line["content"]);
 						$reply['content'] .= "</span.";
 
-//					} else {
-//						$reply['content'] .= $line["content"];
-//					}
+					//} else {
+						//$reply['content'] .= $line["content"];
+					//}
 
 					$reply['content'] .= "</span>";
 
@@ -723,8 +723,8 @@ class Feeds extends Handler_Protected {
 
 					$reply['content'] .= "<div style=\"float : right\">";
 
-//					$reply['content'] .= "$marked_pic";
-//					$reply['content'] .= "$published_pic";
+					//$reply['content'] .= "$marked_pic";
+					//$reply['content'] .= "$published_pic";
 
 					foreach (PluginHost::getInstance()->get_hooks(PluginHost::HOOK_ARTICLE_BUTTON) as $p) {
 						$reply['content'] .= $p->hook_article_button($line);
