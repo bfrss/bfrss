@@ -10,4 +10,5 @@ An unordered list of things to do before the 1.0 release.
 - [ ] Use HTML5
 - [ ] Use [modern](http://dojotoolkit.org/documentation/tutorials/1.10/modern_dojo/)
   [Dojo](http://dojotoolkit.org/)
+- [ ] Update Dojo from version 1.8.3 to 1.10
 
