@@ -1,13 +1,20 @@
-{% macro error(message) %}
-<div class="error">
-    <span><img src="../images/alert.png"></span>
+{% macro error(message, id='', path_prefix='') %}
+<div class="error" id="{{ id }}">
+    <span><img src="{{ path_prefix }}images/alert.png"></span>
     <span>{{ message }}</span>
 </div><!-- class="error" -->
 {% endmacro %}
 
-{% macro notice(message) %}
-<div class="notice">
-    <span><img src="../images/information.png"></span>
+{% macro warning(message, id='', path_prefix='') %}
+<div class="warning" id="{{ id }}">
+    <span><img src="{{ path_prefix }}images/alert.png"></span>
+    <span>{{ message }}</span>
+</div><!-- class="warning" -->
+{% endmacro %}
+
+{% macro notice(message, id='', path_prefix='') %}
+<div class="notice" id="{{ id }}">
+    <span><img src="{{ path_prefix }}images/information.png"></span>
     <span>{{ message }}</span>
 </div><!-- class="notice" -->
 {% endmacro %}
