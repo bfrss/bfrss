@@ -1,18 +1,26 @@
 <?php
 require_once "colors.php";
 
-class Feeds extends Handler_Protected {
-
-    function csrf_ignore($method) {
+class Feeds extends Handler_Protected
+{
+    function csrf_ignore($method)
+    {
         $csrf_ignored = array("index", "feedbrowser", "quickaddfeed", "search");
 
         return array_search($method, $csrf_ignored) !== false;
     }
 
-    private function format_headline_subtoolbar($feed_site_url, $feed_title,
-            $feed_id, $is_cat, $search,
-            $search_mode, $view_mode, $error, $feed_last_updated) {
-
+    private function format_headline_subtoolbar(
+        $feed_site_url,
+        $feed_title,
+        $feed_id,
+        $is_cat,
+        $search,
+        $search_mode,
+        $view_mode,
+        $error,
+        $feed_last_updated
+    ) {
         $catchup_sel_link = "catchupSelection()";
 
         $archive_sel_link = "archiveSelection()";
@@ -29,7 +37,9 @@ class Feeds extends Handler_Protected {
 
         $set_score_link = "setSelectionScore()";
 
-        if ($is_cat) $cat_q = "&is_cat=$is_cat";
+        if ($is_cat) {
+            $cat_q = "&is_cat=$is_cat";
+        }
 
         if ($search) {
             $search_q = "&q=$search&smode=$search_mode";
@@ -39,8 +49,9 @@ class Feeds extends Handler_Protected {
 
         $reply .= "<span class=\"holder\">";
 
-        $rss_link = htmlspecialchars(get_self_url_prefix() .
-            "/public.php?op=rss&id=$feed_id$cat_q$search_q");
+        $rss_link = htmlspecialchars(
+            get_self_url_prefix() . "/public.php?op=rss&id=$feed_id$cat_q$search_q"
+        );
 
         // right part
 
@@ -57,8 +68,7 @@ class Feeds extends Handler_Protected {
         $reply .= "<span id='feed_title' class='$error_class'>";
 
         if ($feed_site_url) {
-            $last_updated = T_sprintf("Last updated: %s",
-                $feed_last_updated);
+            $last_updated = T_sprintf("Last updated: %s", $feed_last_updated);
 
             $target = "target=\"_blank\"";
             $reply .= "<a title=\"$last_updated\" $target href=\"$feed_site_url\">".
@@ -144,12 +154,21 @@ class Feeds extends Handler_Protected {
         return $reply;
     }
 
-    private function format_headlines_list($feed, $method, $view_mode, $limit, $cat_view,
-                    $next_unread_feed, $offset, $vgr_last_feed = false,
-                    $override_order = false, $include_children = false) {
-
-        if (isset($_REQUEST["DevForceUpdate"]))
+    private function format_headlines_list(
+        $feed,
+        $method,
+        $view_mode,
+        $limit,
+        $cat_view,
+        $next_unread_feed,
+        $offset,
+        $vgr_last_feed = false,
+        $override_order = false,
+        $include_children = false
+    ) {
+        if (isset($_REQUEST["DevForceUpdate"])) {
             header("Content-Type: text/plain; charset=utf-8");
+        }
 
         $disable_cache = false;
 
@@ -161,8 +180,12 @@ class Feeds extends Handler_Protected {
 
         $topmost_article_ids = array();
 
-        if (!$offset) $offset = 0;
-        if ($method == "undefined") $method = "";
+        if (!$offset) {
+            $offset = 0;
+        }
+        if ($method == "undefined") {
+            $method = "";
+        }
 
         $method_split = explode(":", $method);
 
@@ -171,23 +194,27 @@ class Feeds extends Handler_Protected {
 
             $result = $this->dbh->query(
                 "SELECT cache_images,".SUBSTRING_FOR_DATE."(last_updated,1,19) AS last_updated
-                    FROM ttrss_feeds WHERE id = '$feed'");
+                FROM ttrss_feeds WHERE id = '$feed'"
+            );
 
-                if ($this->dbh->num_rows($result) != 0) {
-                    $last_updated = strtotime($this->dbh->fetch_result($result, 0, "last_updated"));
-                    $cache_images = sql_bool_to_bool($this->dbh->fetch_result($result, 0, "cache_images"));
+            if ($this->dbh->num_rows($result) != 0) {
+                $last_updated = strtotime($this->dbh->fetch_result($result, 0, "last_updated"));
+                $cache_images = sql_bool_to_bool($this->dbh->fetch_result($result, 0, "cache_images"));
 
-                    if (!$cache_images && time() - $last_updated > 120 || isset($_REQUEST['DevForceUpdate'])) {
-                        include "rssfuncs.php";
-                        update_rss_feed($feed, true, true);
-                    } else {
-                        $this->dbh->query("UPDATE ttrss_feeds SET last_updated = '1970-01-01', last_update_started = '1970-01-01'
-                            WHERE id = '$feed'");
-                    }
+                if (!$cache_images && time() - $last_updated > 120 || isset($_REQUEST['DevForceUpdate'])) {
+                    include "rssfuncs.php";
+                    update_rss_feed($feed, true, true);
+                } else {
+                    $this->dbh->query(
+                        "UPDATE ttrss_feeds
+                        SET last_updated = '1970-01-01', last_update_started = '1970-01-01'
+                        WHERE id = '$feed'"
+                    );
                 }
+            }
         }
 
-        if ($method_split[0] == "MarkAllReadGR")  {
+        if ($method_split[0] == "MarkAllReadGR") {
             catchup_feed($method_split[1], false);
         }
 
@@ -195,7 +222,8 @@ class Feeds extends Handler_Protected {
 
         if (is_numeric($feed) && $feed > 0 && !$cat_view) {
             $result = $this->dbh->query(
-                "SELECT id FROM ttrss_feeds WHERE id = '$feed' LIMIT 1");
+                "SELECT id FROM ttrss_feeds WHERE id = '$feed' LIMIT 1"
+            );
 
             if ($this->dbh->num_rows($result) == 0) {
                 $reply['content'] = "<div align='center'>".__('Feed not found.')."</div>";
@@ -210,19 +238,22 @@ class Feeds extends Handler_Protected {
 
         @$search_mode = $this->dbh->escape_string($_REQUEST["search_mode"]);
 
-        if ($_REQUEST["debug"]) $timing_info = print_checkpoint("H0", $timing_info);
+        if ($_REQUEST["debug"]) {
+            $timing_info = print_checkpoint("H0", $timing_info);
+        }
 
         //error_log("format_headlines_list: [" . $feed . "] method [" . $method . "]");
-        if($search_mode == '' && $method != '' ){
+        if ($search_mode == '' && $method != '') {
             $search_mode = $method;
         }
         //error_log("search_mode: " . $search_mode);
 
         if (!$cat_view && is_numeric($feed) && $feed < PLUGIN_FEED_BASE_INDEX && $feed > LABEL_BASE_INDEX) {
             $handler = PluginHost::getInstance()->get_feed_handler(
-                PluginHost::feed_to_pfeed_id($feed));
+                PluginHost::feed_to_pfeed_id($feed)
+            );
 
-        //    function queryFeedHeadlines($feed, $limit, $view_mode, $cat_view, $search, $search_mode, $override_order = false, $offset = 0, $owner_uid = 0, $filter = false, $since_id = 0, $include_children = false, $ignore_vfeed_group = false) {
+            // function queryFeedHeadlines($feed, $limit, $view_mode, $cat_view, $search, $search_mode, $override_order = false, $offset = 0, $owner_uid = 0, $filter = false, $since_id = 0, $include_children = false, $ignore_vfeed_group = false) {
 
             if ($handler) {
                 $options = array(
@@ -238,34 +269,57 @@ class Feeds extends Handler_Protected {
                     "since_id" => 0,
                     "include_children" => $include_children);
 
-                $qfh_ret = $handler->get_headlines(PluginHost::feed_to_pfeed_id($feed),
-                    $options);
+                $qfh_ret = $handler->get_headlines(
+                    PluginHost::feed_to_pfeed_id($feed),
+                    $options
+                );
             }
 
         } else {
-            $qfh_ret = queryFeedHeadlines($feed, $limit, $view_mode, $cat_view,
-                $search, $search_mode, $override_order, $offset, 0,
-                false, 0, $include_children);
+            $qfh_ret = queryFeedHeadlines(
+                $feed,
+                $limit,
+                $view_mode,
+                $cat_view,
+                $search,
+                $search_mode,
+                $override_order,
+                $offset,
+                0,
+                false,
+                0,
+                $include_children
+            );
         }
 
         $vfeed_group_enabled = get_pref("VFEED_GROUP_BY_FEED") && $feed != -6;
 
-        if ($_REQUEST["debug"]) $timing_info = print_checkpoint("H1", $timing_info);
+        if ($_REQUEST["debug"]) {
+            $timing_info = print_checkpoint("H1", $timing_info);
+        }
 
         $result = $qfh_ret[0];
         $feed_title = $qfh_ret[1];
         $feed_site_url = $qfh_ret[2];
         $last_error = $qfh_ret[3];
-        $last_updated = strpos($qfh_ret[4], '1970-') === FALSE ?
-            make_local_datetime($qfh_ret[4], false) : __("Never");
+        $last_updated = strpos($qfh_ret[4], '1970-') === false ?
+            make_local_datetime($qfh_ret[4], false) :
+            __("Never");
         $highlight_words = $qfh_ret[5];
 
         $vgroup_last_feed = $vgr_last_feed;
 
-        $reply['toolbar'] = $this->format_headline_subtoolbar($feed_site_url,
+        $reply['toolbar'] = $this->format_headline_subtoolbar(
+            $feed_site_url,
             $feed_title,
-            $feed, $cat_view, $search, $search_mode, $view_mode,
-            $last_error, $last_updated);
+            $feed,
+            $cat_view,
+            $search,
+            $search_mode,
+            $view_mode,
+            $last_error,
+            $last_updated
+        );
 
         $headlines_count = $this->dbh->num_rows($result);
 
@@ -294,7 +348,9 @@ class Feeds extends Handler_Protected {
             $num_unread = 0;
             $cur_feed_title = '';
 
-            if ($_REQUEST["debug"]) $timing_info = print_checkpoint("PS", $timing_info);
+            if ($_REQUEST["debug"]) {
+                $timing_info = print_checkpoint("PS", $timing_info);
+            }
 
             $expand_cdm = get_pref('CDM_EXPANDED');
 
@@ -318,14 +374,17 @@ class Feeds extends Handler_Protected {
                     $label_cache = json_decode($label_cache, true);
 
                     if ($label_cache) {
-                        if ($label_cache["no-labels"] == 1)
+                        if ($label_cache["no-labels"] == 1) {
                             $labels = array();
-                        else
+                        } else {
                             $labels = $label_cache;
+                        }
                     }
                 }
 
-                if (!is_array($labels)) $labels = get_article_labels($id);
+                if (!is_array($labels)) {
+                    $labels = get_article_labels($id);
+                }
 
                 $labels_str = "<span class=\"HLLCTR-$id\">";
                 $labels_str .= format_article_labels($labels, $id);
@@ -378,8 +437,10 @@ class Feeds extends Handler_Protected {
                     #$line["title"] . "</a>";
 
                 $updated_fmt = make_local_datetime($line["updated"], false);
-                $date_entered_fmt = T_sprintf("Imported at %s",
-                    make_local_datetime($line["date_entered"], false));
+                $date_entered_fmt = T_sprintf(
+                    "Imported at %s",
+                    make_local_datetime($line["date_entered"], false)
+                );
 
                 $score = $line["score"];
 
@@ -394,7 +455,7 @@ class Feeds extends Handler_Protected {
 
                 if ($score > 500) {
                     $hlc_suffix = "high";
-                } else if ($score < -100) {
+                } elseif ($score < -100) {
                     $hlc_suffix = "low";
                 } else {
                     $hlc_suffix = "";
@@ -485,10 +546,9 @@ class Feeds extends Handler_Protected {
                             $rgba = @$rgba_cache[$feed_id];
 
                             $reply['content'] .= "<span class=\"hlFeed\"><a style=\"background : rgba($rgba, 0.3)\" href=\"#\" onclick=\"viewfeed($feed_id)\">".
-                                truncate_string($line["feed_title"],30)."</a></span>";
+                                truncate_string($line["feed_title"], 30)."</a></span>";
                         }
                     }
-
 
                     $reply['content'] .= "<span class=\"hlUpdated\">";
 
@@ -512,13 +572,20 @@ class Feeds extends Handler_Protected {
 
                 } else {
 
-                    if ($line["tag_cache"])
+                    if ($line["tag_cache"]) {
                         $tags = explode(",", $line["tag_cache"]);
-                    else
+                    } else {
                         $tags = false;
+                    }
 
-                    $line["content"] = sanitize($line["content"],
-                            sql_bool_to_bool($line['hide_images']), false, $entry_site_url, $highlight_words, $line["id"]);
+                    $line["content"] = sanitize(
+                        $line["content"],
+                        sql_bool_to_bool($line['hide_images']),
+                        false,
+                        $entry_site_url,
+                        $highlight_words,
+                        $line["id"]
+                    );
 
                     foreach (PluginHost::getInstance()->get_hooks(PluginHost::HOOK_RENDER_ARTICLE_CDM) as $p) {
                         $line = $p->hook_render_article_cdm($line);
@@ -571,8 +638,11 @@ class Feeds extends Handler_Protected {
 
                     if ($highlight_words && count($highlight_words > 0)) {
                         foreach ($highlight_words as $word) {
-                            $line["title"] = preg_replace("/(\Q$word\E)/i",
-                                "<span class=\"highlight\">$1</span>", $line["title"]);
+                            $line["title"] = preg_replace(
+                                "/(\Q$word\E)/i",
+                                "<span class=\"highlight\">$1</span>",
+                                $line["title"]
+                            );
                         }
                     }
 
@@ -591,10 +661,11 @@ class Feeds extends Handler_Protected {
                         <img src=\"images/collapse.png\" onclick=\"cdmCollapseArticle(event, $id)\"
                         title=\"".__("Collapse article")."\"/></span>";
 
-                    if (!$expand_cdm)
+                    if (!$expand_cdm) {
                         $content_hidden = "style=\"display : none\"";
-                    else
+                    } else {
                         $excerpt_hidden = "style=\"display : none\"";
+                    }
 
                     $reply['content'] .= "<span $excerpt_hidden id=\"CEXC-$id\" class=\"cdmExcerpt\">" . $content_preview . "</span>";
 
@@ -607,7 +678,7 @@ class Feeds extends Handler_Protected {
                             $reply['content'] .= "<div class=\"hlFeed\">
                                 <a href=\"#\" style=\"background-color: rgba($rgba,0.3)\"
                                 onclick=\"viewfeed($feed_id)\">".
-                                truncate_string($line["feed_title"],30)."</a>
+                                truncate_string($line["feed_title"], 30)."</a>
                             </div>";
                         }
                     }
@@ -637,14 +708,16 @@ class Feeds extends Handler_Protected {
                     }
                     $reply['content'] .= "</div>";
 
-                    if (!$line['lang']) $line['lang'] = 'en';
+                    if (!$line['lang']) {
+                        $line['lang'] = 'en';
+                    }
 
                     $reply['content'] .= "<div class=\"cdmContentInner\" lang=\"".$line['lang']."\">";
 
-            if ($line["orig_feed_id"]) {
+                    if ($line["orig_feed_id"]) {
 
-                $tmp_result = $this->dbh->query("SELECT * FROM ttrss_archived_feeds
-                    WHERE id = ".$line["orig_feed_id"]);
+                        $tmp_result = $this->dbh->query("SELECT * FROM ttrss_archived_feeds
+                            WHERE id = ".$line["orig_feed_id"]);
 
                         if ($this->dbh->num_rows($tmp_result) != 0) {
 
@@ -719,7 +792,9 @@ class Feeds extends Handler_Protected {
                         }
                     }
 
-                    if ($entry_comments) $reply['content'] .= "&nbsp;($entry_comments)";
+                    if ($entry_comments) {
+                        $reply['content'] .= "&nbsp;($entry_comments)";
+                    }
 
                     $reply['content'] .= "<div style=\"float : right\">";
 
@@ -742,7 +817,9 @@ class Feeds extends Handler_Protected {
                 ++$lnum;
             }
 
-            if ($_REQUEST["debug"]) $timing_info = print_checkpoint("PE", $timing_info);
+            if ($_REQUEST["debug"]) {
+                $timing_info = print_checkpoint("PE", $timing_info);
+            }
 
         } else {
             $message = "";
@@ -792,24 +869,30 @@ class Feeds extends Handler_Protected {
             }
         }
 
-        if ($_REQUEST["debug"]) $timing_info = print_checkpoint("H2", $timing_info);
+        if ($_REQUEST["debug"]) {
+            $timing_info = print_checkpoint("H2", $timing_info);
+        }
 
         return array($topmost_article_ids, $headlines_count, $feed, $disable_cache,
             $vgroup_last_feed, $reply);
     }
 
-    function catchupAll() {
+    function catchupAll()
+    {
         $this->dbh->query("UPDATE ttrss_user_entries SET
-                        last_read = NOW(), unread = false WHERE unread = true AND owner_uid = " . $_SESSION["uid"]);
+            last_read = NOW(), unread = false WHERE unread = true AND owner_uid = " . $_SESSION["uid"]);
         ccache_zero_all($_SESSION["uid"]);
     }
 
-    function view() {
+    function view()
+    {
         $timing_info = microtime(true);
 
         $reply = array();
 
-        if ($_REQUEST["debug"]) $timing_info = print_checkpoint("0", $timing_info);
+        if ($_REQUEST["debug"]) {
+            $timing_info = print_checkpoint("0", $timing_info);
+        }
 
         $feed = $this->dbh->escape_string($_REQUEST["feed"]);
         $method = $this->dbh->escape_string($_REQUEST["m"]);
@@ -821,7 +904,9 @@ class Feeds extends Handler_Protected {
         @$vgroup_last_feed = $this->dbh->escape_string($_REQUEST["vgrlf"]);
         $order_by = $this->dbh->escape_string($_REQUEST["order_by"]);
 
-        if (is_numeric($feed)) $feed = (int) $feed;
+        if (is_numeric($feed)) {
+            $feed = (int) $feed;
+        }
 
         /* Feed -5 is a special case: it is used to display auxiliary information
          * when there's nothing to load - e.g. no stuff in fresh feed */
@@ -835,14 +920,20 @@ class Feeds extends Handler_Protected {
 
         if ($feed < LABEL_BASE_INDEX) {
             $label_feed = feed_to_label_id($feed);
-            $result = $this->dbh->query("SELECT id FROM ttrss_labels2 WHERE
-                            id = '$label_feed' AND owner_uid = " . $_SESSION['uid']);
-        } else if (!$cat_view && is_numeric($feed) && $feed > 0) {
-            $result = $this->dbh->query("SELECT id FROM ttrss_feeds WHERE
-                            id = '$feed' AND owner_uid = " . $_SESSION['uid']);
-        } else if ($cat_view && is_numeric($feed) && $feed > 0) {
-            $result = $this->dbh->query("SELECT id FROM ttrss_feed_categories WHERE
-                            id = '$feed' AND owner_uid = " . $_SESSION['uid']);
+            $result = $this->dbh->query(
+                "SELECT id FROM ttrss_labels2
+                WHERE id = '$label_feed' AND owner_uid = " . $_SESSION['uid']
+            );
+        } elseif (!$cat_view && is_numeric($feed) && $feed > 0) {
+            $result = $this->dbh->query(
+                "SELECT id FROM ttrss_feeds
+                WHERE id = '$feed' AND owner_uid = " . $_SESSION['uid']
+            );
+        } elseif ($cat_view && is_numeric($feed) && $feed > 0) {
+            $result = $this->dbh->query(
+                "SELECT id FROM ttrss_feed_categories
+                WHERE id = '$feed' AND owner_uid = " . $_SESSION['uid']
+            );
         }
 
         if ($result && $this->dbh->num_rows($result) == 0) {
@@ -862,44 +953,60 @@ class Feeds extends Handler_Protected {
 
         /* bump login timestamp if needed */
         if (time() - $_SESSION["last_login_update"] > 3600) {
-            $this->dbh->query("UPDATE ttrss_users SET last_login = NOW() WHERE id = " .
-                $_SESSION["uid"]);
+            $this->dbh->query(
+                "UPDATE ttrss_users SET last_login = NOW() WHERE id = " .
+                $_SESSION["uid"]
+            );
             $_SESSION["last_login_update"] = time();
         }
 
         if (!$cat_view && is_numeric($feed) && $feed > 0) {
-            $this->dbh->query("UPDATE ttrss_feeds SET last_viewed = NOW()
-                            WHERE id = '$feed' AND owner_uid = ".$_SESSION["uid"]);
+            $this->dbh->query(
+                "UPDATE ttrss_feeds SET last_viewed = NOW()
+                WHERE id = '$feed' AND owner_uid = ".$_SESSION["uid"]
+            );
         }
 
         $reply['headlines'] = array();
 
-        if (!$next_unread_feed)
+        if (!$next_unread_feed) {
             $reply['headlines']['id'] = $feed;
-        else
+        } else {
             $reply['headlines']['id'] = $next_unread_feed;
+        }
 
         $reply['headlines']['is_cat'] = (bool) $cat_view;
 
         $override_order = false;
 
         switch ($order_by) {
-        case "title":
-            $override_order = "ttrss_entries.title";
-            break;
-        case "date_reverse":
-            $override_order = "score DESC, date_entered, updated";
-            break;
-        case "feed_dates":
-            $override_order = "updated DESC";
-            break;
+            case "title":
+                $override_order = "ttrss_entries.title";
+                break;
+            case "date_reverse":
+                $override_order = "score DESC, date_entered, updated";
+                break;
+            case "feed_dates":
+                $override_order = "updated DESC";
+                break;
         }
 
-        if ($_REQUEST["debug"]) $timing_info = print_checkpoint("04", $timing_info);
+        if ($_REQUEST["debug"]) {
+            $timing_info = print_checkpoint("04", $timing_info);
+        }
 
-        $ret = $this->format_headlines_list($feed, $method,
-            $view_mode, $limit, $cat_view, $next_unread_feed, $offset,
-            $vgroup_last_feed, $override_order, true);
+        $ret = $this->format_headlines_list(
+            $feed,
+            $method,
+            $view_mode,
+            $limit,
+            $cat_view,
+            $next_unread_feed,
+            $offset,
+            $vgroup_last_feed,
+            $override_order,
+            true
+        );
 
         //$topmost_article_ids = $ret[0];
         $headlines_count = $ret[1];
@@ -910,13 +1017,17 @@ class Feeds extends Handler_Protected {
         $reply['headlines']['content'] =& $ret[5]['content'];
         $reply['headlines']['toolbar'] =& $ret[5]['toolbar'];
 
-        if ($_REQUEST["debug"]) $timing_info = print_checkpoint("05", $timing_info);
+        if ($_REQUEST["debug"]) {
+            $timing_info = print_checkpoint("05", $timing_info);
+        }
 
         $reply['headlines-info'] = array("count" => (int) $headlines_count,
                         "vgroup_last_feed" => $vgroup_last_feed,
                         "disable_cache" => (bool) $disable_cache);
 
-        if ($_REQUEST["debug"]) $timing_info = print_checkpoint("30", $timing_info);
+        if ($_REQUEST["debug"]) {
+            $timing_info = print_checkpoint("30", $timing_info);
+        }
 
         $reply['runtime-info'] = make_runtime_info();
 
@@ -924,7 +1035,8 @@ class Feeds extends Handler_Protected {
 
     }
 
-    private function generate_dashboard_feed() {
+    private function generate_dashboard_feed()
+    {
         $reply = array();
 
         $reply['headlines']['id'] = -5;
@@ -963,7 +1075,8 @@ class Feeds extends Handler_Protected {
         return $reply;
     }
 
-    private function generate_error_feed($error) {
+    private function generate_error_feed($error)
+    {
         $reply = array();
 
         $reply['headlines']['id'] = -6;
@@ -980,7 +1093,8 @@ class Feeds extends Handler_Protected {
         return $reply;
     }
 
-    function quickAddFeed() {
+    function quickAddFeed()
+    {
         print "<input dojoType=\"dijit.form.TextBox\" style=\"display : none\" name=\"op\" value=\"rpc\">";
         print "<input dojoType=\"dijit.form.TextBox\" style=\"display : none\" name=\"method\" value=\"addfeed\">";
 
@@ -1056,8 +1170,11 @@ class Feeds extends Handler_Protected {
         //return;
     }
 
-    function feedBrowser() {
-        if (defined('_DISABLE_FEED_BROWSER') && _DISABLE_FEED_BROWSER) return;
+    function feedBrowser()
+    {
+        if (defined('_DISABLE_FEED_BROWSER') && _DISABLE_FEED_BROWSER) {
+            return;
+        }
 
         $browser_search = $this->dbh->escape_string($_REQUEST["search"]);
 
@@ -1104,7 +1221,8 @@ class Feeds extends Handler_Protected {
 
     }
 
-    function search() {
+    function search()
+    {
         $this->params = explode(":", $this->dbh->escape_string($_REQUEST["param"]), 2);
 
         $active_feed_id = sprintf("%d", $this->params[0]);
