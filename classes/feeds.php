@@ -21,137 +21,78 @@ class Feeds extends Handler_Protected
         $error,
         $feed_last_updated
     ) {
-        $catchup_sel_link = "catchupSelection()";
+        // Initialize template engine
+        $loader = new Twig_Loader_Filesystem('templates/html/classes/feeds');
+        $twig = new Twig_Environment($loader, array('cache' => 'cache/templates'));
 
-        $archive_sel_link = "archiveSelection()";
-        $delete_sel_link = "deleteSelection()";
+        // Load template
+        $template = $twig->loadTemplate('format_headline_subtoolbar.html');
+        $template_vars = array(
+            'catchup_sel_link' => 'catchupSelection()',
+            'archive_sel_link' => 'archiveSelection()',
+            'delete_sel_link' => 'deleteSelection()',
+            'sel_all_link' => 'selectArticles("all")',
+            'sel_unread_link' => 'selectArticles("unread")',
+            'sel_inv_link' => 'selectArticles("invert")',
+            'sel_none_link' => 'selectArticles("none")',
+            'tog_unread_link' => 'selectionToggleUnread()',
+            'tog_marked_link' => 'selectionToggleMarked()',
+            'tog_published_link' => 'selectionTogglePublished()',
+            'set_score_link' => 'setSelectionScore()',
+        );
 
-        $sel_all_link = "selectArticles('all')";
-        $sel_unread_link = "selectArticles('unread')";
-        $sel_none_link = "selectArticles('none')";
-        $sel_inv_link = "selectArticles('invert')";
-
-        $tog_unread_link = "selectionToggleUnread()";
-        $tog_marked_link = "selectionToggleMarked()";
-        $tog_published_link = "selectionTogglePublished()";
-
-        $set_score_link = "setSelectionScore()";
+        // Fill template variables
+        $template_vars['feed_id'] = $feed_id;
+        $template_vars['is_cat'] = $is_cat;
 
         if ($is_cat) {
-            $cat_q = "&is_cat=$is_cat";
+            $cat_q = "&is_cat=".$is_cat;
         }
 
         if ($search) {
-            $search_q = "&q=$search&smode=$search_mode";
+            $search_q = "&q=".$search."&smode=".$search_mode;
         } else {
             $search_q = "";
         }
 
-        $reply .= "<span class=\"holder\">";
-
-        $rss_link = htmlspecialchars(
-            get_self_url_prefix() . "/public.php?op=rss&id=$feed_id$cat_q$search_q"
+        $template_vars['rss_link'] = htmlspecialchars(
+            get_self_url_prefix() . "/public.php?op=rss&id=".$feed_id . $cat_q . $search_q
         );
 
-        // right part
-
-        $error_class = $error ? "error" : "";
-
-        $reply .= "<span class='r'>
-            <a href=\"#\"
-                title=\"".__("View as RSS feed")."\"
-                onclick=\"displayDlg('".__("View as RSS")."','generatedFeed', '$feed_id:$is_cat:$rss_link')\">
-                <img class=\"noborder\" src=\"images/pub_set.png\"></a>";
-
-
-        #$reply .= "<span>";
-        $reply .= "<span id='feed_title' class='$error_class'>";
+        if ($error) {
+            $template_vars['show_error'] = true;
+            $template_vars['error'] = $error;
+        }
 
         if ($feed_site_url) {
-            $last_updated = T_sprintf("Last updated: %s", $feed_last_updated);
-
-            $target = "target=\"_blank\"";
-            $reply .= "<a title=\"$last_updated\" $target href=\"$feed_site_url\">".
-                truncate_string($feed_title, 30)."</a>";
-
-            if ($error) {
-                $error = htmlspecialchars($error);
-                $reply .= "&nbsp;<img title=\"$error\" src='images/error.png' alt='error' class=\"noborder\">";
-            }
-
+            $template_vars['show_feed_site_url'] = true;
+            $template_vars['feed_site_url'] = $feed_site_url;
+            $template_vars['last_updated'] = T_sprintf("Last updated: %s", $feed_last_updated);
+            $template_vars['feed_title'] = truncate_string($feed_title, 30);
         } else {
-            $reply .= $feed_title;
+            $template_vars['feed_title'] = $feed_title;
         }
 
-        $reply .= "</span>";
-
-        $reply .= "</span>";
-
-        #$reply .= "</span>";
-
-        // left part
-
-        $reply .= "<span class=\"main\">";
-        $reply .= "<span id='selected_prompt'></span>";
-
-        $reply .= "
-            <a href=\"#\" onclick=\"$sel_all_link\">".__('All')."</a>,
-            <a href=\"#\" onclick=\"$sel_unread_link\">".__('Unread')."</a>,
-            <a href=\"#\" onclick=\"$sel_inv_link\">".__('Invert')."</a>,
-            <a href=\"#\" onclick=\"$sel_none_link\">".__('None')."</a></li>";
-
-        $reply .= " ";
-
-        $reply .= "<select dojoType=\"dijit.form.Select\"
-            onchange=\"headlineActionsChange(this)\">";
-        $reply .= "<option value=\"false\">".__('More...')."</option>";
-
-        $reply .= "<option value=\"0\" disabled=\"1\">".__('Selection toggle:')."</option>";
-
-        $reply .= "<option value=\"$tog_unread_link\">".__('Unread')."</option>
-            <option value=\"$tog_marked_link\">".__('Starred')."</option>
-            <option value=\"$tog_published_link\">".__('Published')."</option>";
-
-        $reply .= "<option value=\"0\" disabled=\"1\">".__('Selection:')."</option>";
-
-        $reply .= "<option value=\"$catchup_sel_link\">".__('Mark as read')."</option>";
-        $reply .= "<option value=\"$set_score_link\">".__('Set score')."</option>";
-
-        if ($feed_id != "0") {
-            $reply .= "<option value=\"$archive_sel_link\">".__('Archive')."</option>";
-        } else {
-            $reply .= "<option value=\"$archive_sel_link\">".__('Move back')."</option>";
-            $reply .= "<option value=\"$delete_sel_link\">".__('Delete')."</option>";
-
-        }
+        $template_vars['isarchive'] = $feed_id == "0";
 
         if (PluginHost::getInstance()->get_plugin("mail")) {
-            $reply .= "<option value=\"emailArticle(false)\">".__('Forward by email').
-                "</option>";
+            $template_vars['mail'] = true;
         }
 
         if (PluginHost::getInstance()->get_plugin("mailto")) {
-            $reply .= "<option value=\"mailtoArticle(false)\">".__('Forward by email').
-                "</option>";
+            $template_vars['mailto'] = true;
         }
 
-        $reply .= "<option value=\"0\" disabled=\"1\">".__('Feed:')."</option>";
-
-        //$reply .= "<option value=\"catchupPage()\">".__('Mark as read')."</option>";
-
-        $reply .= "<option value=\"displayDlg('".__("View as RSS")."','generatedFeed', '$feed_id:$is_cat:$rss_link')\">".__('View as RSS')."</option>";
-
-        $reply .= "</select>";
-
-        //$reply .= "</h2";
-
+        $template_vars['hook_toolbar_buttons'] = array();
         foreach (PluginHost::getInstance()->get_hooks(PluginHost::HOOK_HEADLINE_TOOLBAR_BUTTON) as $p) {
-             $reply .= $p->hook_headline_toolbar_button($feed_id, $is_cat);
+            array_push(
+                $template_vars['hook_toolbar_buttons'],
+                $p->hook_headline_toolbar_button($feed_id, $is_cat)
+            );
         }
 
-        $reply .= "</span></span>";
-
-        return $reply;
+        // Render the template
+        return $template->render($template_vars);
     }
 
     private function format_headlines_list(
