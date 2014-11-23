@@ -4,8 +4,10 @@ An unordered list of things to do before the 1.0 release.
 
 - [ ] Use [**Composor**](https://getcomposer.org/) for all PHP dependencies
   (see [lib/](https://github.com/bfrss/bfrss/tree/master/lib))
+  - [ ] Check for updates
 - [ ] Use [**Bower**](http://bower.io/) for Javascript dependencies
   (see [lib/](https://github.com/bfrss/bfrss/tree/master/lib))
+  - [ ] Check for updates
 - [ ] Use **templates** ([twig](http://twig.sensiolabs.org/)) all over the code
 - [ ] Use **HTML5**
   (depends on templates)
