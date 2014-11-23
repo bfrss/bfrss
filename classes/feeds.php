@@ -96,7 +96,7 @@ class Feeds extends Handler_Protected
     }
 
     private function format_headlines_list(
-        $feed,
+        $feed, // part of return value
         $method,
         $view_mode,
         $limit,
@@ -111,15 +111,15 @@ class Feeds extends Handler_Protected
             header("Content-Type: text/plain; charset=utf-8");
         }
 
-        $disable_cache = false;
+        $disable_cache = false; // part of return value
 
-        $reply = array();
+        $reply = array(); // part of return value
 
         $rgba_cache = array();
 
         $timing_info = microtime(true);
 
-        $topmost_article_ids = array();
+        $topmost_article_ids = array(); // part of return value
 
         if (!$offset) {
             $offset = 0;
@@ -244,7 +244,7 @@ class Feeds extends Handler_Protected
             __("Never");
         $highlight_words = $qfh_ret[5];
 
-        $vgroup_last_feed = $vgr_last_feed;
+        $vgroup_last_feed = $vgr_last_feed; // part of return value
 
         $reply['toolbar'] = $this->format_headline_subtoolbar(
             $feed_site_url,
@@ -258,7 +258,7 @@ class Feeds extends Handler_Protected
             $last_updated
         );
 
-        $headlines_count = $this->dbh->num_rows($result);
+        $headlines_count = $this->dbh->num_rows($result); // part of return value
 
         if ($offset == 0) {
             foreach (PluginHost::getInstance()->get_hooks(PluginHost::HOOK_HEADLINES_BEFORE) as $p) {
