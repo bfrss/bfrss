@@ -1163,7 +1163,4 @@ class Feeds extends Handler_Protected {
         <button dojoType=\"dijit.form.Button\" onclick=\"dijit.byId('searchDlg').hide()\">".__('Cancel')."</button>
         </div>";
     }
-
-
 }
-?>
