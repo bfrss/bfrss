@@ -43,8 +43,7 @@ function make_feed_browser($search, $limit, $mode = 1)
         );
     }
 
-    $rv = '';
-    $feedctr = 0;
+    $rv = "";
 
     while ($line = db_fetch_assoc($result)) {
 
@@ -85,12 +84,10 @@ function make_feed_browser($search, $limit, $mode = 1)
         $rv .= "<li".$id.">".
             $check_box." ".$feed_url_tag." ".$site_url_tag.
             "&nbsp;<span class='subscribers'>".$count."</span></li>";
-
-        ++$feedctr;
     }
 
-    if ($feedctr === 0) {
-        $rv .= "<li style=\"text-align:center;\"><p>".__('No feeds found.')."</p></li>";
+    if ($rv === "") {
+        $rv = "<li style=\"text-align:center;\"><p>".__('No feeds found.')."</p></li>";
     }
 
     return $rv;
