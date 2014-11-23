@@ -53,8 +53,6 @@ function make_feed_browser($search, $limit, $mode = 1)
         $check_box = "<input onclick='toggleSelectListRow2(this)'
             dojoType=\"dijit.form.CheckBox\" type=\"checkbox\">";
 
-        $class = ($feedctr % 2) ? "even" : "odd";
-
         $site_url_tag = "<a target=\"_blank\" href=\"".$site_url."\">
             <span class=\"fb_feedTitle\">".
             htmlspecialchars($line['title']).
