@@ -21,8 +21,10 @@ class RPC extends Handler_Protected {
 
         foreach ($ids as $id) {
             if ($_SESSION["profile"] != $id) {
-                $this->dbh->query("DELETE FROM ttrss_settings_profiles
-                    WHERE id = '$id' AND owner_uid = " . $_SESSION["uid"]);
+                $this->dbh->query(
+                    "DELETE FROM ttrss_settings_profiles
+                    WHERE id = '$id' AND owner_uid = " . $_SESSION["uid"]
+                );
             }
         }
     }
@@ -31,31 +33,39 @@ class RPC extends Handler_Protected {
     function addprofile()
     {
         $title = $this->dbh->escape_string(trim($_REQUEST["title"]));
-        if ($title) {
-            $this->dbh->query("BEGIN");
+        if (!$title) {
+            return;
+        }
 
-            $result = $this->dbh->query("SELECT id FROM ttrss_settings_profiles
-                WHERE title = '$title' AND owner_uid = " . $_SESSION["uid"]);
+        $this->dbh->query("BEGIN");
 
-            if ($this->dbh->num_rows($result) == 0) {
+        $result = $this->dbh->query(
+            "SELECT id FROM ttrss_settings_profiles
+            WHERE title = '$title' AND owner_uid = " . $_SESSION["uid"]
+        );
 
-                $this->dbh->query("INSERT INTO ttrss_settings_profiles (title, owner_uid)
-                    VALUES ('$title', ".$_SESSION["uid"] .")");
+        if ($this->dbh->num_rows($result) == 0) {
 
-                $result = $this->dbh->query("SELECT id FROM ttrss_settings_profiles
-                    WHERE title = '$title'");
+            $this->dbh->query(
+                "INSERT INTO ttrss_settings_profiles (title, owner_uid)
+                VALUES ('$title', ".$_SESSION["uid"] .")"
+            );
 
-                if ($this->dbh->num_rows($result) != 0) {
-                    $profile_id = $this->dbh->fetch_result($result, 0, "id");
+            $result = $this->dbh->query(
+                "SELECT id FROM ttrss_settings_profiles
+                WHERE title = '$title'"
+            );
 
-                    if ($profile_id) {
-                        initialize_user_prefs($_SESSION["uid"], $profile_id);
-                    }
+            if ($this->dbh->num_rows($result) != 0) {
+                $profile_id = $this->dbh->fetch_result($result, 0, "id");
+
+                if ($profile_id) {
+                    initialize_user_prefs($_SESSION["uid"], $profile_id);
                 }
             }
-
-            $this->dbh->query("COMMIT");
         }
+
+        $this->dbh->query("COMMIT");
     }
 
     // Silent
@@ -69,25 +79,33 @@ class RPC extends Handler_Protected {
             return;
         }
 
-        if ($title) {
-            $this->dbh->query("BEGIN");
-
-            $result = $this->dbh->query("SELECT id FROM ttrss_settings_profiles
-                WHERE title = '$title' AND owner_uid =" . $_SESSION["uid"]);
-
-            if ($this->dbh->num_rows($result) == 0) {
-                $this->dbh->query("UPDATE ttrss_settings_profiles
-                            SET title = '$title' WHERE id = '$id' AND
-                            owner_uid = " . $_SESSION["uid"]);
-                print $title;
-            } else {
-                $result = $this->dbh->query("SELECT title FROM ttrss_settings_profiles
-                            WHERE id = '$id' AND owner_uid =" . $_SESSION["uid"]);
-                print $this->dbh->fetch_result($result, 0, "title");
-            }
-
-            $this->dbh->query("COMMIT");
+        if (!$title) {
+            return;
         }
+
+        $this->dbh->query("BEGIN");
+
+        $result = $this->dbh->query(
+            "SELECT id FROM ttrss_settings_profiles
+            WHERE title = '$title' AND owner_uid =" . $_SESSION["uid"]
+        );
+
+        if ($this->dbh->num_rows($result) == 0) {
+            $this->dbh->query(
+                "UPDATE ttrss_settings_profiles
+                SET title = '$title'
+                WHERE id = '$id' AND owner_uid = " . $_SESSION["uid"]
+            );
+            print $title;
+        } else {
+            $result = $this->dbh->query(
+                "SELECT title FROM ttrss_settings_profiles
+                WHERE id = '$id' AND owner_uid =" . $_SESSION["uid"]
+            );
+            print $this->dbh->fetch_result($result, 0, "title");
+        }
+
+        $this->dbh->query("COMMIT");
     }
 
     // Silent
@@ -101,7 +119,8 @@ class RPC extends Handler_Protected {
                 WHERE
                     (SELECT COUNT(*) FROM ttrss_user_entries
                     WHERE orig_feed_id = '$id') = 0
-                AND id = '$id' AND owner_uid = ".$_SESSION["uid"]);
+                AND id = '$id' AND owner_uid = ".$_SESSION["uid"]
+            );
 
             $this->dbh->affected_rows($result);
         }
@@ -136,23 +155,18 @@ class RPC extends Handler_Protected {
 
         set_pref($key, $value, $_SESSION['uid'], $key != 'USER_STYLESHEET');
 
-        print json_encode(array("param" =>$key, "value" => $value));
+        print json_encode(array("param" => $key, "value" => $value));
     }
 
     function mark()
     {
-        $mark = $_REQUEST["mark"];
+        $mark = $_REQUEST["mark"] == "1" ? "true" : "false";
         $id = $this->dbh->escape_string($_REQUEST["id"]);
 
-        if ($mark == "1") {
-            $mark = "true";
-        } else {
-            $mark = "false";
-        }
-
-        $this->dbh->query("UPDATE ttrss_user_entries SET marked = $mark,
-                    last_marked = NOW()
-                    WHERE ref_id = '$id' AND owner_uid = " . $_SESSION["uid"]);
+        $this->dbh->query(
+            "UPDATE ttrss_user_entries SET marked = $mark, last_marked = NOW()
+            WHERE ref_id = '$id' AND owner_uid = " . $_SESSION["uid"]
+        );
 
         print json_encode(array("message" => "UPDATE_COUNTERS"));
     }
@@ -161,8 +175,10 @@ class RPC extends Handler_Protected {
     {
         $ids = $this->dbh->escape_string($_REQUEST["ids"]);
 
-        $this->dbh->query("DELETE FROM ttrss_user_entries
-            WHERE ref_id IN ($ids) AND owner_uid = " . $_SESSION["uid"]);
+        $this->dbh->query(
+            "DELETE FROM ttrss_user_entries
+            WHERE ref_id IN ($ids) AND owner_uid = " . $_SESSION["uid"]
+        );
 
         purge_orphans();
 
@@ -177,17 +193,21 @@ class RPC extends Handler_Protected {
             $id = $this->dbh->escape_string(trim($id));
             $this->dbh->query("BEGIN");
 
-            $result = $this->dbh->query("SELECT feed_url,site_url,title FROM ttrss_archived_feeds
+            $result = $this->dbh->query(
+                "SELECT feed_url,site_url,title FROM ttrss_archived_feeds
                 WHERE id = (SELECT orig_feed_id FROM ttrss_user_entries WHERE ref_id = $id
-                AND owner_uid = ".$_SESSION["uid"].")");
+                AND owner_uid = ".$_SESSION["uid"].")"
+            );
 
             if ($this->dbh->num_rows($result) != 0) {
                 $feed_url = $this->dbh->escape_string(db_fetch_result($result, 0, "feed_url"));
                 $site_url = $this->dbh->escape_string(db_fetch_result($result, 0, "site_url"));
                 $title = $this->dbh->escape_string(db_fetch_result($result, 0, "title"));
 
-                $result = $this->dbh->query("SELECT id FROM ttrss_feeds WHERE feed_url = '$feed_url'
-                    AND owner_uid = " .$_SESSION["uid"]);
+                $result = $this->dbh->query(
+                    "SELECT id FROM ttrss_feeds WHERE feed_url = '$feed_url'
+                    AND owner_uid = " .$_SESSION["uid"]
+                );
 
                 if ($this->dbh->num_rows($result) == 0) {
 
@@ -200,11 +220,13 @@ class RPC extends Handler_Protected {
                             '$feed_url',
                             '$site_url',
                             '$title',
-                            NULL, '', '', 0)");
+                            NULL, '', '', 0)"
+                    );
 
                     $result = $this->dbh->query(
                         "SELECT id FROM ttrss_feeds WHERE feed_url = '$feed_url'
-                        AND owner_uid = ".$_SESSION["uid"]);
+                        AND owner_uid = ".$_SESSION["uid"]
+                    );
 
                     if ($this->dbh->num_rows($result) != 0) {
                         $feed_id = $this->dbh->fetch_result($result, 0, "id");
@@ -215,9 +237,11 @@ class RPC extends Handler_Protected {
                 }
 
                 if ($feed_id) {
-                    $result = $this->dbh->query("UPDATE ttrss_user_entries
+                    $result = $this->dbh->query(
+                        "UPDATE ttrss_user_entries
                         SET feed_id = '$feed_id', orig_feed_id = NULL
-                        WHERE ref_id = $id AND owner_uid = " . $_SESSION["uid"]);
+                        WHERE ref_id = $id AND owner_uid = " . $_SESSION["uid"]
+                    );
                 }
             }
 
@@ -242,8 +266,10 @@ class RPC extends Handler_Protected {
     {
         $this->dbh->query("BEGIN");
 
-        $result = $this->dbh->query("SELECT feed_id FROM ttrss_user_entries
-            WHERE ref_id = '$id' AND owner_uid = $owner_uid");
+        $result = $this->dbh->query(
+            "SELECT feed_id FROM ttrss_user_entries
+            WHERE ref_id = '$id' AND owner_uid = $owner_uid"
+        );
 
         if ($this->dbh->num_rows($result) != 0) {
 
@@ -252,19 +278,25 @@ class RPC extends Handler_Protected {
             $feed_id = (int) $this->dbh->fetch_result($result, 0, "feed_id");
 
             if ($feed_id) {
-                $result = $this->dbh->query("SELECT id FROM ttrss_archived_feeds
-                    WHERE id = '$feed_id'");
+                $result = $this->dbh->query(
+                    "SELECT id FROM ttrss_archived_feeds
+                    WHERE id = '$feed_id'"
+                );
 
                 if ($this->dbh->num_rows($result) == 0) {
-                    $this->dbh->query("INSERT INTO ttrss_archived_feeds
+                    $this->dbh->query(
+                        "INSERT INTO ttrss_archived_feeds
                         (id, owner_uid, title, feed_url, site_url)
-                    SELECT id, owner_uid, title, feed_url, site_url from ttrss_feeds
-                      WHERE id = '$feed_id'");
+                        SELECT id, owner_uid, title, feed_url, site_url from ttrss_feeds
+                        WHERE id = '$feed_id'"
+                    );
                 }
 
-                $this->dbh->query("UPDATE ttrss_user_entries
+                $this->dbh->query(
+                    "UPDATE ttrss_user_entries
                     SET orig_feed_id = feed_id, feed_id = NULL
-                    WHERE ref_id = '$id' AND owner_uid = " . $_SESSION["uid"]);
+                    WHERE ref_id = '$id' AND owner_uid = " . $_SESSION["uid"]
+                );
             }
         }
 
@@ -273,18 +305,14 @@ class RPC extends Handler_Protected {
 
     function publ()
     {
-        $pub = $_REQUEST["pub"];
+        $pub = $_REQUEST["pub"] == "1" ? "true" : "false";
         $id = $this->dbh->escape_string($_REQUEST["id"]);
 
-        if ($pub == "1") {
-            $pub = "true";
-        } else {
-            $pub = "false";
-        }
-
-        $this->dbh->query("UPDATE ttrss_user_entries SET
+        $this->dbh->query(
+            "UPDATE ttrss_user_entries SET
             published = $pub, last_published = NOW()
-            WHERE ref_id = '$id' AND owner_uid = " . $_SESSION["uid"]);
+            WHERE ref_id = '$id' AND owner_uid = " . $_SESSION["uid"]
+        );
 
         $pubsub_result = false;
 
@@ -298,8 +326,12 @@ class RPC extends Handler_Protected {
             $pubsub_result = $p->publish_update($rss_link);
         }
 
-        print json_encode(array("message" => "UPDATE_COUNTERS",
-            "pubsub_result" => $pubsub_result));
+        print json_encode(
+            array(
+                'message' => "UPDATE_COUNTERS",
+                'pubsub_result' => $pubsub_result
+            )
+        );
     }
 
     function getAllCounters()
@@ -410,9 +442,12 @@ class RPC extends Handler_Protected {
 
         require_once "feedbrowser.php";
 
-        print json_encode(array("content" =>
-            make_feed_browser($search, $limit, $mode),
-                "mode" => $mode));
+        print json_encode(
+            array(
+                'content' => make_feed_browser($search, $limit, $mode),
+                'mode' => $mode
+            )
+        );
     }
 
     // Silent
@@ -609,9 +644,11 @@ class RPC extends Handler_Protected {
         } else {
             $newValue = "NOT marked";
         }
-        $this->dbh->query("UPDATE ttrss_user_entries SET
+        $this->dbh->query(
+            "UPDATE ttrss_user_entries SET
             marked = ".$newValue.",last_marked = NOW()
-            WHERE ($ids_qpart) AND owner_uid = " . $_SESSION["uid"]);
+            WHERE ($ids_qpart) AND owner_uid = " . $_SESSION["uid"]
+        );
     }
 
     private function publishArticlesById($ids, $cmode)
@@ -631,9 +668,11 @@ class RPC extends Handler_Protected {
         } else {
             $newValuepublished = "published";
         }
-        $this->dbh->query("UPDATE ttrss_user_entries SET
+        $this->dbh->query(
+            "UPDATE ttrss_user_entries SET
             published = ".$newValue.",last_published = NOW()
-            WHERE ($ids_qpart) AND owner_uid = " . $_SESSION["uid"]);
+            WHERE ($ids_qpart) AND owner_uid = " . $_SESSION["uid"]
+        );
 
         if (PUBSUBHUBBUB_HUB) {
             $rss_link = get_self_url_prefix() .
