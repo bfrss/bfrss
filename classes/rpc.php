@@ -1,31 +1,35 @@
 <?php
 class RPC extends Handler_Protected {
 
-    function csrf_ignore($method) {
+    function csrf_ignore($method)
+    {
         $csrf_ignored = array("sanitycheck", "completelabels");
 
         return array_search($method, $csrf_ignored) !== false;
     }
 
-    function setprofile() {
+    function setprofile()
+    {
         $id = $this->dbh->escape_string($_REQUEST["id"]);
 
         $_SESSION["profile"] = $id;
     }
 
-    function remprofiles() {
+    function remprofiles()
+    {
         $ids = explode(",", $this->dbh->escape_string(trim($_REQUEST["ids"])));
 
         foreach ($ids as $id) {
             if ($_SESSION["profile"] != $id) {
-                $this->dbh->query("DELETE FROM ttrss_settings_profiles WHERE id = '$id' AND
-                            owner_uid = " . $_SESSION["uid"]);
+                $this->dbh->query("DELETE FROM ttrss_settings_profiles
+                    WHERE id = '$id' AND owner_uid = " . $_SESSION["uid"]);
             }
         }
     }
 
     // Silent
-    function addprofile() {
+    function addprofile()
+    {
         $title = $this->dbh->escape_string(trim($_REQUEST["title"]));
         if ($title) {
             $this->dbh->query("BEGIN");
@@ -36,10 +40,10 @@ class RPC extends Handler_Protected {
             if ($this->dbh->num_rows($result) == 0) {
 
                 $this->dbh->query("INSERT INTO ttrss_settings_profiles (title, owner_uid)
-                            VALUES ('$title', ".$_SESSION["uid"] .")");
+                    VALUES ('$title', ".$_SESSION["uid"] .")");
 
-                $result = $this->dbh->query("SELECT id FROM ttrss_settings_profiles WHERE
-                    title = '$title'");
+                $result = $this->dbh->query("SELECT id FROM ttrss_settings_profiles
+                    WHERE title = '$title'");
 
                 if ($this->dbh->num_rows($result) != 0) {
                     $profile_id = $this->dbh->fetch_result($result, 0, "id");
@@ -55,7 +59,8 @@ class RPC extends Handler_Protected {
     }
 
     // Silent
-    function saveprofile() {
+    function saveprofile()
+    {
         $id = $this->dbh->escape_string($_REQUEST["id"]);
         $title = $this->dbh->escape_string(trim($_REQUEST["value"]));
 
@@ -86,20 +91,24 @@ class RPC extends Handler_Protected {
     }
 
     // Silent
-    function remarchive() {
+    function remarchive()
+    {
         $ids = explode(",", $this->dbh->escape_string($_REQUEST["ids"]));
 
         foreach ($ids as $id) {
-            $result = $this->dbh->query("DELETE FROM ttrss_archived_feeds WHERE
-        (SELECT COUNT(*) FROM ttrss_user_entries
-                            WHERE orig_feed_id = '$id') = 0 AND
-        id = '$id' AND owner_uid = ".$_SESSION["uid"]);
+            $result = $this->dbh->query(
+                "DELETE FROM ttrss_archived_feeds
+                WHERE
+                    (SELECT COUNT(*) FROM ttrss_user_entries
+                    WHERE orig_feed_id = '$id') = 0
+                AND id = '$id' AND owner_uid = ".$_SESSION["uid"]);
 
             $this->dbh->affected_rows($result);
         }
     }
 
-    function addfeed() {
+    function addfeed()
+    {
         $feed = $this->dbh->escape_string($_REQUEST['feed']);
         $cat = $this->dbh->escape_string($_REQUEST['cat']);
         $login = $this->dbh->escape_string($_REQUEST['login']);
@@ -110,7 +119,8 @@ class RPC extends Handler_Protected {
         print json_encode(array("result" => $rc));
     }
 
-    function togglepref() {
+    function togglepref()
+    {
         $key = $this->dbh->escape_string($_REQUEST["key"]);
         set_pref($key, !get_pref($key));
         $value = get_pref($key);
@@ -118,7 +128,8 @@ class RPC extends Handler_Protected {
         print json_encode(array("param" =>$key, "value" => $value));
     }
 
-    function setpref() {
+    function setpref()
+    {
         // set_pref escapes input, so no need to double escape it here
         $key = $_REQUEST['key'];
         $value = str_replace("\n", "<br/>", $_REQUEST['value']);
@@ -128,7 +139,8 @@ class RPC extends Handler_Protected {
         print json_encode(array("param" =>$key, "value" => $value));
     }
 
-    function mark() {
+    function mark()
+    {
         $mark = $_REQUEST["mark"];
         $id = $this->dbh->escape_string($_REQUEST["id"]);
 
@@ -145,7 +157,8 @@ class RPC extends Handler_Protected {
         print json_encode(array("message" => "UPDATE_COUNTERS"));
     }
 
-    function delete() {
+    function delete()
+    {
         $ids = $this->dbh->escape_string($_REQUEST["ids"]);
 
         $this->dbh->query("DELETE FROM ttrss_user_entries
@@ -156,7 +169,8 @@ class RPC extends Handler_Protected {
         print json_encode(array("message" => "UPDATE_COUNTERS"));
     }
 
-    function unarchive() {
+    function unarchive()
+    {
         $ids = explode(",", $_REQUEST["ids"]);
 
         foreach ($ids as $id) {
@@ -213,7 +227,8 @@ class RPC extends Handler_Protected {
         print json_encode(array("message" => "UPDATE_COUNTERS"));
     }
 
-    function archive() {
+    function archive()
+    {
         $ids = explode(",", $this->dbh->escape_string($_REQUEST["ids"]));
 
         foreach ($ids as $id) {
@@ -223,7 +238,8 @@ class RPC extends Handler_Protected {
         print json_encode(array("message" => "UPDATE_COUNTERS"));
     }
 
-    private function archive_article($id, $owner_uid) {
+    private function archive_article($id, $owner_uid)
+    {
         $this->dbh->query("BEGIN");
 
         $result = $this->dbh->query("SELECT feed_id FROM ttrss_user_entries
@@ -255,7 +271,8 @@ class RPC extends Handler_Protected {
         $this->dbh->query("COMMIT");
     }
 
-    function publ() {
+    function publ()
+    {
         $pub = $_REQUEST["pub"];
         $id = $this->dbh->escape_string($_REQUEST["id"]);
 
@@ -285,7 +302,8 @@ class RPC extends Handler_Protected {
             "pubsub_result" => $pubsub_result));
     }
 
-    function getAllCounters() {
+    function getAllCounters()
+    {
         $last_article_id = (int) $_REQUEST["last_article_id"];
 
         $reply = array();
@@ -302,7 +320,8 @@ class RPC extends Handler_Protected {
     }
 
     /* GET["cmode"] = 0 - mark as read, 1 - as unread, 2 - toggle */
-    function catchupSelected() {
+    function catchupSelected()
+    {
         $ids = explode(",", $this->dbh->escape_string($_REQUEST["ids"]));
         $cmode = sprintf("%d", $_REQUEST["cmode"]);
 
@@ -311,7 +330,8 @@ class RPC extends Handler_Protected {
         print json_encode(array("message" => "UPDATE_COUNTERS", "ids" => $ids));
     }
 
-    function markSelected() {
+    function markSelected()
+    {
         $ids = explode(",", $this->dbh->escape_string($_REQUEST["ids"]));
         $cmode = sprintf("%d", $_REQUEST["cmode"]);
 
@@ -320,7 +340,8 @@ class RPC extends Handler_Protected {
         print json_encode(array("message" => "UPDATE_COUNTERS"));
     }
 
-    function publishSelected() {
+    function publishSelected()
+    {
         $ids = explode(",", $this->dbh->escape_string($_REQUEST["ids"]));
         $cmode = sprintf("%d", $_REQUEST["cmode"]);
 
@@ -329,7 +350,8 @@ class RPC extends Handler_Protected {
         print json_encode(array("message" => "UPDATE_COUNTERS"));
     }
 
-    function sanityCheck() {
+    function sanityCheck()
+    {
         $_SESSION["hasAudio"] = $_REQUEST["hasAudio"] === "true";
         $_SESSION["hasSandbox"] = $_REQUEST["hasSandbox"] === "true";
         $_SESSION["hasMp3"] = $_REQUEST["hasMp3"] === "true";
@@ -347,7 +369,8 @@ class RPC extends Handler_Protected {
         print json_encode($reply);
     }
 
-    function completeLabels() {
+    function completeLabels()
+    {
         $search = $this->dbh->escape_string($_REQUEST["search"]);
 
         $result = $this->dbh->query("SELECT DISTINCT caption FROM
@@ -363,7 +386,8 @@ class RPC extends Handler_Protected {
         print "</ul>";
     }
 
-    function purge() {
+    function purge()
+    {
         $ids = explode(",", $this->dbh->escape_string($_REQUEST["ids"]));
         $days = sprintf("%d", $_REQUEST["days"]);
 
@@ -378,7 +402,8 @@ class RPC extends Handler_Protected {
         }
     }
 
-    function updateFeedBrowser() {
+    function updateFeedBrowser()
+    {
         $search = $this->dbh->escape_string($_REQUEST["search"]);
         $limit = $this->dbh->escape_string($_REQUEST["limit"]);
         $mode = (int) $this->dbh->escape_string($_REQUEST["mode"]);
@@ -391,8 +416,8 @@ class RPC extends Handler_Protected {
     }
 
     // Silent
-    function massSubscribe() {
-
+    function massSubscribe()
+    {
         $payload = json_decode($_REQUEST["payload"], false);
         $mode = $_REQUEST["mode"];
 
@@ -408,13 +433,13 @@ class RPC extends Handler_Protected {
                     feed_url = '$feed_url' AND owner_uid = " . $_SESSION["uid"]);
 
                 if ($this->dbh->num_rows($result) == 0) {
-                    $result = $this->dbh->query("INSERT INTO ttrss_feeds
-                                    (owner_uid,feed_url,title,cat_id,site_url)
-                                    VALUES ('".$_SESSION["uid"]."',
-                                    '$feed_url', '$title', NULL, '')");
+                    $this->dbh->query("INSERT INTO ttrss_feeds
+                        (owner_uid,feed_url,title,cat_id,site_url)
+                        VALUES ('".$_SESSION["uid"]."',
+                        '$feed_url', '$title', NULL, '')");
                 }
             }
-        } else if ($mode == 2) {
+        } elseif ($mode == 2) {
             // feed archive
             foreach ($payload as $id) {
                 $result = $this->dbh->query("SELECT * FROM ttrss_archived_feeds
@@ -429,17 +454,18 @@ class RPC extends Handler_Protected {
                         feed_url = '$feed_url' AND owner_uid = " . $_SESSION["uid"]);
 
                     if ($this->dbh->num_rows($result) == 0) {
-                        $result = $this->dbh->query("INSERT INTO ttrss_feeds
-                                        (owner_uid,feed_url,title,cat_id,site_url)
-                                    VALUES ('$id','".$_SESSION["uid"]."',
-                                    '$feed_url', '$title', NULL, '$site_url')");
+                        $this->dbh->query("INSERT INTO ttrss_feeds
+                            (owner_uid,feed_url,title,cat_id,site_url)
+                            VALUES ('$id','".$_SESSION["uid"]."',
+                            '$feed_url', '$title', NULL, '$site_url')");
                     }
                 }
             }
         }
     }
 
-    function catchupFeed() {
+    function catchupFeed()
+    {
         $feed_id = $this->dbh->escape_string($_REQUEST['feed_id']);
         $is_cat = $this->dbh->escape_string($_REQUEST['is_cat']) == "true";
         $mode = $this->dbh->escape_string($_REQUEST['mode']);
@@ -449,7 +475,8 @@ class RPC extends Handler_Protected {
         print json_encode(array("message" => "UPDATE_COUNTERS"));
     }
 
-    function quickAddCat() {
+    function quickAddCat()
+    {
         $cat = $this->dbh->escape_string($_REQUEST["cat"]);
 
         add_feed_category($cat);
@@ -466,7 +493,8 @@ class RPC extends Handler_Protected {
         print_feed_cat_select("cat_id", $id, '');
     }
 
-    function setpanelmode() {
+    function setpanelmode()
+    {
         $wide = (int) $_REQUEST["wide"];
 
         setcookie("ttrss_widescreen", $wide,
@@ -475,8 +503,8 @@ class RPC extends Handler_Protected {
         print json_encode(array("wide" => $wide));
     }
 
-    static function updaterandomfeed_real($dbh) {
-
+    static function updaterandomfeed_real($dbh)
+    {
         // Test if the feed need a update (update interval exceded).
         if (DB_TYPE == "pgsql") {
             $update_limit_qpart = "AND ((
@@ -559,12 +587,13 @@ class RPC extends Handler_Protected {
 
     }
 
-    function updaterandomfeed() {
+    function updaterandomfeed()
+    {
         RPC::updaterandomfeed_real($this->dbh);
     }
 
-    private function markArticlesById($ids, $cmode) {
-
+    private function markArticlesById($ids, $cmode)
+    {
         $tmp_ids = array();
 
         foreach ($ids as $id) {
@@ -574,22 +603,19 @@ class RPC extends Handler_Protected {
         $ids_qpart = join(" OR ", $tmp_ids);
 
         if ($cmode == 0) {
-            $this->dbh->query("UPDATE ttrss_user_entries SET
-            marked = false, last_marked = NOW()
-            WHERE ($ids_qpart) AND owner_uid = " . $_SESSION["uid"]);
-        } else if ($cmode == 1) {
-            $this->dbh->query("UPDATE ttrss_user_entries SET
-            marked = true, last_marked = NOW()
-            WHERE ($ids_qpart) AND owner_uid = " . $_SESSION["uid"]);
+            $newValue = "false";
+        } elseif ($cmode == 1) {
+            $newValue = "true";
         } else {
-            $this->dbh->query("UPDATE ttrss_user_entries SET
-            marked = NOT marked,last_marked = NOW()
-            WHERE ($ids_qpart) AND owner_uid = " . $_SESSION["uid"]);
+            $newValue = "NOT marked";
         }
+        $this->dbh->query("UPDATE ttrss_user_entries SET
+            marked = ".$newValue.",last_marked = NOW()
+            WHERE ($ids_qpart) AND owner_uid = " . $_SESSION["uid"]);
     }
 
-    private function publishArticlesById($ids, $cmode) {
-
+    private function publishArticlesById($ids, $cmode)
+    {
         $tmp_ids = array();
 
         foreach ($ids as $id) {
@@ -599,18 +625,15 @@ class RPC extends Handler_Protected {
         $ids_qpart = join(" OR ", $tmp_ids);
 
         if ($cmode == 0) {
-            $this->dbh->query("UPDATE ttrss_user_entries SET
-            published = false,last_published = NOW()
-            WHERE ($ids_qpart) AND owner_uid = " . $_SESSION["uid"]);
-        } else if ($cmode == 1) {
-            $this->dbh->query("UPDATE ttrss_user_entries SET
-            published = true,last_published = NOW()
-            WHERE ($ids_qpart) AND owner_uid = " . $_SESSION["uid"]);
+            $newValuepublished = "false";
+        } elseif ($cmode == 1) {
+            $newValuepublished = "true";
         } else {
-            $this->dbh->query("UPDATE ttrss_user_entries SET
-            published = NOT published,last_published = NOW()
-            WHERE ($ids_qpart) AND owner_uid = " . $_SESSION["uid"]);
+            $newValuepublished = "published";
         }
+        $this->dbh->query("UPDATE ttrss_user_entries SET
+            published = ".$newValue.",last_published = NOW()
+            WHERE ($ids_qpart) AND owner_uid = " . $_SESSION["uid"]);
 
         if (PUBSUBHUBBUB_HUB) {
             $rss_link = get_self_url_prefix() .

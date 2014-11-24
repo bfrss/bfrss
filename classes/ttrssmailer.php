@@ -8,16 +8,17 @@
 require_once 'lib/phpmailer/class.phpmailer.php';
 require_once "config.php";
 
-class ttrssMailer extends PHPMailer {
+class ttrssMailer extends PHPMailer
+{
+    // Define all items that we want to override with defaults in PHPMailer
+    public $From = SMTP_FROM_ADDRESS;
+    public $FromName = SMTP_FROM_NAME;
+    public $CharSet = "UTF-8";
+    public $PluginDir = "lib/phpmailer/";
+    public $ContentType = "text/html"; // default email type is HTML
 
-        //define all items that we want to override with defaults in PHPMailer
-        public $From = SMTP_FROM_ADDRESS;
-        public $FromName = SMTP_FROM_NAME;
-        public $CharSet = "UTF-8";
-        public $PluginDir = "lib/phpmailer/";
-        public $ContentType = "text/html"; //default email type is HTML
-
-    function __construct() {
+    function __construct()
+    {
         $this->SetLanguage("en", "lib/phpmailer/language/");
 
         if (SMTP_SERVER) {
@@ -27,35 +28,39 @@ class ttrssMailer extends PHPMailer {
             $this->Host = $pair[0];
             $this->Port = $pair[1];
 
-            if (!$this->Port) $this->Port = 25;
+            if (!$this->Port) {
+                $this->Port = 25;
+            }
         } else {
             $this->Host = '';
             $this->Port = '';
         }
 
-
         //if SMTP_LOGIN is specified, set credentials and enable auth
-        if(SMTP_LOGIN){
+        if (SMTP_LOGIN) {
             $this->SMTPAuth = true;
             $this->Username = SMTP_LOGIN;
             $this->Password = SMTP_PASSWORD;
-            }
-        if(SMTP_SECURE)
+        }
+        if (SMTP_SECURE) {
             $this->SMTPSecure = SMTP_SECURE;
+        }
     }
-    /*    @brief a simple mail function to send email using the defaults
-    *    This will send an HTML email using the configured defaults
-    *    @param $toAddress A string with the recipients email address
-    *    @param $toName A string with the recipients name
-    *    @param $subject A string with the emails subject
-    *    @param $body A string containing the body of the email
-    */
-    public function quickMail ($toAddress, $toName, $subject, $body, $altbody=""){
+    /* @brief a simple mail function to send email using the defaults
+     * This will send an HTML email using the configured defaults
+     * @param $toAddress A string with the recipients email address
+     * @param $toName A string with the recipients name
+     * @param $subject A string with the emails subject
+     * @param $body A string containing the body of the email
+     */
+    public function quickMail($toAddress, $toName, $subject, $body, $altbody = "")
+    {
         $this->addAddress($toAddress, $toName);
         $this->Subject = $subject;
         $this->Body = $body;
         $this->IsHTML($altbody != '');
-        $rc=$this->send();
+
+        $rc = $this->send();
         return $rc;
     }
 }
