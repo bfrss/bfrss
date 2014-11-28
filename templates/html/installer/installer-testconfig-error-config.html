@@ -1,0 +1,17 @@
+{% from 'messages.html' import error as error_macro %}
+{% from 'messages.html' import notice as notice_macro %}
+{% extends "installer-base.html" %}
+
+{% block content %}
+{{ parent() }}
+
+<h2>Checking configuration</h2>
+
+<p>Some configuration tests failed. Please correct them before continuing.</p>
+<ul>
+{% for error in config_errors %}
+  <li style="color:red;">{{ error }}</li>
+{% endfor %}
+</ul>
+
+{% endblock %}

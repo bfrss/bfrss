@@ -1,0 +1,52 @@
+{% from 'messages.html' import error as error_macro %}
+{% from 'messages.html' import notice as notice_macro %}
+{% extends "installer-base.html" %}
+
+{% block content %}
+{{ parent() }}
+
+{% if op == 'installschema' -%}
+  <h2>Initializing database...</h2>
+
+  {{- notice_macro("Database initialization completed.") }}
+{% else %}
+  {{- notice_macro("Database initialization skipped.") }}
+{%- endif %}
+
+<h2>Generated configuration file</h2>
+
+<p>Copy following text and save as <code>config.php</code> in tt-rss
+main directory. It is suggested to read through the file to the end in
+case you need any options changed fom default values.</p>
+
+<p>After copying the file, you will be able to login with default
+username and password combination: <code>admin</code> and
+<code>password</code>. Don't forget to change the password immediately!</p>
+
+<form action="" method="post">
+  <input type="hidden" name="op" value="saveconfig">
+  <input type="hidden" name="DB_USER" value="{{ DB_USER }}"/>
+  <input type="hidden" name="DB_PASS" value="{{ DB_PASS }}"/>
+  <input type="hidden" name="DB_NAME" value="{{ DB_NAME }}"/>
+  <input type="hidden" name="DB_HOST" value="{{ DB_HOST }}"/>
+  <input type="hidden" name="DB_PORT" value="{{ DB_PORT }}"/>
+  <input type="hidden" name="DB_TYPE" value="{{ DB_TYPE }}"/>
+  <input type="hidden" name="SELF_URL_PATH" value="{{ SELF_URL_PATH }}"/>
+
+  <textarea cols="80" rows="20" style="font-size:12px;">
+    {{ config_file_content|raw }}
+  </textarea>
+
+  {% if writable == true -%}
+    <p>We can also try saving the file automatically now.</p>
+    <p><input type="submit" value="Save configuration"></p>
+  {%- endif %}
+</form>
+
+{% if writable == false -%}
+    {{ error_macro("Unfortunately, parent directory is not writable, so we're
+        unable to save config.php automatically.") }}
+{%- endif %}
+
+{{ notice_macro("You can generate the file again by changing the form above.") }}
+{% endblock %}

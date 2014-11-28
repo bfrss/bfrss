@@ -1,0 +1,76 @@
+<span class="holder">
+
+  <!-- right part -->
+  <span class="r">
+    <a href="#" title="View as RSS feed"
+        onclick="displayDlg('View as RSS','generatedFeed', '{{ feed_id }}:{{ is_cat }}:{{ rss_link }}')">
+    <img class="noborder" src="images/pub_set.png"></a>
+
+    {%- if show_error == true %}
+      <span id="feed_title" class="error">
+    {%- else -%}
+      <span id="feed_title">
+    {%- endif %}
+
+    {%- if show_feed_site_url == true %}
+      <a title="{{ last_updated }}" target="_blank" href="{{ feed_site_url }}">{{ feed_title }}</a>
+      {%- if show_error == true %}
+        &nbsp;
+        <img title="{{ error }}" src="images/error.png" alt="error" class="noborder">
+      {%- endif %}
+    {%- else -%}
+      <span id="feed_title">
+      {{ feed_title }}
+    {%- endif %}
+
+    </span><!-- id="feed_title" -->
+  </span><!-- class="r" -->
+
+  <!-- left part -->
+  <span class="main">
+    <span id="selected_prompt">
+    </span>
+
+    <a href="#" onclick="{{ sel_all_link }}">All</a>,
+    <a href="#" onclick="{{ sel_unread_link }}">Unread</a>,
+    <a href="#" onclick="{{ sel_inv_link }}">Invert</a>,
+    <a href="#" onclick="{{ sel_none_link }}">None</a></li>
+
+    <select dojoType="dijit.form.Select" onchange="headlineActionsChange(this)">
+      <option value="false">More...</option>
+      <option value="0" disabled="1">Selection toggle:</option>
+      <option value="{{ tog_unread_link }}">Unread</option>
+      <option value="{{ tog_marked_link }}">Starred</option>
+      <option value="{{ tog_published_link }}">Published</option>
+      <option value="0" disabled="1">Selection:</option>
+      <option value="{{ catchup_sel_link }}">Mark as read</option>
+      <option value="{{ set_score_link }}">Set score</option>
+
+      {%- if isarchive == true %}
+        <option value="{{ archive_sel_link }}">Move back</option>
+        <option value="{{ delete_sel_link }}">Delete</option>
+      {%- else -%}
+        <option value="{{ archive_sel_link }}">Archive</option>
+      {%- endif %}
+
+      {%- if mail == true %}
+        <option value="emailArticle(false)">Forward by email</option>
+      {%- endif %}
+
+      {%- if mailto == true %}
+        <option value="mailtoArticle(false)">Forward by email</option>
+      {%- endif %}
+
+      <option value="0" disabled="1">Feed:</option>
+      <option value="catchupPage()">Mark as read</option>
+      <option value="displayDlg('View as RSS','generatedFeed', '{{ feed_id }}:{{ is_cat }}:{{ rss_link }}')">
+        View as RSS
+      </option>
+    </select><!-- dijit.form.Select -->
+
+    {%- for hook_toolbar_button in hook_toolbar_buttons %}
+      {{ hook_toolbar_button|raw }}
+    {%- endfor %}
+  </span><!-- class="main" -->
+
+</span><!-- class="holder" -->

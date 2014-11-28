@@ -1,0 +1,80 @@
+{% from 'macros/messages.html' import notice as notice_macro %}
+<input dojoType="dijit.form.TextBox" style="display:none;" name="op" value="rpc">
+<input dojoType="dijit.form.TextBox" style="display:none;" name="method" value="addfeed">
+
+<div id="fadd_multiple_notify" style="display:none;">
+    {{ notice_macro("Provided URL is a HTML page referencing multiple feeds,
+        please select required feed from the dropdown menu below.") }}
+</div><!-- id="fadd_multiple_notify" -->
+
+<div class="dlgSec">
+  Feed or site URL
+</div><!-- class="dlgSec" -->
+
+<div class="dlgSecCont">
+  <div style="float:right;">
+    <img id="feed_add_spinner" src="images/indicator_white.gif" style="display:none;">
+  </div>
+
+  <input style="font-size:16px; width:20em;" placeHolder="Feed or site URL"
+      dojoType="dijit.form.ValidationTextBox" required="1" name="feed" id="feedDlg_feedUrl">
+  <hr/>
+
+  {%- if cats == true %}
+  Place in category:
+  {{ feed_cat_select|raw }}
+  {%- endif -%}
+
+</div><!-- class="dlgSecCont" -->
+
+<div id="feedDlg_feedsContainer" style="display:none;">
+  <div class="dlgSec">
+    Available feeds
+  </div>
+  <div class="dlgSecCont">
+    <select id="feedDlg_feedContainerSelect" dojoType="dijit.form.Select" size="3">
+      <script type="dojo/method" event="onChange" args="value">
+        dijit.byId("feedDlg_feedUrl").attr("value", value);
+      </script>
+    </select>
+  </div><!-- class="dlgSecCont" -->
+</div><!-- id="feedDlg_feedsContainer" -->
+
+<div id="feedDlg_loginContainer" style="display:none;">
+  <div class="dlgSec">
+    Authentication
+  </div>
+  <div class="dlgSecCont">
+    <input dojoType="dijit.form.TextBox" name="login" placeHolder="Login"
+        style="width:10em;">
+    <input dojoType="dijit.form.TextBox" name="pass" placeHolder="Password"
+        style="width:10em;" type="password">
+  </div><!-- class="dlgSecCont" -->
+</div><!-- id="feedDlg_loginContainer" -->
+
+<div style="clear:both;">
+  <input id="feedDlg_loginCheck" type="checkbox" name="need_auth"
+      dojoType="dijit.form.CheckBox"
+      onclick="checkboxToggleElement(this, 'feedDlg_loginContainer')">
+  <label for="feedDlg_loginCheck">
+    This feed requires authentication.
+  </label>
+</div>
+
+</form>
+
+<div class="dlgButtons">
+  <button dojoType="dijit.form.Button" onclick="return dijit.byId('feedAddDlg').execute()">
+    Subscribe
+  </button>
+
+  {%- if feedbrowser == true %}
+    <button dojoType="dijit.form.Button" onclick="return feedBrowser()">
+      More feeds
+    </button>
+  {%- endif -%}
+
+  <button dojoType="dijit.form.Button" onclick="return dijit.byId('feedAddDlg').hide()">
+    Cancel
+  </button>
+</div><!-- class="dlgButtons" -->

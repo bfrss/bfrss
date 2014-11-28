@@ -1,0 +1,57 @@
+{% from 'messages.html' import error as error_macro %}
+{% from 'messages.html' import notice as notice_macro %}
+{% extends "installer.html" %}
+
+{% block content %}
+<form action="" method="post">
+  <input type="hidden" name="op" value="testconfig">
+
+  <h2>Database settings</h2>
+  <fieldset>
+    <label>Database type</label>
+    <select name="DB_TYPE">
+      <option {{ pgsql }} value="pgsql">PostgreSQL</option>
+      <option {{ mysql }} value="mysql">MySQL</option>
+    </select>
+  </fieldset>
+
+  <fieldset>
+    <label>Username</label>
+    <input required name="DB_USER" size="20" value="{{ DB_USER }}"/>
+  </fieldset>
+
+  <fieldset>
+    <label>Password</label>
+    <input name="DB_PASS" size="20" type="password" value="{{ DB_PASS }}"/>
+  </fieldset>
+
+  <fieldset>
+    <label>Database name</label>
+    <input required name="DB_NAME" size="20" value="{{ DB_NAME }}"/>
+  </fieldset>
+
+  <fieldset>
+    <label>Host name</label>
+    <input name="DB_HOST" size="20" value="{{ DB_HOST }}"/>
+    <span class="hint">If needed</span>
+  </fieldset>
+
+  <fieldset>
+    <label>Port</label>
+    <input name="DB_PORT" type="number" size="20" value="{{ DB_PORT }}"/>
+    <span class="hint">Usually 3306 for MySQL or 5432 for PostgreSQL</span>
+  </fieldset>
+
+  <h2>Other settings</h2>
+  <p>This should be set to the location your Tiny Tiny RSS will be available on.</p>
+
+  <fieldset>
+    <label>Tiny Tiny RSS URL</label>
+    <input type="url" name="SELF_URL_PATH" size="60"
+      placeholder="{{ SELF_URL_PATH }}"
+      value="{{ SELF_URL_PATH }}"/>
+  </fieldset>
+
+  <p><input type="submit" value="Test configuration"></p>
+</form>
+{% endblock %}

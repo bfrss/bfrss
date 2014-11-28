@@ -1,0 +1,18 @@
+{% from 'messages.html' import error as error_macro %}
+{% from 'messages.html' import notice as notice_macro %}
+{% extends "installer-base.html" %}
+
+{% block content %}
+{{ parent() }}
+
+<h2>Saving configuration file to parent directory...</h2>
+
+{% if notice -%}
+  {{- notice_macro(notice) }}
+{%- endif %}
+
+{% if error -%}
+  {{- error_macro(error) }}
+{%- endif %}
+
+{% endblock %}

@@ -1,0 +1,77 @@
+{% from 'messages.html' import error as error_macro %}
+{% from 'messages.html' import notice as notice_macro %}
+{% extends "installer-base.html" %}
+
+{% block content %}
+{{ parent() }}
+
+<h2>Checking configuration</h2>
+
+{% if config_notices|length > 0 %}
+  {{- notice_macro("Configuration check succeeded with minor problems:") }}
+  <ul>
+  {% for notice in config_notices %}
+    <li>{{ notice }}</li>
+  {% endfor %}
+  </ul>
+{%- else %}
+  {{- notice_macro("Configuration check succeeded.") }}
+{%- endif %}
+
+
+<h2>Checking database</h2>
+
+{{ notice_macro("Database test succeeded.") }}
+
+<h2>Initialize database</h2>
+
+<p>
+  Before you can start using tt-rss, database needs to be initialized.
+  Click on the button below to do that now.
+</p>
+
+{% if db_exists %}
+{{ error_macro("Existing tt-rss tables will be removed from the database.
+    If you would like to keep your data, skip database initialization.") }}
+{% endif %}
+
+<table>
+<tr>
+<td>
+  <form method="post">
+    <input type="hidden" name="op" value="installschema">
+
+    <input type="hidden" name="DB_USER" value="{{ DB_USER }}"/>
+    <input type="hidden" name="DB_PASS" value="{{ DB_PASS }}"/>
+    <input type="hidden" name="DB_NAME" value="{{ DB_NAME }}"/>
+    <input type="hidden" name="DB_HOST" value="{{ DB_HOST }}"/>
+    <input type="hidden" name="DB_PORT" value="{{ DB_PORT }}"/>
+    <input type="hidden" name="DB_TYPE" value="{{ DB_TYPE }}"/>
+    <input type="hidden" name="SELF_URL_PATH" value="{{ SELF_URL_PATH }}"/>
+
+    <p>
+      <input
+        {% if db_exists %}
+        onclick="return confirm('Please read the warning above. Continue?')"
+        {% endif %}
+        type="submit" value="Initialize database" style="color:red;">
+    </p>
+  </form>
+</td>
+<td>
+  <form method="post">
+    <input type="hidden" name="DB_USER" value="{{ DB_USER }}"/>
+    <input type="hidden" name="DB_PASS" value="{{ DB_PASS }}"/>
+    <input type="hidden" name="DB_NAME" value="{{ DB_NAME }}"/>
+    <input type="hidden" name="DB_HOST" value="{{ DB_HOST }}"/>
+    <input type="hidden" name="DB_PORT" value="{{ DB_PORT }}"/>
+    <input type="hidden" name="DB_TYPE" value="{{ DB_TYPE }}"/>
+    <input type="hidden" name="SELF_URL_PATH" value="{{ SELF_URL_PATH }}"/>
+
+    <input type="hidden" name="op" value="skipschema">
+    <p><input type="submit" value="Skip initialization"></p>
+  </form>
+</td>
+</tr>
+</table>
+{% endblock %}

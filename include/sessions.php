@@ -3,7 +3,7 @@
 
 require_once "config.php";
 require_once "classes/db.php";
-require_once "autoload.php";
+require_once "vendor/autoload.php";
 require_once "errorhandler.php";
 require_once "lib/accept-to-gettext.php";
 require_once "lib/gettext/gettext.inc";

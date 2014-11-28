@@ -1,0 +1,10 @@
+{% from 'messages.html' import error as error_macro %}
+{% from 'messages.html' import notice as notice_macro %}
+{% extends "installer-base.html" %}
+
+{% block content %}
+{{ parent() }}
+
+{{ error_macro("Unable to connect to database using specified parameters.") }}
+
+{% endblock %}

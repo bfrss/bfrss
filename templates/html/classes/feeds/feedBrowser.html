@@ -1,0 +1,47 @@
+<input dojoType="dijit.form.TextBox" style="display:none;"
+    name="op" value="rpc">
+<input dojoType="dijit.form.TextBox" style="display:none;"
+    name="method" value="updateFeedBrowser">
+
+<div dojoType="dijit.Toolbar">
+  <div style="float:right;">
+    <img style="display:none;" id="feed_browser_spinner" src="images/indicator_white.gif">
+    <input name="search" dojoType="dijit.form.TextBox" size="20" type="search"
+        onchange="dijit.byId('feedBrowserDlg').update()" value="{{ browser_search }}">
+    <button dojoType="dijit.form.Button" onclick="dijit.byId('feedBrowserDlg').update()">
+      Search
+    </button>
+  </div>
+
+  <select name="mode" dojoType="dijit.form.Select" onchange="dijit.byId('feedBrowserDlg').update()">
+    <option value="1">Popular feeds</option>
+    <option value="2">Feed archive</option>
+  </select>
+
+  limit:
+  <select dojoType="dijit.form.Select" name="limit" onchange="dijit.byId('feedBrowserDlg').update()">
+    <option value="25">25</option>
+    <option value="50">50</option>
+    <option value="100">100</option>
+    <option value="200">200</option>
+  </select>
+</div><!-- dijit.Toolbar -->
+
+<ul class="browseFeedList" id="browseFeedList">
+  {{ feed_list|raw }}
+</ul>
+
+<div align="center">
+  <button dojoType="dijit.form.Button"
+      onclick="dijit.byId('feedBrowserDlg').execute()">
+    Subscribe
+  </button>
+  <button dojoType="dijit.form.Button" style="display:none;" id="feed_archive_remove"
+      onclick="dijit.byId('feedBrowserDlg').removeFromArchive()">
+    Remove
+  </button>
+  <button dojoType="dijit.form.Button"
+      onclick="dijit.byId('feedBrowserDlg').hide()" >
+    Cancel
+  </button>
+</div>

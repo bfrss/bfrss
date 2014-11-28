@@ -40,7 +40,7 @@ if (array_search($op, $public_calls) !== false) {
 
 @$csrf_token = $_REQUEST['csrf_token'];
 
-require_once "autoload.php";
+require_once "vendor/autoload.php";
 require_once "sessions.php";
 require_once "functions.php";
 require_once "config.php";
@@ -120,13 +120,27 @@ $op = str_replace("-", "_", $op);
 
 $override = PluginHost::getInstance()->lookup_handler($op, $method);
 
-if (class_exists($op) || $override) {
+$op_classname = array(
+    'article' => 'Article',
+    'backend' => 'Backend',
+    'dlg' => 'Dlg',
+    'feeds' => 'Feeds',
+    'opml' => 'Opml',
+    'pluginhandler' => 'PluginHandler',
+    'pref_feeds' => 'Pref_Feeds',
+    'pref_filters' => 'Pref_Filters',
+    'pref_labels' => 'Pref_Labels',
+    'pref_prefs' => 'Pref_Prefs',
+    'pref_system' => 'Pref_System',
+    'pref_users' => 'Pref_Users',
+    'rpc' => 'RPC',
+);
 
-    if ($override) {
-        $handler = $override;
-    } else {
-        $handler = new $op($_REQUEST);
-    }
+$classname = $op_classname[strtolower($op)];
+
+if ($override || class_exists($classname)) {
+
+    $handler = $override ? $override : new $classname($_REQUEST);
 
     if ($handler && implements_interface($handler, 'IHandler')) {
         if (validate_csrf($csrf_token) || $handler->csrf_ignore($method)) {

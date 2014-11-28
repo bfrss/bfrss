@@ -1,0 +1,7 @@
+{% macro stylesheet_tag(filename, timestamp) %}
+<link rel="stylesheet" type="text/css" href="{{ filename }}?{{ timestamp }}"/>
+{% endmacro %}
+
+{% macro javascript_tag(filename, timestamp) %}
+<script type="text/javascript" charset="utf-8" src="{{ filename }}?{{timestamp }}"></script>
+{% endmacro %}

@@ -8,7 +8,7 @@ define('DISABLE_SESSIONS', true);
 
 chdir(dirname(__FILE__));
 
-require_once "autoload.php";
+require_once "vendor/autoload.php";
 require_once "functions.php";
 require_once "rssfuncs.php";
 require_once "config.php";

@@ -1,0 +1,41 @@
+<div class="dlgSec">
+  Look for
+</div><!-- class="dlgSec" -->
+
+<div class="dlgSecCont">
+  <input dojoType="dijit.form.ValidationTextBox"
+      style="font-size:16px; width:20em;"
+      required="1" name="query" type="search" value="">
+  <hr/>Limit search to: 
+  <select name="search_mode" dojoType="dijit.form.Select">
+    <option value="all_feeds">All feeds</option>
+
+    {%- if this_feed == true %}
+      <option disabled="1" value="false">This feed</option>
+    {%- else -%}
+      <option selected="1" value="this_feed">{{ feed_title }}</option>
+    {%- endif %}
+
+    {%- if this_cat == true %}
+      {%- if is_cat == true %}
+        <option selected="1" value="this_cat">{{ feed_cat_title }}</option>
+      {%- else -%}
+        <option value="this_cat">{{ feed_cat_title }}</option>
+      {%- endif %}
+    {%- endif %}
+
+  </select><!-- dijit.form.ValidationTextBox -->
+</div><!-- class="dlgSecCont" -->
+
+<div class="dlgButtons">
+
+  {%- if syntax == true %}
+  <div style="float:left;">
+    <!-- TODO update link -->
+    <a class="visibleLink" target="_blank" href="http://tt-rss.org/wiki/SearchSyntax">Search syntax</a>
+  </div>
+  {%- endif %}
+
+  <button dojoType="dijit.form.Button" onclick="dijit.byId('searchDlg').execute()">Search</button>
+  <button dojoType="dijit.form.Button" onclick="dijit.byId('searchDlg').hide()">Cancel</button>
+</div><!-- class="dlgButtons" -->
