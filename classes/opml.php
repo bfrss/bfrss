@@ -1,15 +1,19 @@
 <?php
 class Opml extends Handler_Protected {
 
-    function csrf_ignore($method) {
+    function csrf_ignore($method)
+    {
         $csrf_ignored = array("export", "import");
 
         return array_search($method, $csrf_ignored) !== false;
     }
 
-    function export() {
+    function export()
+    {
         $output_name = $_REQUEST["filename"];
-        if (!$output_name) $output_name = "TinyTinyRSS.opml";
+        if (!$output_name) {
+            $output_name = "TinyTinyRSS.opml";
+        }
 
         $show_settings = $_REQUEST["settings"];
 
@@ -17,7 +21,8 @@ class Opml extends Handler_Protected {
         return $this->opml_export($output_name, $owner_uid, false, ($show_settings == 1));
     }
 
-    function import() {
+    function import()
+    {
         $owner_uid = $_SESSION["uid"];
 
         header('Content-Type: text/html; charset=utf-8');
@@ -42,14 +47,12 @@ class Opml extends Handler_Protected {
             </form>";
 
         print "</div></body></html>";
-
-
     }
 
     // Export
 
-    private function opml_export_category($owner_uid, $cat_id, $hide_private_feeds=false) {
-
+    private function opml_export_category($owner_uid, $cat_id, $hide_private_feeds = false)
+    {
         if ($cat_id) {
             $cat_qpart = "parent_cat = '$cat_id'";
             $feed_cat_qpart = "cat_id = '$cat_id'";
@@ -58,33 +61,42 @@ class Opml extends Handler_Protected {
             $feed_cat_qpart = "cat_id IS NULL";
         }
 
-        if ($hide_private_feeds)
+        if ($hide_private_feeds) {
             $hide_qpart = "(private IS false AND auth_login = '' AND auth_pass = '')";
-        else
+        } else {
             $hide_qpart = "true";
+        }
 
         $out = "";
 
         if ($cat_id) {
-            $result = $this->dbh->query("SELECT title FROM ttrss_feed_categories WHERE id = '$cat_id'
-                AND owner_uid = '$owner_uid'");
+            $result = $this->dbh->query(
+                "SELECT title FROM ttrss_feed_categories WHERE id = '$cat_id'
+                AND owner_uid = '$owner_uid'"
+            );
             $cat_title = htmlspecialchars($this->dbh->fetch_result($result, 0, "title"));
         }
 
-        if ($cat_title) $out .= "<outline text=\"$cat_title\">\n";
+        if ($cat_title) {
+            $out .= "<outline text=\"$cat_title\">\n";
+        }
 
-        $result = $this->dbh->query("SELECT id,title
-            FROM ttrss_feed_categories WHERE
-            $cat_qpart AND owner_uid = '$owner_uid' ORDER BY order_id, title");
+        $result = $this->dbh->query(
+            "SELECT id,title FROM ttrss_feed_categories
+            WHERE $cat_qpart AND owner_uid = '$owner_uid'
+            ORDER BY order_id, title"
+        );
 
         while ($line = $this->dbh->fetch_assoc($result)) {
             $title = htmlspecialchars($line["title"]);
             $out .= $this->opml_export_category($owner_uid, $line["id"], $hide_private_feeds);
         }
 
-        $feeds_result = $this->dbh->query("select title, feed_url, site_url
-                from ttrss_feeds where $feed_cat_qpart AND owner_uid = '$owner_uid' AND $hide_qpart
-                order by order_id, title");
+        $feeds_result = $this->dbh->query(
+            "SELECT title, feed_url, site_url FROM ttrss_feeds
+            WHERE $feed_cat_qpart AND owner_uid = '$owner_uid' AND $hide_qpart
+            ORDER BY order_id, title"
+        );
 
         while ($fline = $this->dbh->fetch_assoc($feeds_result)) {
             $title = htmlspecialchars($fline["title"]);
@@ -105,8 +117,11 @@ class Opml extends Handler_Protected {
         return $out;
     }
 
-    function opml_export($name, $owner_uid, $hide_private_feeds=false, $include_settings=true) {
-        if (!$owner_uid) return;
+    function opml_export($name, $owner_uid, $hide_private_feeds=false, $include_settings=true)
+    {
+        if (!$owner_uid) {
+            return;
+        }
 
         if (!isset($_REQUEST["debug"])) {
             header("Content-type: application/xml+opml");
@@ -233,8 +248,9 @@ class Opml extends Handler_Protected {
 
         // cleanup empty categories
         foreach ($outlines as $node) {
-            if ($node->getElementsByTagName('outline')->length == 0)
+            if ($node->getElementsByTagName('outline')->length == 0) {
                 $node->parentNode->removeChild($node);
+            }
         }
 
         $res = $doc->saveXML();
@@ -251,7 +267,8 @@ class Opml extends Handler_Protected {
 
     // Import
 
-    private function opml_import_feed($doc, $node, $cat_id, $owner_uid) {
+    private function opml_import_feed($doc, $node, $cat_id, $owner_uid)
+    {
         $attrs = $node->attributes;
 
         $feed_title = $this->dbh->escape_string(mb_substr($attrs->getNamedItem('text')->nodeValue, 0, 250));
@@ -270,7 +287,9 @@ class Opml extends Handler_Protected {
                 #$this->opml_notice("[FEED] [$feed_title/$feed_url] dst_CAT=$cat_id");
                 $this->opml_notice(T_sprintf("Adding feed: %s", $feed_title));
 
-                if (!$cat_id) $cat_id = 'NULL';
+                if (!$cat_id) {
+                    $cat_id = 'NULL';
+                }
 
                 $query = "INSERT INTO ttrss_feeds
                     (title, feed_url, owner_uid, cat_id, site_url, order_id) VALUES
@@ -284,7 +303,8 @@ class Opml extends Handler_Protected {
         }
     }
 
-    private function opml_import_label($doc, $node, $owner_uid) {
+    private function opml_import_label($doc, $node, $owner_uid)
+    {
         $attrs = $node->attributes;
         $label_name = $this->dbh->escape_string($attrs->getNamedItem('label-name')->nodeValue);
 
@@ -301,7 +321,8 @@ class Opml extends Handler_Protected {
         }
     }
 
-    private function opml_import_preference($doc, $node, $owner_uid) {
+    private function opml_import_preference($doc, $node, $owner_uid)
+    {
         $attrs = $node->attributes;
         $pref_name = $this->dbh->escape_string($attrs->getNamedItem('pref-name')->nodeValue);
 
@@ -315,7 +336,8 @@ class Opml extends Handler_Protected {
         }
     }
 
-    private function opml_import_filter($doc, $node, $owner_uid) {
+    private function opml_import_filter($doc, $node, $owner_uid)
+    {
         $attrs = $node->attributes;
 
         $filter_type = $this->dbh->escape_string($attrs->getNamedItem('filter-type')->nodeValue);
@@ -385,7 +407,8 @@ class Opml extends Handler_Protected {
         }
     }
 
-    private function opml_import_category($doc, $root_node, $owner_uid, $parent_id) {
+    private function opml_import_category($doc, $root_node, $owner_uid, $parent_id)
+    {
         $body = $doc->getElementsByTagName('body');
 
         $default_cat_id = (int) get_feed_category('Imported feeds', false);
@@ -393,8 +416,9 @@ class Opml extends Handler_Protected {
         if ($root_node) {
             $cat_title = $this->dbh->escape_string(mb_substr($root_node->attributes->getNamedItem('text')->nodeValue, 0, 250));
 
-            if (!$cat_title)
+            if (!$cat_title) {
                 $cat_title = $this->dbh->escape_string(mb_substr($root_node->attributes->getNamedItem('title')->nodeValue, 0, 250));
+            }
 
             if (!in_array($cat_title, array("tt-rss-filters", "tt-rss-labels", "tt-rss-prefs"))) {
                 $cat_id = get_feed_category($cat_title, $parent_id);
@@ -425,8 +449,9 @@ class Opml extends Handler_Protected {
                 $attrs = $node->attributes;
                 $node_cat_title = $this->dbh->escape_string($attrs->getNamedItem('text')->nodeValue);
 
-                if (!$node_cat_title)
+                if (!$node_cat_title) {
                     $node_cat_title = $this->dbh->escape_string($attrs->getNamedItem('title')->nodeValue);
+                }
 
                 $node_feed_url = $this->dbh->escape_string($attrs->getNamedItem('xmlUrl')->nodeValue);
 
@@ -441,25 +466,28 @@ class Opml extends Handler_Protected {
                     }
 
                     switch ($cat_title) {
-                    case "tt-rss-prefs":
-                        $this->opml_import_preference($doc, $node, $owner_uid);
-                        break;
-                    case "tt-rss-labels":
-                        $this->opml_import_label($doc, $node, $owner_uid);
-                        break;
-                    case "tt-rss-filters":
-                        $this->opml_import_filter($doc, $node, $owner_uid);
-                        break;
-                    default:
-                        $this->opml_import_feed($doc, $node, $dst_cat_id, $owner_uid);
+                        case "tt-rss-prefs":
+                            $this->opml_import_preference($doc, $node, $owner_uid);
+                            break;
+                        case "tt-rss-labels":
+                            $this->opml_import_label($doc, $node, $owner_uid);
+                            break;
+                        case "tt-rss-filters":
+                            $this->opml_import_filter($doc, $node, $owner_uid);
+                            break;
+                        default:
+                            $this->opml_import_feed($doc, $node, $dst_cat_id, $owner_uid);
                     }
                 }
             }
         }
     }
 
-    function opml_import($owner_uid) {
-        if (!$owner_uid) return;
+    function opml_import($owner_uid)
+    {
+        if (!$owner_uid) {
+            return;
+        }
 
         $debug = isset($_REQUEST["debug"]);
         $doc = false;
@@ -493,7 +521,7 @@ class Opml extends Handler_Protected {
             $doc = new DOMDocument();
             $doc->load($tmp_file);
             unlink($tmp_file);
-        } else if (!$doc) {
+        } elseif (!$doc) {
             print_error(__('Error: unable to find moved OPML file.'));
             return;
         }
@@ -505,11 +533,13 @@ class Opml extends Handler_Protected {
         }
     }
 
-    private function opml_notice($msg) {
+    private function opml_notice($msg)
+    {
         print "$msg<br/>";
     }
 
-    static function opml_publish_url(){
+    static function opml_publish_url()
+    {
 
         $url_path = get_self_url_prefix();
         $url_path .= "/opml.php?op=publish&key=" .
