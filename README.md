@@ -13,7 +13,7 @@ phpcs --report-full --standard=PSR2 filename.php
 
 ## Dependencies
 
-We use [Composor](https://getcomposer.org/) to manage the dependencies of bfrss.
+We use [Composer](https://getcomposer.org/) to manage the dependencies of bfrss.
 If you haven't installed it, you can run the following command in the project
 root to do so:
 
